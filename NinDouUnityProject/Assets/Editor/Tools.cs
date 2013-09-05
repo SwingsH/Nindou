@@ -99,17 +99,14 @@ public static class Tools {
 	[MenuItem("Tools/QuickTest1")]
 	public static void QuickTest1()
 	{
+
 		if (Selection.activeGameObject && Selection.activeGameObject.GetComponent<ParticleSystem>())
 		{
 			ParticleSystem ps = Selection.activeGameObject.GetComponent<ParticleSystem>();
 			//Particle p = ps.
-
-			ps.Emit(1);
-			ps.Emit(1);
-			ps.Emit(1);
-			ps.Emit(1);
-
-			ps.Emit(Vector3.zero, ps.startSpeed * Vector3.right, ps.startSize, ps.startLifetime, ps.startColor);
+			
+			ParticleSystem.Particle[] pss = new ParticleSystem.Particle[0];
+			Debug.Log(ps.particleCount);
 		}	
 	}
 }

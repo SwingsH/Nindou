@@ -62,6 +62,11 @@ public class BattleManager : MonoBehaviour
 		info.MaxLife = 50;
 		info.AttackID = 0;
 		EnemyInfos.Add(info);
+		if (Application.isPlaying)
+		{
+			IniPlayers();
+			RandomEnemy(5, 0);
+		}
 	}
 
 	void LateUpdate()
@@ -152,6 +157,8 @@ public class BattleManager : MonoBehaviour
 			}
 			foreach (Unit eu in Players)
 			{
+				if (eu == null)
+					continue;
 				//eu.Draw(Color.blue);
 				g.DrawGrid(eu.Pos, Color.blue);
 			}
@@ -162,7 +169,7 @@ public class BattleManager : MonoBehaviour
 						Enemys[CurrentInfoIndex].Draw(Color.white);
 					break;
 				case eGroup.Player:
-					if (CurrentInfoIndex >= 0 && CurrentInfoIndex < Players.Length)
+					if (CurrentInfoIndex >= 0 && CurrentInfoIndex < Players.Length && Players[CurrentInfoIndex] != null)
 						Players[CurrentInfoIndex].Draw(Color.white);
 					break;
 			}
@@ -206,7 +213,7 @@ public class BattleManager : MonoBehaviour
 		SimpleMoveUnit su = new SimpleMoveUnit();
 		if (TestEntity)
 			su.Entity = Instantiate(TestEntity) as GameObject;
-
+		su.BeHitParticle = TestDataBase.Get_Particle("BeHit");
 		su.NormalAttack = new MainSkill(TestDataBase.Instance.SkillDataBase[info.AttackID]);
 		foreach (ushort skillID in info.SkillID)
 		{

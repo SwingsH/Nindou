@@ -75,6 +75,8 @@ public class AnimUnit : Unit
 		{
 			base.Entity = value;
 			Anim = Entity.GetComponentInChildren<BoneAnimation>();
+			if (Entity != null && BeHitParticle != null)
+				BeHitParticle.transform.parent = Entity.transform;
 		}
 	}
 	public virtual BoneAnimation Anim
@@ -108,6 +110,23 @@ public class AnimUnit : Unit
 		}
 	}
 
+	protected ParticleSystem _beHitParticle;
+	public ParticleSystem BeHitParticle
+	{
+		set
+		{
+			if(value)
+			{
+				_beHitParticle = value;
+				if (Entity != null)
+					value.transform.parent = Entity.transform;
+			}
+		}
+		get
+		{
+			return _beHitParticle;
+		}
+	}
 	/// <summary>
 	/// 播放warpmode為Once的動畫
 	/// </summary>
@@ -138,7 +157,6 @@ public class AnimUnit : Unit
 				state = Anim.PlayQueued(animInfo.clipName, QueueMode.CompleteOthers);
 				state.speed = ns;
 			}
-				
 		}
 	}
 
@@ -148,17 +166,24 @@ public class AnimUnit : Unit
 	}
 	public override void Damaged(DamageInfo info)
 	{
-		if (Random.value < info.Accuracy)
+		if (Life > 0)
 		{
-			float rate = 1;
-			if (Random.value < info.Critical)
+			if (Random.value < info.Accuracy)
 			{
-				rate = 1 + info.CriticalBonus;
+				float rate = 1;
+				if (Random.value < info.Critical)
+				{
+					rate = 1 + info.CriticalBonus;
+				}
+				Life -= Mathf.CeilToInt(rate * info.Power);
+				if (BeHitParticle)
+				{
+					BeHitParticle.Stop();
+					BeHitParticle.Play();
+				}
+				if (Life <= 0)
+					BattleManager.Unit_Dead(this);
 			}
-			Life -= Mathf.CeilToInt(rate * info.Power);
-
-			if (Life <= 0)
-				BattleManager.Unit_Dead(this);
 		}
 	}
 }
@@ -396,14 +421,22 @@ public class ActionUnit : AnimUnit
 
 	void UserTriggerDelegate(UserTriggerEvent triggerEvent)
 	{
-		if (AttackList.Count > 0)
+		switch(triggerEvent.tag)
 		{
-			AttackInfo info = AttackList[0];
-			AttackList.RemoveAt(0);
-			foreach (Unit u in info.Target)
-			{
-				u.Damaged(info.Damage);				
-			}
+			case AnimationSetting.HIT_TAG:
+				if (AttackList.Count > 0)
+				{
+					AttackInfo info = AttackList[0];
+					AttackList.RemoveAt(0);
+					foreach (Unit u in info.Target)
+					{
+						u.Damaged(info.Damage);				
+					}
+				}
+			break;
+			case AnimationSetting.ATKEND_TAG:
+			TestDataBase.Particle_Emit("Shoot", triggerEvent.boneTransform.position, Direction == eDirection.Left ? Vector3.left : Vector3.right);
+			break;
 		}
 	}
 

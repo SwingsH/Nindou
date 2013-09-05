@@ -104,6 +104,7 @@
 		<AnimName>Attack</AnimName>
 		<AnimPlayTimes>1</AnimPlayTimes>
 		<CastTime>50</CastTime>
+		<PartcileAttackEnd>Shoot</PartcileAttackEnd>
 	</SkillData>
 	<SkillData>
 		<ID>7</ID>
@@ -119,6 +120,7 @@
 		<AnimName>Attack2</AnimName>
 		<AnimPlayTimes>1</AnimPlayTimes>
 		<CastTime>80</CastTime>
+		<PartcileAttackEnd>Shoot</PartcileAttackEnd>
 	</SkillData>
 	<SkillData>
 		<ID>8</ID>
@@ -134,6 +136,7 @@
 		<AnimName>Attack</AnimName>
 		<AnimPlayTimes>3</AnimPlayTimes>
 		<CastTime>120</CastTime>
+		<PartcileAttackEnd>Shoot</PartcileAttackEnd>
 	</SkillData>
 	<SkillData>
 		<ID>100</ID>
