@@ -108,6 +108,7 @@ public static class Tools {
 			ps.Emit(1);
 			ps.Emit(1);
 			ps.Emit(1);
+
 			ps.Emit(Vector3.zero, ps.startSpeed * Vector3.right, ps.startSize, ps.startLifetime, ps.startColor);
 		}	
 	}

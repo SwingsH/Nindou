@@ -417,7 +417,9 @@ public class BattleManager : MonoBehaviour
 		if (unit.Entity)
 			Destroy(unit.Entity);
 	}
-
+	void Unit_Clear()
+	{
+	}
 	void AllDeadEvent(eGroup group)
 	{
 		switch (group)
@@ -429,6 +431,7 @@ public class BattleManager : MonoBehaviour
 				IniPlayers();
 				break;
 		}
+		
 	}
 	#region Grid Control
 	public static bool Get_IsGridEmpty(GridPos pos)
