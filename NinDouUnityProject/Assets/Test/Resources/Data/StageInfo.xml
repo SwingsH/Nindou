@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="big5"?>
+<ArrayOfStageInfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <StageInfo>
+    <StageID>0</StageID>
+    <TotalPower>0</TotalPower>
+    <EnemyData>
+      <unsignedShort>0</unsignedShort>
+      <unsignedShort>0</unsignedShort>
+      <unsignedShort>0</unsignedShort>
+      <unsignedShort>0</unsignedShort>
+      <unsignedShort>0</unsignedShort>
+    </EnemyData>
+  </StageInfo>
+  <StageInfo>
+    <StageID>0</StageID>
+    <TotalPower>0</TotalPower>
+    <EnemyData>
+      <unsignedShort>0</unsignedShort>
+      <unsignedShort>0</unsignedShort>
+      <unsignedShort>0</unsignedShort>
+      <unsignedShort>0</unsignedShort>
+      <unsignedShort>0</unsignedShort>
+    </EnemyData>
+  </StageInfo>
+  <StageInfo>
+    <StageID>0</StageID>
+    <TotalPower>0</TotalPower>
+    <EnemyData>
+      <unsignedShort>0</unsignedShort>
+      <unsignedShort>0</unsignedShort>
+      <unsignedShort>0</unsignedShort>
+      <unsignedShort>0</unsignedShort>
+      <unsignedShort>0</unsignedShort>
+    </EnemyData>
+  </StageInfo>
+</ArrayOfStageInfo>
