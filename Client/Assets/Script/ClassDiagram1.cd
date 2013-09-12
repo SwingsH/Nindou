@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Comment CommentText="">
+    <Position X="0.5" Y="0.5" Height="0.917" Width="3.502" />
+  </Comment>
+  <Class Name="MainSkill">
+    <Position X="7.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Script\MainSkill.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="SkillData" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="GameMaster" Collapsed="true">
+    <Position X="0.5" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAA=</HashCode>
+      <FileName>Assets\Script\GameMaster.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="State">
+    <Position X="10.25" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Script\State.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SkillData">
+    <Position X="5.5" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Script\SkillData.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BattleManager">
+    <Position X="3.75" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAEAAAAACAAAAAAAAAgAAAAAAAAAACIAQDgAAAAAAA=</HashCode>
+      <FileName>Assets\Script\BattleManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ResourceCenter">
+    <Position X="0.5" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Script\ResourceCenter.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="DamageInfo">
+    <Position X="10.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Script\BattleDataStructs.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Font Name="Microsoft JhengHei" Size="9" />
+</ClassDiagram>
