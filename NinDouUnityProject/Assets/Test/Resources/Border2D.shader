@@ -1,5 +1,6 @@
 ﻿Shader "Custom/Border2D" {
 	Properties {
+		_Color ("Text Color", Color) = (1,1,1,1)
 		_MainTex ("Base (RGB)", 2D) = "white" {}
 		_BorderColor("BorderColor",Color) = (1,1,1,1)
 		_BorderWidth("BorderWidth", float) = 1
@@ -39,7 +40,8 @@
 			fixed4 ct = tex2D(_MainTex,tt);
 			if(ct.a >0)
 			{
-				rc = _BorderColor;
+				rc.rgb = _BorderColor.rgb;
+				rc.a =ct.a;
 				i.vertex.z -=1;
 			}
 			tt = i.texcoord ;
@@ -47,7 +49,8 @@
 			ct = tex2D(_MainTex,tt);
 			if(ct.a >0)
 			{
-				rc = _BorderColor;
+				rc.rgb = _BorderColor.rgb;
+				rc.a = max(rc.a,ct.a);
 				i.vertex.z -=1;
 			}
 			tt = i.texcoord ;
@@ -55,7 +58,8 @@
 			ct = tex2D(_MainTex,tt);
 			if(ct.a >0)
 			{
-				rc = _BorderColor;
+				rc.rgb = _BorderColor.rgb;
+				rc.a = max(rc.a,ct.a);
 				i.vertex.z -=1;
 			}
 			tt = i.texcoord ;
@@ -63,7 +67,8 @@
 			ct = tex2D(_MainTex,tt);
 			if(ct.a >0)
 			{
-				rc = _BorderColor;
+				rc.rgb = _BorderColor.rgb;
+				rc.a = max(rc.a,ct.a);
 				i.vertex.z -=1;
 			}
 		}
@@ -84,12 +89,14 @@
 
 		Pass {
 			CGPROGRAM
+			#pragma exclude_renderers flash
 			#pragma vertex vert
 			#pragma fragment frag
 			ENDCG
 		}
 		Pass {
 			SetTexture [_MainTex] {
+				//constantColor [_Color] combine constant * primary, constant * texture
 				combine texture * primary
 			}
 		}

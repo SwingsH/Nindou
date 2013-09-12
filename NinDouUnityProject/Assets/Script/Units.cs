@@ -329,7 +329,7 @@ public class ActionUnit : AnimUnit
 			MoveAction.Target = GridPos.Null;
 		if (Entity)
 		{
-			Entity.transform.position = WorldPos;
+			Entity.transform.position =BattleManager.GetRealWorldPos(WorldPos);
 			Entity.transform.rotation = Camera.main.transform.rotation;
 			switch (Direction)
 			{

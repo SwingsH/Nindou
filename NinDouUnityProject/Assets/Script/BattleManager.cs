@@ -15,7 +15,8 @@ public class BattleManager : MonoBehaviour
 		get { return _instance; }
 		protected set { _instance = value; }
 	}
-	
+
+	public static Camera UnitCamera;
 	GridInfo g;
 	public GameObject groundObject;
 	
@@ -36,6 +37,20 @@ public class BattleManager : MonoBehaviour
 			return;
 		}
 		Instance = this;
+		if (UnitCamera == null)
+		{
+			UnitCamera = new GameObject("UnitCamera").AddComponent<Camera>();
+		}
+		if(Camera.main)
+		{
+			Camera.main.cullingMask = 1 << GameSettingConst.LAYER_BACKGROUND;
+			UnitCamera.transform.position = Camera.main.transform.position;
+			UnitCamera.transform.rotation = Camera.main.transform.rotation;
+		}
+		UnitCamera.orthographic = true;
+		UnitCamera.cullingMask = ~(1 << GameSettingConst.LAYER_BACKGROUND);
+		UnitCamera.clearFlags = CameraClearFlags.Depth;
+		UnitCamera.orthographicSize = GameSettingConst.UNIT_CAMERA_SIZE;
 	}
 	void Start()
 	{
@@ -46,7 +61,7 @@ public class BattleManager : MonoBehaviour
 			Mesh m = groundObject.GetComponent<MeshFilter>().sharedMesh;
 			Vector3 op = groundObject.transform.TransformPoint(new Vector3(m.bounds.min.x, 0, m.bounds.min.z));
 			Vector3 size = groundObject.transform.TransformPoint(m.bounds.size);
-			g = new GridInfo(op, size.x, size.z, Mathf.FloorToInt(groundObject.transform.lossyScale.x / 3), Mathf.FloorToInt(groundObject.transform.lossyScale.z / 3));
+			g = new GridInfo(op, size.x, size.z, Mathf.FloorToInt(groundObject.transform.lossyScale.x / 6), Mathf.FloorToInt(groundObject.transform.lossyScale.z / 6));
 		}
 
 		PlayerInfos.AddRange(TestDataBase.Instance.playerInfo);
@@ -162,17 +177,17 @@ public class BattleManager : MonoBehaviour
 				//eu.Draw(Color.blue);
 				g.DrawGrid(eu.Pos, Color.blue);
 			}
-			switch (CurrentInfoGroup)
-			{
-				case eGroup.Enemy:
-					if (CurrentInfoIndex >= 0 && CurrentInfoIndex < Enemys.Count)
-						Enemys[CurrentInfoIndex].Draw(Color.white);
-					break;
-				case eGroup.Player:
-					if (CurrentInfoIndex >= 0 && CurrentInfoIndex < Players.Length && Players[CurrentInfoIndex] != null)
-						Players[CurrentInfoIndex].Draw(Color.white);
-					break;
-			}
+			//switch (CurrentInfoGroup)
+			//{
+			//    case eGroup.Enemy:
+			//        if (CurrentInfoIndex >= 0 && CurrentInfoIndex < Enemys.Count)
+			//            Enemys[CurrentInfoIndex].Draw(Color.white);
+			//        break;
+			//    case eGroup.Player:
+			//        if (CurrentInfoIndex >= 0 && CurrentInfoIndex < Players.Length && Players[CurrentInfoIndex] != null)
+			//            Players[CurrentInfoIndex].Draw(Color.white);
+			//        break;
+			//}
 		}
 		else
 			Start();
@@ -268,13 +283,13 @@ public class BattleManager : MonoBehaviour
 	{
 		if (Players != null)
 		{
-			Rect r = new Rect(10, Screen.height - 70, 200, 60);
+			Rect r = new Rect(10, Screen.height * 0.85f, Screen.width *0.25f, Screen.height * 0.15f);
 			for (int i = 0; i < Players.Length; i++)
 			{
 				if (Players[i] == null)
 					continue;
 				ActionUnit au = Players[i] as ActionUnit;
-				r.x = 10 + i * r.width;
+				r.x = i * r.width;
 				string content = au.MoveState.ToString();
 				if(GUI.Button(r,content))
 				{
@@ -440,6 +455,19 @@ public class BattleManager : MonoBehaviour
 		}
 		
 	}
+
+	public static Vector3 GetRealWorldPos(Vector3 worldPos)
+	{
+		return TranslateCamera(UnitCamera, worldPos, Camera.main);
+	}
+	public static Vector3 TranslateCamera(Camera current, Vector3 currentPos, Camera targetCam)
+	{
+		if (current == null || targetCam == null)
+			return currentPos;
+		Vector3 result = current.ScreenToWorldPoint(targetCam.WorldToScreenPoint(currentPos));
+		return result;
+	}
+
 	#region Grid Control
 	public static bool Get_IsGridEmpty(GridPos pos)
 	{
@@ -451,7 +479,7 @@ public class BattleManager : MonoBehaviour
 	{
 		if (Instance == null)
 			return Vector3.zero;
-		return Instance.g.Get_GridWorldPos(pos);
+		return (Instance.g.Get_GridWorldPos(pos));
 	}
 	public static List<GridPos> Get_EmptyGrid()
 	{
@@ -697,6 +725,14 @@ public class GridInfo
 		return Get_GridWorldPos(pos.x, pos.y);
 	}
 	public Vector3 Get_GridWorldPos(int x, int y)
+	{
+		return StartPoint + new Vector3(x * GridSize.x + GridSize.x / 2, 0, y * GridSize.y + GridSize.y / 5);
+	}
+	public Vector3 Get_GridCenterWorldPos(GridPos pos)
+	{
+		return Get_GridCenterWorldPos(pos.x, pos.y);
+	}
+	public Vector3 Get_GridCenterWorldPos(int x, int y)
 	{
 		return StartPoint + new Vector3(x * GridSize.x + GridSize.x / 2, 0, y * GridSize.y + GridSize.y / 2);
 	}
@@ -1020,15 +1056,15 @@ public class GridInfo
 	{
 		Vector3 GridSizeV3 = new Vector3(GridSize.x, 0, GridSize.y);
 		Gizmos.color = color;
-		Gizmos.DrawCube(Get_GridWorldPos(Get_GridPos(pos)), GridSizeV3);
+		Gizmos.DrawCube(Get_GridCenterWorldPos(Get_GridPos(pos)), GridSizeV3);
 	}
 	public void DrawGrid(GridPos pos, Color color)
 	{
 		Vector3 GridSizeV3 = new Vector3(GridSize.x, 0, GridSize.y);
 		Gizmos.color = color;
-		Gizmos.DrawCube(Get_GridWorldPos(pos), GridSizeV3);
+		Gizmos.DrawCube(Get_GridCenterWorldPos(pos), GridSizeV3);
 		Gizmos.color = Color.black;
-		Gizmos.DrawWireCube(Get_GridWorldPos(pos), GridSizeV3);
+		Gizmos.DrawWireCube(Get_GridCenterWorldPos(pos), GridSizeV3);
 	}
 	public void DrawGrid(int x,int y, Color color)
 	{
