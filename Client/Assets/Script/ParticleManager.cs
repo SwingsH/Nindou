@@ -56,7 +56,7 @@ public class ParticleManager : MonoBehaviour {
 		ParticleSystem tempps;
 		if (!AvailableParticles.TryGetValue(name, out tempList) || tempList == null || tempList.Count ==0)
 		{
-			tempps  = ResourceCenter.GetParticle(name);
+			tempps = ResourceStation.GetParticle(name);
 		}
 		else
 		{

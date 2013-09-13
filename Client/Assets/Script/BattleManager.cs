@@ -43,14 +43,14 @@ public class BattleManager : MonoBehaviour
 		}
 		if(Camera.main)
 		{
-			Camera.main.cullingMask = 1 << GameSettingConst.LAYER_BACKGROUND;
+			Camera.main.cullingMask = 1 << GLOBALCONST.GameSetting.LAYER_BACKGROUND;
 			UnitCamera.transform.position = Camera.main.transform.position;
 			UnitCamera.transform.rotation = Camera.main.transform.rotation;
 		}
 		UnitCamera.orthographic = true;
-		UnitCamera.cullingMask = ~(1 << GameSettingConst.LAYER_BACKGROUND);
+		UnitCamera.cullingMask = ~(1 << GLOBALCONST.GameSetting.LAYER_BACKGROUND);
 		UnitCamera.clearFlags = CameraClearFlags.Depth;
-		UnitCamera.orthographicSize = GameSettingConst.UNIT_CAMERA_SIZE;
+		UnitCamera.orthographicSize = GLOBALCONST.GameSetting.UNIT_CAMERA_SIZE;
 	}
 	void Start()
 	{
@@ -105,8 +105,13 @@ public class BattleManager : MonoBehaviour
 			su.Pos = pos;
 			su.WorldPos = Get_GridWorldPos(pos);
 			SmoothMoves.BoneAnimation ba = su.Entity.GetComponentInChildren<SmoothMoves.BoneAnimation>();
-			ba.SwapMaterial(ba.mRenderer.sharedMaterial, ba.mRenderer.material);
-			ba.mRenderer.sharedMaterial.SetColor("_BorderColor", Color.blue);
+			Dictionary<string, string> atlasInfo = new Dictionary<string, string>();
+			string[] boneNames = new string[] { GLOBALCONST.HEAD, GLOBALCONST.HAND_LEFT, GLOBALCONST.HAND_RIGHT, GLOBALCONST.LEG_LEFT, GLOBALCONST.LEG_RIGHT, GLOBALCONST.BODY };
+			foreach (string bone in boneNames)
+			{
+				atlasInfo.Add(bone, TestDataBase.TestAtlasName[0]);
+			}
+			ResourceStation.GenerateModel(ba, atlasInfo);
 			if (su.Entity != null)
 				su.Entity.name += index;
 			if (Players.Length <= index)
@@ -122,13 +127,21 @@ public class BattleManager : MonoBehaviour
 			Unit su = GenerateUnit(EnemyInfos[index], eGroup.Enemy);
 			su.Pos = pos;
 			su.WorldPos = Get_GridWorldPos(pos);
-			SmoothMoves.BoneAnimation ba = su.Entity.GetComponentInChildren<SmoothMoves.BoneAnimation>();
-			ba.SwapMaterial(ba.mRenderer.sharedMaterial, ba.mRenderer.material);
-			ba.mRenderer.sharedMaterial.SetColor("_BorderColor", Color.red);
+			
 			if (su.Entity != null)
 				su.Entity.name += Enemys.Count;
 			Enemys.Add(su);
 			AppearUnit(su, su.Pos);
+
+
+			SmoothMoves.BoneAnimation ba = su.Entity.GetComponentInChildren<SmoothMoves.BoneAnimation>();
+			Dictionary<string, string> atlasInfo = new Dictionary<string, string>();
+			string[] boneNames = new string[]{GLOBALCONST.HEAD,GLOBALCONST.HAND_LEFT,GLOBALCONST.HAND_RIGHT,GLOBALCONST.LEG_LEFT,GLOBALCONST.LEG_RIGHT,GLOBALCONST.BODY};
+			foreach (string bone in boneNames)
+			{
+				atlasInfo.Add(bone,TestDataBase.TestAtlasName[Random.Range(0,TestDataBase.TestAtlasName.Length)]);
+			}
+			ResourceStation.GenerateModel(ba, atlasInfo);
 		}
 	}
 	void AddEnemy(GridPos pos)
@@ -464,7 +477,9 @@ public class BattleManager : MonoBehaviour
 	{
 		if (current == null || targetCam == null)
 			return currentPos;
+		
 		Vector3 result = current.ScreenToWorldPoint(targetCam.WorldToScreenPoint(currentPos));
+		result += targetCam.transform.forward * (currentPos.z - current.transform.position.z) * 30;
 		return result;
 	}
 

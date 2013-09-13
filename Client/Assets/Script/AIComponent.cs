@@ -98,10 +98,8 @@ public class NinDoAttackComponent : ActionComponent
 					}
 				}
 			}
-			//UnavailableTime = Mathf.Min(UnavailableTime, Time.time + castSkill.CoolDown); //套用cd較普通攻擊低的當做下次再攻擊的時間
 			castSkill.CastableTime = Time.time + castSkill.CoolDown;
 			BusyTime = Time.time + castSkill.CastTime;
-
 
 			List<AttackInfo> attackInfos = new List<AttackInfo>();
 			List<DamageInfo> di = castSkill.GenerateDamageInfo(unit);

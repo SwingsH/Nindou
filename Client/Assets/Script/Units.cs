@@ -446,6 +446,12 @@ public class ActionUnit : AnimUnit
 		if (currentAction != null)
 			currentAction.DrawInfo();
 	}
+
+	//~ActionUnit()
+	//{
+	//    if (Anim != null)
+	//        Anim.UnregisterUserTriggerDelegate(UserTriggerDelegate);
+	//}
 }
 public enum eGroup
 {

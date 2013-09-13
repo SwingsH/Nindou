@@ -115,4 +115,6 @@ public class TestDataBase{
 		ps.Stop();
 		Instance.particles.Add(particleName, ps);
 	}
+
+	public static string[] TestAtlasName = new string[] { "NindoTestSprite", "GrayKappa", "BlueKappa", "RedKappa" };
 }

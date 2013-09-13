@@ -6,6 +6,7 @@ using System.IO;
 using System.Text;
 using System.Xml.Serialization;
 using SmoothMoves;
+using Resources = UnityEngine.Resources;
 /// <summary>
 /// 中文
 /// </summary>
@@ -67,48 +68,6 @@ public static class Tools {
             t2d.SetPixels(colors);
         }
     }
-	[MenuItem("Tools/RandomTest")]
-	public static void RandomTest()
-	{
-		int count1 = 0;
-		int count2 = 0;
-		float Rate1 = 0.5f;
-		float Rate2 = 0.5f;
-		for (int i = 0; i < 10000; i++)
-		{
-			float r = Random.value;
-			if (r >= 0 && r < Rate1)
-			{
-				count1++;
-				continue;
-			}
-			r = Random.value;
-			if (r >= 0 && r < Rate2)
-				count2++;
-			r = Random.value;
-		}
-		Debug.Log(count1);
-		Debug.Log(count2);
-
-		count1 = 0;
-		count2 = 0;
-		float Rate3 = Rate2 / (1f - Rate1);
-		for (int i = 0; i < 10000; i++)
-		{
-			float r = Random.value;
-			if (r >= 0 && r < Rate1)
-			{
-				count1++;
-				continue;
-			}
-			r = Random.value;
-			if (r >= 0 && r < Rate3)
-				count2++;
-			r = Random.value;
-		}
-		Debug.Log(count1);
-		Debug.Log(count2);
-	}
 
 	[MenuItem("Tools/QuickTest")]
 	public static void QuickTest()
@@ -162,68 +121,7 @@ public static class Tools {
 			}
 		}
 	}
-	[MenuItem("Tools/QuickTest1")]
-	public static void QuickTest1()
-	{
-		foreach (Texture2D t2d in Selection.objects)
-		{
 
-			if (t2d)
-			{
-				string iPath = AssetDatabase.GetAssetPath(t2d);
-				string opath = Application.dataPath.Replace("Assets", Path.GetDirectoryName(iPath) + "/" + Path.GetFileNameWithoutExtension(iPath) + "r.png");
-
-				TextureImporter ti = AssetImporter.GetAtPath(iPath) as TextureImporter;
-				if (ti)
-				{
-					ti.isReadable = true;
-					AssetDatabase.ImportAsset(iPath);
-				}
-				Texture2D t2d2 = new Texture2D(t2d.width, t2d.height);
-
-				Color[] c = t2d.GetPixels();
-				for (int i = 0; i < c.Length; i++)
-				{
-					if (c[i].a > 0)
-					{
-						if (c[i].g > c[i].r)
-						{
-							float t = c[i].r;
-							c[i].r = c[i].g;
-							c[i].g = t;
-						}
-					}
-				}
-				t2d2.SetPixels(c);
-				t2d2.Apply();
-
-				FileStream fs = new FileStream(opath, FileMode.Create);
-				byte[] tb = t2d2.EncodeToPNG();
-				fs.Write(tb, 0, tb.Length);
-				fs.Close();
-
-				Object.Destroy(t2d2);
-			}
-		}
-		AssetDatabase.Refresh();
-	}
-	
-	[MenuItem("Tools/QuickTest2")]
-	public static void Trans()
-	{
-		Object[] cams = Object.FindObjectsOfTypeAll(typeof(Camera));
-		Camera cam = null;
-		foreach(Camera cami in cams)
-		{
-			if (cami.name == "UnitCamera")
-			{
-				cam = cami;
-				break;
-			}
-		}
-		Debug.Log(cam);
-		Selection.activeGameObject.transform.position = TranslateCamera(Camera.main, Selection.activeGameObject.transform.position, cam);
-	}
 	public static Vector3 TranslateCamera(Camera current, Vector3 currentPos, Camera targetCam)
 	{
 		if (current == null || targetCam == null)
@@ -243,6 +141,52 @@ public static class Tools {
 		Debug.Log(result);
 		return result;
 	}
+
+	[MenuItem("Tools/ChangeColor")]
+	public static void ChangeColor()
+	{
+		foreach (Texture2D t2d in Selection.objects)
+		{
+
+			if (t2d)
+			{
+				string iPath = AssetDatabase.GetAssetPath(t2d);
+				//string opath = Application.dataPath.Replace("Assets", Path.GetDirectoryName(iPath) + "/" + Path.GetFileNameWithoutExtension(iPath) + ".png");
+
+				TextureImporter ti = AssetImporter.GetAtPath(iPath) as TextureImporter;
+				if (ti)
+				{
+					ti.isReadable = true;
+					AssetDatabase.ImportAsset(iPath);
+				}
+				Color[] c = t2d.GetPixels();
+				for (int i = 0; i < c.Length; i++)
+				{
+					if (c[i].a > 0)
+					{
+						//if (c[i].g > c[i].b)
+						//{
+							float t = c[i].b;
+							c[i].b = c[i].g;
+							c[i].g = t;
+						//}
+						//c[i].r = c[i].grayscale;
+						//c[i].g = c[i].b = c[i].r;
+					}
+				}
+				t2d.SetPixels(c);
+				t2d.Apply();
+
+				FileStream fs = new FileStream(iPath, FileMode.Create);
+				byte[] tb = t2d.EncodeToPNG();
+				fs.Write(tb, 0, tb.Length);
+				fs.Close();
+			}
+		}
+		AssetDatabase.Refresh();
+	}
+
+	#region AnimationData
 	[MenuItem("Assets/AnimationData/TransFormOnly")]
 	public static void SetAnimationData_TransFormOnly()
 	{
@@ -268,14 +212,13 @@ public static class Tools {
 			}
 		}
 	}
-
 	[MenuItem("Assets/AnimationData/TestImage")]
 	public static void SetAnimationData_Image()
 	{
 		BoneAnimationData baData = Selection.activeObject as BoneAnimationData;
 		if (baData)
 		{
-			TextureAtlas ta = UnityEngine.Resources.Load("Atlas/KappaRed", typeof(ScriptableObject)) as TextureAtlas;
+			TextureAtlas ta = UnityEngine.Resources.Load("Atlas/RedKappa", typeof(ScriptableObject)) as TextureAtlas;
 			foreach (AnimationClipSM acsm in baData.animationClips)
 			{
 				foreach (AnimationClipBone acb in acsm.bones)
@@ -296,5 +239,52 @@ public static class Tools {
 				}
 			}
 		}
+	}
+
+	[MenuItem("Assets/AnimationData/Set Z by Depth")]
+	public static void SetAnimationData_ZPos()
+	{
+		BoneAnimationData baData = Selection.activeObject as BoneAnimationData;
+		if (baData)
+		{
+			foreach (AnimationClipSM acsm in baData.animationClips)
+			{
+				foreach (AnimationClipBone acb in acsm.bones)
+				{
+
+					for (int i = 0; i < acb.keyframes.Count; i++)
+					{
+
+						acb.keyframes[i].localPosition3.val.z = 0.1f * (acb.keyframes[i].depth - 5);
+						
+
+					}
+				}
+			}
+		}
+	}
+	#endregion
+
+
+	[MenuItem("Tools/QuickTest1")]
+	public static void QuickTest1()
+	{
+		TimeMachine.ChangeTimeScale(0, 3);
+	}
+	[MenuItem("Tools/QuickTest2")]
+	public static void Trans()
+	{
+		Object[] cams = Resources.FindObjectsOfTypeAll(typeof(Camera));
+		Camera cam = null;
+		foreach (Camera cami in cams)
+		{
+			if (cami.name == "UnitCamera")
+			{
+				cam = cami;
+				break;
+			}
+		}
+		Debug.Log(cam);
+		Selection.activeGameObject.transform.position = TranslateCamera(Camera.main, Selection.activeGameObject.transform.position, cam);
 	}
 }
