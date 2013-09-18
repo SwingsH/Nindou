@@ -14,6 +14,8 @@ public struct DamageInfo
 	public float Accuracy;
 	public float Critical;
 	public float CriticalBonus;
+
+	public string HitParticle;
 }
 
 public enum eDirection
@@ -23,12 +25,6 @@ public enum eDirection
 	Right,
 }
 
-public struct AttackInfo
-{
-	public List<Unit> Target;
-	public DamageInfo Damage;
-}
-
 public enum eTargetMode
 {
 	Closest,
@@ -36,12 +32,13 @@ public enum eTargetMode
 
 public class UnitInfo
 {
-	public string ModelName;
+	public string ModelName = "NindoTestBone";
 	public int MaxLife;
 	public ushort AttackID;
 	public ushort[] SkillID = new ushort[0];
 	public byte MoveMode;
 	public int MoveSpeed;
+	public string[] spriteNames = new string[8];
 }
 
 public class StageInfo

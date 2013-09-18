@@ -18,6 +18,10 @@ public class MainSkill
 		protected get;
 		set;
 	}
+	public string Name
+	{
+		get { return SkillData.Name; }
+	}
 	public int Power
 	{
 		get { return SkillData.Power; }
@@ -84,27 +88,35 @@ public class MainSkill
 		get { return SkillData.ActiveRate / 100f; }
 	}
 
-	public List<DamageInfo> GenerateDamageInfo(Unit caster)
+	public string ParticleAttackStart
 	{
-		if (!(caster is AnimUnit))
-			return new List<DamageInfo>();
-
-		int DamageTimes = AnimationData.GetAnimClipTriggerEventCount((caster as AnimUnit).Anim, AnimClipName, AnimationSetting.HIT_TAG);
-		if (DamageTimes == 0)
-			return new List<DamageInfo>();
-		int seperatePow = Mathf.Clamp(Power / DamageTimes, 1, int.MaxValue);
-		
+		get { return SkillData.ParticleAttackStart; }
+	}
+	public string ParticleAttackEnd
+	{
+		get { return SkillData.ParticleAttackEnd; }
+	}
+	public string ParticleHit
+	{
+		get { return SkillData.ParticleHit; }
+	}
+	public DamageInfo GenerateDamageInfo(Unit caster)
+	{
 		DamageInfo di = new DamageInfo();
 		di.Attacker = caster;
 		di.DamageType = DamageType;
 		di.Accuracy = Accuracy;
-		di.Power = seperatePow;
+		di.Power = Power;
 		di.Critical = Critical;
 		di.CriticalBonus = CriticalBonus;
-		List<DamageInfo> result = new List<DamageInfo>();
-		for (int i = 0; i < DamageTimes; i++)
-			result.Add(di);
-		return result;
+		di.HitParticle = ParticleHit;
+		if (caster is AnimUnit)
+		{
+			int DamageTimes = AnimationData.GetAnimClipTriggerEventCount((caster as AnimUnit).Anim, AnimClipName, AnimationSetting.HIT_TAG);
+			if (DamageTimes != 0)
+				di.Power = Mathf.Clamp(Power / DamageTimes, 1, int.MaxValue);
+		}
+		return di;
 	}
 	public AnimInfo GenerateAnimInfo()
 	{

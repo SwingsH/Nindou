@@ -27,7 +27,8 @@ public class BattleManager : MonoBehaviour
 
 	StageInfo stage;
 
-	public GameObject TestEntity;
+	UnitGenerater Generater;
+	
 	void Awake()
 	{
 		if (Instance != null)
@@ -63,7 +64,7 @@ public class BattleManager : MonoBehaviour
 			Vector3 size = groundObject.transform.TransformPoint(m.bounds.size);
 			g = new GridInfo(op, size.x, size.z, Mathf.FloorToInt(groundObject.transform.lossyScale.x / 6), Mathf.FloorToInt(groundObject.transform.lossyScale.z / 6));
 		}
-
+		Generater = new UnitGenerater();
 		PlayerInfos.AddRange(TestDataBase.Instance.playerInfo);
 		UnitInfo info = new UnitInfo();
 		info.MoveSpeed = 9;
@@ -93,25 +94,15 @@ public class BattleManager : MonoBehaviour
 			if (eu != null)
 				eu.Run();
 	}
-	void AddPlayer(GridPos pos)
-	{
-		AddPlayer(pos, 1);
-	}
+
 	void AddPlayer(GridPos pos, int index)
 	{
 		if (g.CheckEmpty(pos))
 		{
-			Unit su = GenerateUnit(PlayerInfos[index], eGroup.Player);
+			Unit su = Generater.GenerateUnit(PlayerInfos[index]);
+			su.Group = eGroup.Player;
 			su.Pos = pos;
 			su.WorldPos = Get_GridWorldPos(pos);
-			SmoothMoves.BoneAnimation ba = su.Entity.GetComponentInChildren<SmoothMoves.BoneAnimation>();
-			Dictionary<string, string> atlasInfo = new Dictionary<string, string>();
-			string[] boneNames = new string[] { GLOBALCONST.HEAD, GLOBALCONST.HAND_LEFT, GLOBALCONST.HAND_RIGHT, GLOBALCONST.LEG_LEFT, GLOBALCONST.LEG_RIGHT, GLOBALCONST.BODY };
-			foreach (string bone in boneNames)
-			{
-				atlasInfo.Add(bone, TestDataBase.TestAtlasName[0]);
-			}
-			ResourceStation.GenerateModel(ba, atlasInfo);
 			if (su.Entity != null)
 				su.Entity.name += index;
 			if (Players.Length <= index)
@@ -122,26 +113,30 @@ public class BattleManager : MonoBehaviour
 	}
 	void AddEnemy(GridPos pos, int index)
 	{
+		if (index < EnemyInfos.Count)
+		{
+			AddEnemy(pos, EnemyInfos[index]);
+		}
+	}
+	void AddEnemy(GridPos pos, UnitInfo info)
+	{
+
 		if (g.CheckEmpty(pos))
 		{
-			Unit su = GenerateUnit(EnemyInfos[index], eGroup.Enemy);
+			//Test-------------
+			info.spriteNames = new string[6];
+			for(int i = 0 ;i < info.spriteNames.Length;i++)
+			{
+				info.spriteNames[i] = TestDataBase.TestAtlasName[Random.Range(0,TestDataBase.TestAtlasName.Length)];
+			}
+			//-----------------
+			Unit su = Generater.GenerateUnit(info);
+			su.Group = eGroup.Enemy;
 			su.Pos = pos;
 			su.WorldPos = Get_GridWorldPos(pos);
 			
-			if (su.Entity != null)
-				su.Entity.name += Enemys.Count;
 			Enemys.Add(su);
 			AppearUnit(su, su.Pos);
-
-
-			SmoothMoves.BoneAnimation ba = su.Entity.GetComponentInChildren<SmoothMoves.BoneAnimation>();
-			Dictionary<string, string> atlasInfo = new Dictionary<string, string>();
-			string[] boneNames = new string[]{GLOBALCONST.HEAD,GLOBALCONST.HAND_LEFT,GLOBALCONST.HAND_RIGHT,GLOBALCONST.LEG_LEFT,GLOBALCONST.LEG_RIGHT,GLOBALCONST.BODY};
-			foreach (string bone in boneNames)
-			{
-				atlasInfo.Add(bone,TestDataBase.TestAtlasName[Random.Range(0,TestDataBase.TestAtlasName.Length)]);
-			}
-			ResourceStation.GenerateModel(ba, atlasInfo);
 		}
 	}
 	void AddEnemy(GridPos pos)
@@ -149,112 +144,6 @@ public class BattleManager : MonoBehaviour
 		AddEnemy(pos, Random.Range(0, EnemyInfos.Count));
 	}
 
-	Vector3 lastTouchPos;
-	public int AreaMode = 0;
-	public int AreaRange = 3;
-	public bool AreaPreview = false;
-	public bool NewPreview = false;
-	public eDirection Dir = eDirection.Left;
-	void OnDrawGizmos()
-    {
-		if (g != null)
-		{
-			g.DrawGrid();
-			if (AreaPreview)
-			{
-				if (NewPreview)
-				{
-					GridPos tempGP = g.Get_GridPos(lastTouchPos);
-					foreach (GridPos gpi in g.GetEmptyGrid())
-					{
-						if(g.CheckInRange(AreaMode,tempGP,Dir,AreaRange,gpi))
-							g.DrawGrid(gpi, new Color(0, 0, 1, 0.2f));
-					}
-				}
-				else
-				{
-					foreach (GridPos gpi in g.Get_AreaGridPos(AreaMode, g.Get_GridPos(lastTouchPos), Dir, AreaRange))
-						g.DrawGrid(gpi, new Color(0, 0, 1, 0.2f));
-				}
-				g.DrawGrid(g.Get_GridPos(lastTouchPos), new Color(1, 0, 0, 0.2f));
-			}
-			foreach (Unit eu in Enemys)
-			{
-				//eu.Draw(Color.red);
-				g.DrawGrid(eu.Pos, Color.red);
-			}
-			foreach (Unit eu in Players)
-			{
-				if (eu == null)
-					continue;
-				//eu.Draw(Color.blue);
-				g.DrawGrid(eu.Pos, Color.blue);
-			}
-			//switch (CurrentInfoGroup)
-			//{
-			//    case eGroup.Enemy:
-			//        if (CurrentInfoIndex >= 0 && CurrentInfoIndex < Enemys.Count)
-			//            Enemys[CurrentInfoIndex].Draw(Color.white);
-			//        break;
-			//    case eGroup.Player:
-			//        if (CurrentInfoIndex >= 0 && CurrentInfoIndex < Players.Length && Players[CurrentInfoIndex] != null)
-			//            Players[CurrentInfoIndex].Draw(Color.white);
-			//        break;
-			//}
-		}
-		else
-			Start();
-    }
-	public static void DrawGrid(GridPos pos ,Color color)
-	{
-		if (Instance == null || Instance.g == null)
-			return;
-		Instance.g.DrawGrid(pos, color);
-	}
-	void ColliderReciver(Vector3 pos)
-	{
-		
-		lastTouchPos = pos;
-
-		GridPos gp = g.Get_GridPos(lastTouchPos);
-		if (!g.CheckEmpty(gp))
-		{
-			Unit ud = g.Get_GridUnit(gp);
-			if (ud != null)
-			{
-				CurrentInfoGroup = ud.Group;
-				switch (CurrentInfoGroup)
-				{
-					case eGroup.Enemy:
-						CurrentInfoIndex = Enemys.IndexOf(ud);
-						break;
-					case eGroup.Player:
-						CurrentInfoIndex = System.Array.IndexOf<Unit>(Players, ud);
-						break;
-				}
-			}
-		}
-	}
-
-	Unit GenerateUnit(UnitInfo info, eGroup group)
-	{
-		SimpleMoveUnit su = new SimpleMoveUnit();
-		if (TestEntity)
-			su.Entity = Instantiate(TestEntity) as GameObject;
-		su.BeHitParticle = TestDataBase.Get_Particle("BeHit");
-		su.NormalAttack = new MainSkill(TestDataBase.Instance.SkillDataBase[info.AttackID]);
-		foreach (ushort skillID in info.SkillID)
-		{
-			su.triggerSkills.Add(new MainSkill(TestDataBase.Instance.SkillDataBase[skillID]));
-		}
-		su.Group = group;
-		su.MaxLife = info.MaxLife;
-		su.Life = info.MaxLife;
-		su.MoveSpeed = info.MoveSpeed;
-		if (info.MoveMode == 1)
-			su.MoveAction = new TeleportInRangeComponent();
-		return su;
-	}
 	void RandomEnemy(int number, int mode)
 	{
 
@@ -289,123 +178,6 @@ public class BattleManager : MonoBehaviour
 			emptyGrid.RemoveAt(r);
 		}
 	}
-	int CurrentInfoIndex = 0;
-	eGroup CurrentInfoGroup = eGroup.Player;
-	public bool DisplayGUI = false;
-	void OnGUI()
-	{
-		if (Players != null)
-		{
-			Rect r = new Rect(10, Screen.height * 0.85f, Screen.width *0.25f, Screen.height * 0.15f);
-			for (int i = 0; i < Players.Length; i++)
-			{
-				if (Players[i] == null)
-					continue;
-				ActionUnit au = Players[i] as ActionUnit;
-				r.x = i * r.width;
-				string content = au.MoveState.ToString();
-				if(GUI.Button(r,content))
-				{
-					if (au.MoveState == eMoveState.Closer)
-						au.MoveState = eMoveState.KeepRange;
-					else
-						au.MoveState = eMoveState.Closer;
-				}
-			}
-		}
-
-		if (!DisplayGUI)
-			return;
-		//GUI.skin.box.alignment = TextAnchor.UpperRight;
-		if (GUI.Button(new Rect(10, 10, 100, 40),"Clear All"))
-		{
-			
-			foreach (Unit u in new List<Unit>(Players))
-				Unit_Dead(u);
-			foreach (Unit u in new List<Unit>(Enemys))
-				Unit_Dead(u);
-		}
-		GUI.Box(new Rect(110, 10, 100, 40), string.Format("Enemys Number {0}", Enemys.Count));
-		if (GUI.Button(new Rect(210, 10, 100, 40),  Time.timeScale.ToString()))
-		{
-			//List<GridPos> eg = new List<GridPos>(Get_EmptyGrid());
-			//for (int i = 0; i < 50; i++)
-			//{
-			//    int r = Random.Range(0, eg.Count);
-			//    AddEnemy(eg[r]);
-			//    eg.RemoveAt(r);
-			//    r = Random.Range(0, eg.Count);
-			//    AddPlayer(eg[r]);
-			//    eg.RemoveAt(r);
-			//}
-			Time.timeScale = Time.timeScale == 1 ? 10 : (Time.timeScale == 10 ? 100 : 1);
-		}
-
-			if (GUI.Button(new Rect(10, 50, 100, 40), "AddPlayer"))
-			{
-				IniPlayers();
-			}
-
-			if (GUI.Button(new Rect(110, 50 , 100, 40), "AddEnemy"))
-			{
-				RandomEnemy(5, 0);
-			}
-
-		
-		switch(CurrentInfoGroup)
-		{
-			case eGroup.Enemy:
-			if (CurrentInfoIndex >= 0 && CurrentInfoIndex < Enemys.Count)
-				GUI.Box(new Rect(210, 50, 200, GUI.skin.box.CalcHeight(new GUIContent(Enemys[CurrentInfoIndex].ToString()), 200)), Enemys[CurrentInfoIndex].ToString());
-			break;
-			case eGroup.Player:
-			if (CurrentInfoIndex >= 0 && CurrentInfoIndex < Players.Length && Players[CurrentInfoIndex] != null)
-				GUI.Box(new Rect(210, 50, 200, GUI.skin.box.CalcHeight(new GUIContent(Players[CurrentInfoIndex].ToString()),200)), Players[CurrentInfoIndex].ToString());
-			break;
-		}
-#if UNITY_EDITOR
-		if (UnityEditor.Selection.activeGameObject && UnityEditor.Selection.activeGameObject.GetComponent<SmoothMoves.BoneAnimation>() != null)
-		{
-			SmoothMoves.BoneAnimation anim = UnityEditor.Selection.activeGameObject.GetComponent<SmoothMoves.BoneAnimation>();
-			anim.RegisterUserTriggerDelegate(UserTriggerDelegate);
-			if (GUI.Button(new Rect(510, 10, 100, 40), "Play Walk"))
-			{
-				anim.CrossFade("Walk");
-			}
-			if (GUI.Button(new Rect(510, 50, 100, 40), "Stop Walk"))
-			{
-				anim.CrossFade("Idle");
-			}
-			if (GUI.Button(new Rect(510, 90, 100, 40), "Play Atk 3"))
-			{
-				anim.PlayQueued("Attack2");
-				
-				//UnityEditor.Selection.activeGameObject.animation.CrossFadeQueued("Attack");
-				//UnityEditor.Selection.activeGameObject.animation.CrossFadeQueued("Attack");
-			}
-			if (GUI.Button(new Rect(510, 130, 100, 40), "Walk Speed"))
-			{
-				anim["Walk"].speed *= 2;
-			}
-			if (GUI.Button(new Rect(510, 170, 100, 40), "Walk normalizedSpeed"))
-			{
-				anim["Walk"].normalizedSpeed *= 2;
-			}
-			int line = 0;
-
-			foreach (AnimationState AS in UnityEditor.Selection.activeGameObject.animation)
-			{
-				GUI.Box(new Rect(610, 10 + line, 300, 40), AS.name + " " + anim.IsPlaying(AS.name) + "\n " + AS.speed.ToString() + " " + AS.normalizedSpeed.ToString() + " " + AS.length.ToString()+ " " + AS.time.ToString());
-				line +=30;
-			}
-		}
-#endif
-	}
-	void UserTriggerDelegate(SmoothMoves.UserTriggerEvent triggerEvent)
-	{
-		if (triggerEvent.tag == "Damage")
-			Debug.Log(triggerEvent.tag);
-	}
 	void AppearUnit(Unit unit, GridPos pos)
 	{
 		if (g.CheckEmpty(pos))
@@ -422,39 +194,45 @@ public class BattleManager : MonoBehaviour
 
 	public static void Unit_Dead(Unit unit)
 	{
-		if (Instance == null)
-			return;
-
-		switch (unit.Group)
+		if (Instance != null)
 		{
-			case eGroup.Player:
-				bool allNull = true;
-				for (int i = 0; i < Instance.Players.Length; i++)
-				{
-					if (Instance.Players[i] == unit)
-						Instance.Players[i] = null;
-					if (Instance.Players[i] != null)
-						allNull = false;
-				}
-				Instance.g.Left(unit.Pos);
-				if (allNull)
-					Instance.AllDeadEvent(eGroup.Player);
-				break;
-			case eGroup.Enemy:
-				if (Instance.Enemys.Remove(unit))
-				{
+
+			switch (unit.Group)
+			{
+				case eGroup.Player:
+					bool allNull = true;
+					for (int i = 0; i < Instance.Players.Length; i++)
+					{
+						if (Instance.Players[i] == unit)
+							Instance.Players[i] = null;
+						if (Instance.Players[i] != null)
+							allNull = false;
+					}
 					Instance.g.Left(unit.Pos);
-					if (Instance.Enemys.Count == 0)
-						Instance.AllDeadEvent(eGroup.Enemy);
-				}
-				break;
+					if (allNull)
+						Instance.AllDeadEvent(eGroup.Player);
+					break;
+				case eGroup.Enemy:
+					if (Instance.Enemys.Remove(unit))
+					{
+						Instance.g.Left(unit.Pos);
+						if (Instance.Enemys.Count == 0)
+							Instance.AllDeadEvent(eGroup.Enemy);
+					}
+					break;
+			}
+			Instance.Generater.Recycle(unit);
 		}
-		if (unit.Entity)
-			Destroy(unit.Entity);
+		else
+		{
+			if (unit != null && unit.Entity != null)
+				Destroy(unit.Entity);
+		}
 	}
 	void Unit_Clear()
 	{
 	}
+	
 	void AllDeadEvent(eGroup group)
 	{
 		switch (group)
@@ -480,8 +258,10 @@ public class BattleManager : MonoBehaviour
 		
 		Vector3 result = current.ScreenToWorldPoint(targetCam.WorldToScreenPoint(currentPos));
 		result += targetCam.transform.forward * (currentPos.z - current.transform.position.z) * 30;
+		result.z += currentPos.x *0.1f;
 		return result;
 	}
+
 
 	#region Grid Control
 	public static bool Get_IsGridEmpty(GridPos pos)
@@ -597,6 +377,215 @@ public class BattleManager : MonoBehaviour
 		bool r = Instance.g.CheckInRange(mode,pos,dir,range,targetPos);
 		return r;
 	}
+	#endregion
+
+	#region TestCode
+
+	Vector3 lastTouchPos;
+	public int AreaMode = 0;
+	public int AreaRange = 3;
+	public bool AreaPreview = false;
+	public bool NewPreview = false;
+	public eDirection Dir = eDirection.Left;
+	void OnDrawGizmos()
+	{
+		if (g != null)
+		{
+			g.DrawGrid();
+			if (AreaPreview)
+			{
+				if (NewPreview)
+				{
+					GridPos tempGP = g.Get_GridPos(lastTouchPos);
+					foreach (GridPos gpi in g.GetEmptyGrid())
+					{
+						if (g.CheckInRange(AreaMode, tempGP, Dir, AreaRange, gpi))
+							g.DrawGrid(gpi, new Color(0, 0, 1, 0.2f));
+					}
+				}
+				else
+				{
+					foreach (GridPos gpi in g.Get_AreaGridPos(AreaMode, g.Get_GridPos(lastTouchPos), Dir, AreaRange))
+						g.DrawGrid(gpi, new Color(0, 0, 1, 0.2f));
+				}
+				g.DrawGrid(g.Get_GridPos(lastTouchPos), new Color(1, 0, 0, 0.2f));
+			}
+			foreach (Unit eu in Enemys)
+			{
+				//eu.Draw(Color.red);
+				g.DrawGrid(eu.Pos, Color.red);
+			}
+			foreach (Unit eu in Players)
+			{
+				if (eu == null)
+					continue;
+				//eu.Draw(Color.blue);
+				g.DrawGrid(eu.Pos, Color.blue);
+			}
+			//switch (CurrentInfoGroup)
+			//{
+			//    case eGroup.Enemy:
+			//        if (CurrentInfoIndex >= 0 && CurrentInfoIndex < Enemys.Count)
+			//            Enemys[CurrentInfoIndex].Draw(Color.white);
+			//        break;
+			//    case eGroup.Player:
+			//        if (CurrentInfoIndex >= 0 && CurrentInfoIndex < Players.Length && Players[CurrentInfoIndex] != null)
+			//            Players[CurrentInfoIndex].Draw(Color.white);
+			//        break;
+			//}
+		}
+		else
+			Start();
+	}
+	public static void DrawGrid(GridPos pos, Color color)
+	{
+		if (Instance == null || Instance.g == null)
+			return;
+		Instance.g.DrawGrid(pos, color);
+	}
+	void ColliderReciver(Vector3 pos)
+	{
+
+		lastTouchPos = pos;
+
+		GridPos gp = g.Get_GridPos(lastTouchPos);
+		if (!g.CheckEmpty(gp))
+		{
+			Unit ud = g.Get_GridUnit(gp);
+			if (ud != null)
+			{
+				CurrentInfoGroup = ud.Group;
+				switch (CurrentInfoGroup)
+				{
+					case eGroup.Enemy:
+						CurrentInfoIndex = Enemys.IndexOf(ud);
+						break;
+					case eGroup.Player:
+						CurrentInfoIndex = System.Array.IndexOf<Unit>(Players, ud);
+						break;
+				}
+			}
+		}
+	}
+
+	int CurrentInfoIndex = 0;
+	eGroup CurrentInfoGroup = eGroup.Player;
+	public bool DisplayGUI = false;
+	void OnGUI()
+	{
+		if (Players != null)
+		{
+			Rect r = new Rect(10, Screen.height * 0.85f, Screen.width * 0.25f, Screen.height * 0.15f);
+			for (int i = 0; i < Players.Length; i++)
+			{
+				if (Players[i] == null)
+					continue;
+				ActionUnit au = Players[i] as ActionUnit;
+				r.x = i * r.width;
+				string content = au.MoveState.ToString();
+				if (GUI.Button(r, content))
+				{
+					if (au.MoveState == eMoveState.Closer)
+						au.MoveState = eMoveState.KeepRange;
+					else
+						au.MoveState = eMoveState.Closer;
+				}
+			}
+		}
+
+		if (!DisplayGUI)
+			return;
+		//GUI.skin.box.alignment = TextAnchor.UpperRight;
+		if (GUI.Button(new Rect(10, 10, 100, 40), "Clear All"))
+		{
+
+			foreach (Unit u in new List<Unit>(Players))
+				Unit_Dead(u);
+			foreach (Unit u in new List<Unit>(Enemys))
+				Unit_Dead(u);
+		}
+		GUI.Box(new Rect(110, 10, 100, 40), string.Format("Enemys Number {0}", Enemys.Count));
+		if (GUI.Button(new Rect(210, 10, 100, 40), Time.timeScale.ToString()))
+		{
+			//List<GridPos> eg = new List<GridPos>(Get_EmptyGrid());
+			//for (int i = 0; i < 50; i++)
+			//{
+			//    int r = Random.Range(0, eg.Count);
+			//    AddEnemy(eg[r]);
+			//    eg.RemoveAt(r);
+			//    r = Random.Range(0, eg.Count);
+			//    AddPlayer(eg[r]);
+			//    eg.RemoveAt(r);
+			//}
+			Time.timeScale = Time.timeScale == 1 ? 10 : (Time.timeScale == 10 ? 100 : 1);
+		}
+
+		if (GUI.Button(new Rect(10, 50, 100, 40), "AddPlayer"))
+		{
+			IniPlayers();
+		}
+
+		if (GUI.Button(new Rect(110, 50, 100, 40), "AddEnemy"))
+		{
+			RandomEnemy(5, 0);
+		}
+
+
+		switch (CurrentInfoGroup)
+		{
+			case eGroup.Enemy:
+				if (CurrentInfoIndex >= 0 && CurrentInfoIndex < Enemys.Count)
+					GUI.Box(new Rect(210, 50, 200, GUI.skin.box.CalcHeight(new GUIContent(Enemys[CurrentInfoIndex].ToString()), 200)), Enemys[CurrentInfoIndex].ToString());
+				break;
+			case eGroup.Player:
+				if (CurrentInfoIndex >= 0 && CurrentInfoIndex < Players.Length && Players[CurrentInfoIndex] != null)
+					GUI.Box(new Rect(210, 50, 200, GUI.skin.box.CalcHeight(new GUIContent(Players[CurrentInfoIndex].ToString()), 200)), Players[CurrentInfoIndex].ToString());
+				break;
+		}
+#if UNITY_EDITOR
+		if (UnityEditor.Selection.activeGameObject && UnityEditor.Selection.activeGameObject.GetComponent<SmoothMoves.BoneAnimation>() != null)
+		{
+			SmoothMoves.BoneAnimation anim = UnityEditor.Selection.activeGameObject.GetComponent<SmoothMoves.BoneAnimation>();
+			anim.RegisterUserTriggerDelegate(UserTriggerDelegate);
+			if (GUI.Button(new Rect(510, 10, 100, 40), "Play Walk"))
+			{
+				anim.CrossFade("Walk");
+			}
+			if (GUI.Button(new Rect(510, 50, 100, 40), "Stop Walk"))
+			{
+				anim.CrossFade("Idle");
+			}
+			if (GUI.Button(new Rect(510, 90, 100, 40), "Play Atk 3"))
+			{
+				anim.PlayQueued("Attack2");
+
+				//UnityEditor.Selection.activeGameObject.animation.CrossFadeQueued("Attack");
+				//UnityEditor.Selection.activeGameObject.animation.CrossFadeQueued("Attack");
+			}
+			if (GUI.Button(new Rect(510, 130, 100, 40), "Walk Speed"))
+			{
+				anim["Walk"].speed *= 2;
+			}
+			if (GUI.Button(new Rect(510, 170, 100, 40), "Walk normalizedSpeed"))
+			{
+				anim["Walk"].normalizedSpeed *= 2;
+			}
+			int line = 0;
+
+			foreach (AnimationState AS in UnityEditor.Selection.activeGameObject.animation)
+			{
+				GUI.Box(new Rect(610, 10 + line, 300, 40), AS.name + " " + anim.IsPlaying(AS.name) + "\n " + AS.speed.ToString() + " " + AS.normalizedSpeed.ToString() + " " + AS.length.ToString() + " " + AS.time.ToString());
+				line += 30;
+			}
+		}
+#endif
+	}
+	void UserTriggerDelegate(SmoothMoves.UserTriggerEvent triggerEvent)
+	{
+		if (triggerEvent.tag == "Damage")
+			Debug.Log(triggerEvent.tag);
+	}
+
 	#endregion
 }
 public struct GridPos

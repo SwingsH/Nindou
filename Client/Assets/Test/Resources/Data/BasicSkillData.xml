@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="big5"?>
+<ArrayOfSkillData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <SkillData>
+    <ID>0</ID>
+    <Name />
+    <DamageType>0</DamageType>
+    <Power>0</Power>
+    <Critcal>0</Critcal>
+    <Accuracy>0</Accuracy>
+    <ActiveRate>0</ActiveRate>
+    <Range>0</Range>
+    <RangeMode>0</RangeMode>
+    <Cooldown>0</Cooldown>
+    <AnimName />
+    <AnimPlayTimes>0</AnimPlayTimes>
+    <CastTime>0</CastTime>
+    <ParticleAttackStart />
+    <ParticleAttackEnd />
+    <ParticleHit />
+  </SkillData>
+  <SkillData>
+    <ID>0</ID>
+    <Name />
+    <DamageType>0</DamageType>
+    <Power>0</Power>
+    <Critcal>0</Critcal>
+    <Accuracy>0</Accuracy>
+    <ActiveRate>0</ActiveRate>
+    <Range>0</Range>
+    <RangeMode>0</RangeMode>
+    <Cooldown>0</Cooldown>
+    <AnimName />
+    <AnimPlayTimes>0</AnimPlayTimes>
+    <CastTime>0</CastTime>
+    <ParticleAttackStart />
+    <ParticleAttackEnd />
+    <ParticleHit />
+  </SkillData>
+</ArrayOfSkillData>

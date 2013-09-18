@@ -60,13 +60,13 @@ public class ResourceStation {
 
 		if (!Atlases.TryGetValue(prefabName, out atlas))
 		{
-			Atlas_Load(prefabName);
+			Atlas_LoadFromeResource(prefabName);
 			Atlases.TryGetValue(prefabName, out atlas);
 		}
 
 		return atlas;
 	}
-	static void Atlas_Load(string atlasName)
+	static void Atlas_LoadFromeResource(string atlasName)
 	{
 		TextureAtlas prefab = Resources.Load("Atlas/" + atlasName, typeof(TextureAtlas)) as TextureAtlas;
 		if (prefab == null)
@@ -76,23 +76,56 @@ public class ResourceStation {
 
 	#endregion
 
-	public static void GenerateModel(SmoothMoves.BoneAnimation boneData, Dictionary<string,string> atlasInfo)
+	#region BoneAnimation
+	static Dictionary<string, BoneAnimation> boneAnimations = new Dictionary<string, BoneAnimation>();
+	public static BoneAnimation GetBone(string prefabName)
+	{
+		BoneAnimation bone;
+
+		if (!boneAnimations.TryGetValue(prefabName, out bone))
+		{
+			Bone_LoadFromResource(prefabName);
+			if(!boneAnimations.TryGetValue(prefabName, out bone))
+				return null;
+		}
+		BoneAnimation result = GameObject.Instantiate(bone) as BoneAnimation;
+		result.name = prefabName;
+		return result;
+	}
+	static void Bone_LoadFromResource(string prefabName)
+	{
+		GameObject prefab = Resources.Load("BasicBone/" + prefabName) as GameObject;
+		if (prefab == null)
+			return;
+
+		//ParticleSystem ps = (GameObject.Instantiate(prefab) as GameObject).GetComponent<ParticleSystem>();
+		BoneAnimation bone = prefab.GetComponent<BoneAnimation>(); //存原始物件，不實體化
+		if (bone == null)
+			return;
+		bone.name = prefabName; //名字統一，方便找到同一個particle
+		//ps.Stop();
+		boneAnimations.Add(prefabName, bone);
+	}
+	#endregion
+	public static void GenerateModelSprite(SmoothMoves.BoneAnimation boneData,string[] atlasInfo)
 	{
 		if (boneData == null || atlasInfo == null)
 			return;
-		foreach (KeyValuePair<string, string> kvp in atlasInfo)
+		for (int i = 0; i < atlasInfo.Length && i < GLOBALCONST.BONE_NAME.Length; i++)
 		{
-			Transform spriteTrans = boneData.GetSpriteTransform(kvp.Key);
+			string boneName = GLOBALCONST.BONE_NAME[i];
+			string atlasName = atlasInfo[i];
+
+			Transform spriteTrans = boneData.GetSpriteTransform(boneName);
 			if (spriteTrans == null)
 				continue;
-			TextureAtlas atlas = GetAtlas(kvp.Value);
+			TextureAtlas atlas = GetAtlas(atlasName);
 			Sprite sprite = spriteTrans.GetComponent<SmoothMoves.Sprite>();
-			if(sprite == null)
+			if (sprite == null)
 				sprite = spriteTrans.gameObject.AddComponent<Sprite>();
 			sprite.SetAtlas(atlas);
-			sprite.SetTextureName(kvp.Key);
+			sprite.SetTextureName(boneName);
 			sprite.SetPivotOffset(Vector2.zero, true);
 		}
-
 	}
 }

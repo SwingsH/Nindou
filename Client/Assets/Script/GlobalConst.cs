@@ -21,6 +21,18 @@ public class GLOBALCONST
 	public const string LEG_LEFT = "LegL";
 	public const string LEG_RIGHT = "LegR";
 	public const string BODY = "Body";
-	public const string WEAPON = "WEAPON";
+	public const string WEAPON_LEFT = "WeaponL";
+	public const string WEAPON_RIGHT = "WeaponR";
+	public static readonly string[] BONE_NAME = new string[]
+	{
+		HEAD,
+		BODY,
+		HAND_LEFT,
+		HAND_RIGHT,
+		LEG_LEFT,
+		LEG_RIGHT,
+		WEAPON_LEFT,
+		WEAPON_RIGHT,
+	};
 }
 

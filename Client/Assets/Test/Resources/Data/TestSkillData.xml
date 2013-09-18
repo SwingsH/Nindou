@@ -29,6 +29,8 @@
 		<AnimName>Attack</AnimName>
 		<AnimPlayTimes>1</AnimPlayTimes>
 		<CastTime>50</CastTime>
+		<ParticleAttackStart>Slash1</ParticleAttackStart>
+		<ParticleHit>BeSlash1</ParticleHit>
 	</SkillData>
 	<SkillData>
 		<ID>2</ID>
@@ -44,6 +46,8 @@
 		<AnimName>Attack</AnimName>
 		<AnimPlayTimes>1</AnimPlayTimes>
 		<CastTime>120</CastTime>
+		<ParticleAttackStart>Slash1</ParticleAttackStart>
+		<ParticleHit>BeSlash1</ParticleHit>
 	</SkillData>
 	<SkillData>
 		<ID>3</ID>
@@ -59,6 +63,8 @@
 		<AnimName>Attack2</AnimName>
 		<AnimPlayTimes>1</AnimPlayTimes>
 		<CastTime>100</CastTime>
+		<ParticleAttackStart>Slash1</ParticleAttackStart>
+		<ParticleHit>BeSlash1</ParticleHit>
 	</SkillData>
 	<SkillData>
 		<ID>4</ID>
@@ -74,6 +80,8 @@
 		<AnimName>Attack</AnimName>
 		<AnimPlayTimes>1</AnimPlayTimes>
 		<CastTime>80</CastTime>
+		<ParticleAttackStart>Slash1</ParticleAttackStart>
+		<ParticleHit>BeSlash1</ParticleHit>
 	</SkillData>
 	<SkillData>
 		<ID>5</ID>
@@ -89,6 +97,8 @@
 		<AnimName>Attack</AnimName>
 		<AnimPlayTimes>1</AnimPlayTimes>
 		<CastTime>80</CastTime>
+		<ParticleAttackStart>Slash1</ParticleAttackStart>
+		<ParticleHit>BeSlash1</ParticleHit>
 	</SkillData>
 	<SkillData>
 		<ID>6</ID>
@@ -104,7 +114,8 @@
 		<AnimName>Attack</AnimName>
 		<AnimPlayTimes>1</AnimPlayTimes>
 		<CastTime>50</CastTime>
-		<PartcileAttackEnd>Shoot</PartcileAttackEnd>
+		<ParticleAttackEnd>Shoot</ParticleAttackEnd>
+		<ParticleHit>BeHit</ParticleHit>
 	</SkillData>
 	<SkillData>
 		<ID>7</ID>
@@ -120,7 +131,8 @@
 		<AnimName>Attack2</AnimName>
 		<AnimPlayTimes>1</AnimPlayTimes>
 		<CastTime>80</CastTime>
-		<PartcileAttackEnd>Shoot</PartcileAttackEnd>
+		<ParticleAttackEnd>Shoot</ParticleAttackEnd>
+		<ParticleHit>BeHit</ParticleHit>
 	</SkillData>
 	<SkillData>
 		<ID>8</ID>
@@ -136,11 +148,12 @@
 		<AnimName>Attack</AnimName>
 		<AnimPlayTimes>3</AnimPlayTimes>
 		<CastTime>120</CastTime>
-		<PartcileAttackEnd>Shoot</PartcileAttackEnd>
+		<ParticleAttackEnd>Shoot</ParticleAttackEnd>
+		<ParticleHit>BeHit</ParticleHit>
 	</SkillData>
 	<SkillData>
 		<ID>100</ID>
-		<Name>8連擊</Name>
+		<Name>八連擊</Name>
 		<DamageType>0</DamageType>
 		<Power>80</Power>
 		<Critcal>5</Critcal>
@@ -152,5 +165,7 @@
 		<AnimName>Attack2</AnimName>
 		<AnimPlayTimes>4</AnimPlayTimes>
 		<CastTime>100</CastTime>
+		<ParticleAttackStart>Slash1</ParticleAttackStart>
+		<ParticleHit>BeSlash1</ParticleHit>
 	</SkillData>
 </ArrayOfSkillData>

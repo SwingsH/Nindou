@@ -84,4 +84,6 @@ public struct AnimationSetting
 	public const string HIT_TAG = "Damage";
 	public const string ATKSTART_TAG = "AttackStart";
 	public const string ATKEND_TAG = "AttackEnd";
+	public const string START_TAG = "Start";
+	public const string END_TAG = "End";
 }

@@ -59,18 +59,16 @@ public class NinDoAttackComponent : ActionComponent
 			float rateFix = 1;
 			UnavailableTime = Time.time + normalAttack.CoolDown;
 			MainSkill castSkill = normalAttack;
-			List<Unit> targets = new List<Unit>();
-			targets.Add(Target);
-
+			
 			for (int i = 0; i < triggerSkills.Count; i++)
 			{
 				if (triggerSkills[i].Castable)
 				{
 					List<Unit> units;
 					if (triggerSkills[i].DamageType == SkillDamageType.Damage)
-						units = BattleManager.Get_EnemyUnitsInRange(unit.Group, normalAttack.range, unit.Pos, unit.Direction, normalAttack.range);
+						units = BattleManager.Get_EnemyUnitsInRange(unit.Group, triggerSkills[i].range, unit.Pos, unit.Direction, triggerSkills[i].range);
 					else
-						units = BattleManager.Get_FriendUnitsInRange(unit.Group, normalAttack.range, unit.Pos, unit.Direction, normalAttack.range);
+						units = BattleManager.Get_FriendUnitsInRange(unit.Group, triggerSkills[i].range, unit.Pos, unit.Direction, triggerSkills[i].range);
 
 					if (units.Count == 0)
 						continue;
@@ -79,16 +77,6 @@ public class NinDoAttackComponent : ActionComponent
 					if (r < triggerSkills[i].ActivePropability * rateFix)
 					{
 						castSkill = triggerSkills[i];
-						if (castSkill.rangeMode > BattleSettingValue.AllInRangeModeGroup)
-							targets = units;
-						else
-						{
-							if (!units.Contains(Target))
-							{
-								targets.Clear();
-								targets.Add(units[0]);
-							}
-						}
 						break;
 					}
 					else
@@ -98,22 +86,8 @@ public class NinDoAttackComponent : ActionComponent
 					}
 				}
 			}
-			castSkill.CastableTime = Time.time + castSkill.CoolDown;
 			BusyTime = Time.time + castSkill.CastTime;
-
-			List<AttackInfo> attackInfos = new List<AttackInfo>();
-			List<DamageInfo> di = castSkill.GenerateDamageInfo(unit);
-			for (int i = 0; i < di.Count; i++)
-			{
-				AttackInfo ai = new AttackInfo();
-				ai.Target = targets;
-				ai.Damage = di[i];
-				attackInfos.Add(ai);
-			}
-			//把attackinfos的值丟到某個暫存的地方，等動畫來同步造成傷害
-			AnimInfo animInfo = castSkill.GenerateAnimInfo();
-			unit.PlayAnim(animInfo);
-			unit.AttackList.AddRange(attackInfos);
+			unit.CastSkill(castSkill);
 		}
 	}
 	public override ActionState State
@@ -123,6 +97,8 @@ public class NinDoAttackComponent : ActionComponent
 			if (Target == null)
 				return ActionState.Unavailable;
 			if (BusyTime > Time.time)
+				return ActionState.Busy;
+			if (unit.IsCasting)
 				return ActionState.Busy;
 			//if (UnavailableTime > Time.time)
 			//    return ActionState.Unavailable;

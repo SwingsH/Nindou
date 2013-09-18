@@ -14,6 +14,10 @@ public abstract class Unit
 	public abstract void Run();
 	public GridPos Pos;
 	public eDirection Direction;
+	public Vector3 WorldDirection
+	{
+		get { return Direction == eDirection.Left ? Vector3.left : Vector3.right; }
+	}
 	public Vector3 WorldPos;
 	public Color c = Color.white;
 	public eGroup Group;
@@ -61,6 +65,11 @@ public abstract class Unit
 		result += string.Format("\nLife:{0}", Life);
 		return result;
 	}
+
+	//因為不是unity的物件，所以可能會有被unity物件參考或是參考的unity物件的情況造成無法釋放，故需要在此處理
+	public virtual void ClearReference()
+	{
+	}
 }
 
 public class AnimUnit : Unit
@@ -76,7 +85,10 @@ public class AnimUnit : Unit
 			base.Entity = value;
 			Anim = Entity.GetComponentInChildren<BoneAnimation>();
 			if (Entity != null && BeHitParticle != null)
+			{
 				BeHitParticle.transform.parent = Entity.transform;
+				BeHitParticle.transform.transform.localPosition = Vector3.zero;
+			}
 		}
 	}
 	public virtual BoneAnimation Anim
@@ -119,7 +131,10 @@ public class AnimUnit : Unit
 			{
 				_beHitParticle = value;
 				if (Entity != null)
-					value.transform.parent = Entity.transform;
+				{
+					_beHitParticle.transform.parent = Entity.transform;
+					_beHitParticle.transform.transform.localPosition = Vector3.zero;
+				}
 			}
 		}
 		get
@@ -143,13 +158,13 @@ public class AnimUnit : Unit
 		}
 		if (animInfo.times <= 1)
 		{
-			AnimationState state = Anim.PlayQueued(animInfo.clipName, QueueMode.CompleteOthers);
+			AnimationState state = Anim.PlayQueued(animInfo.clipName, QueueMode.PlayNow);
 			float ns = state.length / animInfo.totalTime;
 			state.speed = ns;
 		}
 		else
 		{
-			AnimationState state = Anim.PlayQueued(animInfo.clipName, QueueMode.CompleteOthers);
+			AnimationState state = Anim.PlayQueued(animInfo.clipName, QueueMode.PlayNow);
 			float ns = state.length / (animInfo.totalTime / animInfo.times);
 			state.speed = ns;
 			for (int i = 1; i < animInfo.times; i++)
@@ -176,20 +191,19 @@ public class AnimUnit : Unit
 					rate = 1 + info.CriticalBonus;
 				}
 				Life -= Mathf.CeilToInt(rate * info.Power);
-				if (BeHitParticle)
-				{
-					BeHitParticle.Stop();
-					BeHitParticle.Play();
-				}
+				if(Entity)
+					ParticleManager.Emit(info.HitParticle, Entity.transform.position + Vector3.back*10, Entity.transform.up);
 				if (Life <= 0)
 					BattleManager.Unit_Dead(this);
 			}
 		}
+		
 	}
 }
 
 public class ActionUnit : AnimUnit
 {
+	public static int totalCount = 0;
 	protected ActionComponent currentAction;
 	SimpleMoveComponent _moveAction;
 	public SimpleMoveComponent MoveAction
@@ -236,7 +250,8 @@ public class ActionUnit : AnimUnit
 			if (Anim != null)
 				Anim.UnregisterUserTriggerDelegate(UserTriggerDelegate);
 			base.Anim = value;
-			Anim.RegisterUserTriggerDelegate(UserTriggerDelegate);
+			if(value !=null)
+				Anim.RegisterUserTriggerDelegate(UserTriggerDelegate);
 			StopWalk();
 		}
 	}
@@ -277,8 +292,22 @@ public class ActionUnit : AnimUnit
 		}
 	}
 
-	public List<AttackInfo> AttackList = new List<AttackInfo>(); //傷害資訊暫存，同步動畫用
-	
+	CastInfo CurrentCast;
+	public bool IsCasting
+	{
+		get
+		{
+			if (CurrentCast == null)
+				return false;
+			return CurrentCast.Casting;
+		}
+	}
+
+	public ActionUnit()
+	{
+		totalCount++;
+	}
+
 	public int ActionRangeMode
 	{
 		get
@@ -412,31 +441,80 @@ public class ActionUnit : AnimUnit
 
 	public void PlayWalk()
 	{
-		Anim.Blend(AnimationSetting.WALK_ANIM, 1, 0.1f);
+		if(Anim != null)
+			Anim.Blend(AnimationSetting.WALK_ANIM, 1, 0.1f);
 	}
 	public void StopWalk()
 	{
-		Anim.Blend(AnimationSetting.WALK_ANIM, 0, 0.1f);
+		if (Anim != null)
+			Anim.Blend(AnimationSetting.WALK_ANIM, 0, 0.1f);
+	}
+	public void PlaySkill(MainSkill skill)
+	{
+		PlayAnim(skill.GenerateAnimInfo());
+		CurrentCast = new CastInfo();
+		CurrentCast.skill = skill;
+	}
+	public void CastSkill(MainSkill skill)
+	{
+		if (IsCasting)
+		{
+			Debug.Log("CastError");
+			return;
+		}
+		skill.CastableTime = Time.time + skill.CoolDown;
+		PlayAnim(skill.GenerateAnimInfo());
+		CurrentCast = new CastInfo();
+		CurrentCast.skill = skill;
+		CurrentCast.EndCount = skill.AnimPlayTimes;
+		CurrentCast.Target =GetTarget(skill);
+	}
+	public List<Unit> GetTarget(MainSkill skill)
+	{
+		List<Unit> units;
+		if (skill.DamageType == SkillDamageType.Damage)
+			units = BattleManager.Get_EnemyUnitsInRange(Group, skill.range, Pos, Direction, skill.range);
+		else
+			units = BattleManager.Get_FriendUnitsInRange(Group, skill.range, Pos, Direction, skill.range);
+		if (skill.rangeMode <= BattleSettingValue.AllInRangeModeGroup)
+		{
+			if (!units.Contains(TargetUnit))
+			{
+				units.Clear();
+				units.Add(TargetUnit);
+			}
+		}
+		return units;
 	}
 
 	void UserTriggerDelegate(UserTriggerEvent triggerEvent)
 	{
-		switch(triggerEvent.tag)
+		if (CurrentCast != null)
 		{
-			case AnimationSetting.HIT_TAG:
-				if (AttackList.Count > 0)
-				{
-					AttackInfo info = AttackList[0];
-					AttackList.RemoveAt(0);
-					foreach (Unit u in info.Target)
+			if (triggerEvent.animationName != CurrentCast.skill.AnimClipName)
+				return;
+
+			switch (triggerEvent.tag)
+			{
+				case AnimationSetting.HIT_TAG:
+					Debug.Log(triggerEvent.tag);
+					DamageInfo di = CurrentCast.skill.GenerateDamageInfo(this);
+					if (CurrentCast.Target != null)
 					{
-						u.Damaged(info.Damage);				
+						foreach (Unit u in CurrentCast.Target)
+							u.Damaged(di);
 					}
-				}
-			break;
-			case AnimationSetting.ATKEND_TAG:
-			TestDataBase.Particle_Emit("Shoot", triggerEvent.boneTransform.position, Direction == eDirection.Left ? Vector3.left : Vector3.right);
-			break;
+					break;
+				case AnimationSetting.ATKSTART_TAG:
+					ParticleManager.Emit(CurrentCast.skill.ParticleAttackStart, triggerEvent.boneTransform.position, WorldDirection);
+					break;
+				case AnimationSetting.ATKEND_TAG:
+					ParticleManager.Emit(CurrentCast.skill.ParticleAttackEnd, triggerEvent.boneTransform.position,WorldDirection);
+					break;
+				case AnimationSetting.END_TAG:
+					CurrentCast.EndCount--;
+					break;
+			}
 		}
 	}
 
@@ -447,11 +525,16 @@ public class ActionUnit : AnimUnit
 			currentAction.DrawInfo();
 	}
 
-	//~ActionUnit()
-	//{
-	//    if (Anim != null)
-	//        Anim.UnregisterUserTriggerDelegate(UserTriggerDelegate);
-	//}
+	~ActionUnit()
+	{
+		totalCount--;	
+	}
+
+	public override void ClearReference()
+	{
+		base.ClearReference();
+		Anim.UnregisterUserTriggerDelegate(UserTriggerDelegate);
+	}
 }
 public enum eGroup
 {
@@ -474,4 +557,15 @@ public class SimpleMoveUnit : ActionUnit
 	}
 
 
+}
+
+public class CastInfo
+{
+	public MainSkill skill;
+	public bool Casting
+	{
+		get { return EndCount > 0; }
+	}
+	public List<Unit> Target;
+	public int EndCount;
 }

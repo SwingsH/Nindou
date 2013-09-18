@@ -19,9 +19,10 @@ public class SkillData
 	public string AnimName = "";
 	public int AnimPlayTimes;
 	public ushort CastTime;
-	public string PartcileAttackStart = "";
-	public string PartcileAttackEnd = "";
-	public string PartcileHit = "";
+	public string ParticleAttackStart = "";
+	public string ParticleAttackEnd = "";
+	public string ParticleHit = "";
+	
 	public override string ToString()
 	{
 		return string.Format("ID:{0}\nName:{1}\nPower:{2}", ID, Name, Power);

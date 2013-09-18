@@ -26,7 +26,7 @@ public class InstantiateModel : MonoBehaviour {
 			else
 				sPos = Input.GetTouch(1).position;
 			RaycastHit rh;
-			if (Physics.Raycast(Camera.main.ScreenPointToRay(sPos), out rh, Camera.main.far))
+			if (Physics.Raycast(Camera.main.ScreenPointToRay(sPos), out rh, Camera.main.farClipPlane))
 			{
 				GameObject newGameObject = Instantiate(targetPrefab) as GameObject;
 				goList.Add(newGameObject);

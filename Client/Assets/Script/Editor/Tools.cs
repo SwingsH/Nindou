@@ -201,11 +201,13 @@ public static class Tools {
 					{
 						acb.keyframes[0].keyframeType = KeyframeSM.KEYFRAME_TYPE.TransformOnly;
 					}
-					for (int i = 1; i < acb.keyframes.Count; i++)
+					for (int i = 0; i < acb.keyframes.Count; i++)
 					{
 						acb.keyframes[i].useKeyframeType = false;
 						acb.keyframes[i].useAtlas = false;
+						acb.keyframes[i].atlas = null;
 						acb.keyframes[i].useTextureGUID = false;
+						acb.keyframes[i].textureGUID = string.Empty;
 						acb.keyframes[i].usePivotOffset = false;
 					}
 				}
@@ -226,6 +228,9 @@ public static class Tools {
 					if(acb.keyframes.Count >= 1)
 					{
 						acb.keyframes[0].keyframeType = KeyframeSM.KEYFRAME_TYPE.Image;
+						acb.keyframes[0].useKeyframeType = true;
+						acb.keyframes[0].useAtlas = true;
+						acb.keyframes[0].useTextureGUID = true;
 						acb.keyframes[0].atlas = ta;
 						acb.keyframes[0].textureGUID = ta.GetTextureGUIDFromName(baData.boneDataList[acb.boneDataIndex].boneName);
 					}
@@ -254,10 +259,7 @@ public static class Tools {
 
 					for (int i = 0; i < acb.keyframes.Count; i++)
 					{
-
 						acb.keyframes[i].localPosition3.val.z = 0.1f * (acb.keyframes[i].depth - 5);
-						
-
 					}
 				}
 			}
@@ -265,26 +267,47 @@ public static class Tools {
 	}
 	#endregion
 
+	#region XML
+	[MenuItem("Tools/Rebuild Class Xml For Excel")]
+	public static void RebuildXml()
+	{
+		XmlSerializer xml = new XmlSerializer(typeof(List<SkillData>));
+
+		List<SkillData> silist = new List<SkillData>();
+		silist.Add(new SkillData());
+		silist.Add(new SkillData());
+
+		StringWriter sw = new StringWriter();
+		xml.Serialize(sw, silist);
+		Debug.Log(sw);
+
+		FileStream fs = new FileStream(Application.dataPath + "/Test/Resources/Data/BasicSkillData.xml", FileMode.Create);
+		xml.Serialize(fs, silist);
+		fs.Close();
+	}
+	#endregion
+
 
 	[MenuItem("Tools/QuickTest1")]
 	public static void QuickTest1()
 	{
-		TimeMachine.ChangeTimeScale(0, 3);
+		BoneAnimation ba = Selection.activeGameObject.GetComponent<BoneAnimation>();
+		if (ba)
+		{
+			AnimationState AS = ba.PlayQueued("Attack");
+			Debug.Log(AS.length);
+			Debug.Log(AS.speed);
+			Debug.Log(AS.length / AS.speed);
+		}
+	
 	}
 	[MenuItem("Tools/QuickTest2")]
-	public static void Trans()
+	public static void QuickTest2()
 	{
-		Object[] cams = Resources.FindObjectsOfTypeAll(typeof(Camera));
-		Camera cam = null;
-		foreach (Camera cami in cams)
-		{
-			if (cami.name == "UnitCamera")
-			{
-				cam = cami;
-				break;
-			}
-		}
-		Debug.Log(cam);
-		Selection.activeGameObject.transform.position = TranslateCamera(Camera.main, Selection.activeGameObject.transform.position, cam);
+		string path = EditorUtility.SaveFilePanel ("Save Resource", Application.dataPath + @"\Test\Resources\Assetbundles\", "New Resource", "unity3d");
+		if(string.IsNullOrEmpty(path))
+			return;
+		BuildPipeline.BuildAssetBundle(Selection.activeObject, null, path, BuildAssetBundleOptions.CollectDependencies, BuildTarget.Android);
+		
 	}
 }

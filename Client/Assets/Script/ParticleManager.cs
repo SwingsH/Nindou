@@ -7,10 +7,10 @@ using System.Collections.Generic;
  */
 public class ParticleManager : MonoBehaviour {
 
-	public const int RESERVE_AMOUNT = 10;
+	public const int RESERVE_AMOUNT = 5;
 	public static ParticleManager Instance;
 
-	public static Dictionary<string, List<ParticleSystem>> AvailableParticles = new Dictionary<string, List<ParticleSystem>>();
+	static Dictionary<string, List<ParticleSystem>> AvailableParticles = new Dictionary<string, List<ParticleSystem>>();
 	List<ParticleSystem> actingParticleSystem = new List<ParticleSystem>();
 	public ParticleSystem[] displayingArray; //目前顯示中的
 	void Awake()
@@ -50,7 +50,19 @@ public class ParticleManager : MonoBehaviour {
 		}
 		displayingArray = actingParticleSystem.ToArray();
 	}
-	public static ParticleSystem GetParticle(string name)
+	public static void Emit(string particleName, Vector3 worldPos, Vector3 direction)
+	{
+		if (string.IsNullOrEmpty(particleName))
+			return;
+		ParticleSystem ps = GetParticle(particleName);
+		if (ps)
+		{
+			ps.transform.forward = direction;
+			ps.transform.position = worldPos;
+			ps.Play();
+		}
+	}
+	static ParticleSystem GetParticle(string name)
 	{
 		List<ParticleSystem> tempList;
 		ParticleSystem tempps;
@@ -87,8 +99,6 @@ public class ParticleManager : MonoBehaviour {
 			tempList.Add(ps);
 		else
 			DestroyImmediate(ps.gameObject);
-
-		
 	}
 }
 
