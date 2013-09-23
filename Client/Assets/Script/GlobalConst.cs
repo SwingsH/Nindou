@@ -34,5 +34,15 @@ public class GLOBALCONST
 		WEAPON_LEFT,
 		WEAPON_RIGHT,
 	};
+
+    // TODO: 下面目前都是為了測試用
+    #region 檔名相關常數（無副檔名）
+    public const string FILENAME_SCENE = "SceneData"; // 場景資料
+    #endregion
+
+    public static readonly DataConvertInfomation[] DataConvertList = 
+    {
+        new DataConvertInfomation(typeof(SceneData), FILENAME_SCENE),
+    };
 }
 

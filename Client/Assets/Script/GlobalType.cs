@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System;
+using System.Text;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 /// <summary>
 /// 自定義屬性宣告, StringValue
@@ -156,5 +158,52 @@ public class EnumClassValue : System.Attribute
             return true;
         }
         return false;
+    }
+}
+
+// TODO: 轉成用Enum的屬性定義
+/// <summary>
+/// 描述資料轉換用的資訊用的class，描述資料結構和檔名之間的對應
+/// </summary>
+public class DataConvertInfomation
+{
+    public System.Type DataType
+    {
+        get;
+        protected set;
+    }
+    public string FileName
+    {
+        get;
+        protected set;
+    }
+
+    public DataConvertInfomation(System.Type setDataType, string setFileName)
+    {
+        DataType = setDataType;
+        FileName = setFileName;
+    }
+}
+
+// TODO: 測試用
+/// <summary>
+/// 從表格來的場景資料
+/// </summary>
+[StructLayout(LayoutKind.Sequential)]
+public class SceneData
+{
+    public ushort SceneID;       // 場景ID
+    public string SceneName;     // 場景名稱（中地圖or剛換到該場景顯示的名稱）
+    public string SceneFileName; // 場景檔案名稱
+
+    public override string ToString()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.Append("=========== SceneData =============\n");
+        sb.AppendFormat("場景ID = {0}\n", SceneID);
+        sb.AppendFormat("場景名稱 = {0}\n", SceneName);
+        sb.AppendFormat("場景檔案名稱 = {0}\n", SceneFileName);
+        sb.Append("===================================\n");
+        return sb.ToString();
     }
 }
