@@ -40,9 +40,10 @@ public class GLOBALCONST
     public const string FILENAME_SCENE = "SceneData"; // 場景資料
     #endregion
 
-    public static readonly DataConvertInfomation[] DataConvertList = 
+    // for test
+    public enum DataLoadTag
     {
-        new DataConvertInfomation(typeof(SceneData), FILENAME_SCENE),
+        [EnumClassValue(typeof(SceneData), FILENAME_SCENE)]        Scene = 0, // 場景
     };
 }
 

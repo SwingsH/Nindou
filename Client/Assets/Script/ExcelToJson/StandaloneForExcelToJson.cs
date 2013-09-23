@@ -105,29 +105,33 @@ public class StandaloneForExcelToJson : MonoBehaviour
         }
         int successFileCount = 0;
 
-        foreach (DataConvertInfomation dci in GLOBALCONST.DataConvertList)
+        Array dataLoadTags = Enum.GetValues(typeof(GLOBALCONST.DataLoadTag));
+        foreach(GLOBALCONST.DataLoadTag dlt in dataLoadTags)
         {
             string dataJsonString;
             string tempDebugMsg;
-            ReadExcelToJsonStringError error = excelToJsonString.ReadExcelFile(excelDirectoryPath, dci, NeedReadSite.CLIENT, out dataJsonString, out tempDebugMsg);
+            string fileName = EnumClassValue.GetFileName(dlt);
+            System.Type dataType = EnumClassValue.GetClassType(dlt);
+            
+            ReadExcelToJsonStringError error = excelToJsonString.ReadExcelFile(excelDirectoryPath, dlt, NeedReadSite.CLIENT, out dataJsonString, out tempDebugMsg);
             _debugMessage += tempDebugMsg;
             if (error == ReadExcelToJsonStringError.NONE)
             {
-                string filePath = jsonDirectoryPath + Path.DirectorySeparatorChar + dci.FileName + JSON_EXT;
+                string filePath = jsonDirectoryPath + Path.DirectorySeparatorChar + fileName + JSON_EXT;
                 WriteJsonStringToFile(dataJsonString, filePath);
 
                 _debugMessage = string.Format("{0}將 {1} 資料轉換成json成功\n", _debugMessage, filePath);
-                _fileListMessage = string.Format("{0}{1}：O\n", _fileListMessage, dci.FileName);
+                _fileListMessage = string.Format("{0}{1}：O\n", _fileListMessage, fileName);
                 ++successFileCount;
             }
             else
             {
-                string excelFilePath = excelDirectoryPath + Path.DirectorySeparatorChar + dci.FileName + ".xlsx";
-                _debugMessage = string.Format("{0}取得{1}內資料(型別為{2})失敗：失敗原因：{3}\n", _debugMessage, excelFilePath, dci.DataType, error);
-                _fileListMessage = string.Format("{0}{1}：X\n", _fileListMessage, dci.FileName);
+                string excelFilePath = excelDirectoryPath + Path.DirectorySeparatorChar + fileName + ".xlsx";
+                _debugMessage = string.Format("{0}取得{1}內資料(型別為{2})失敗：失敗原因：{3}\n", _debugMessage, excelFilePath, dataType, error);
+                _fileListMessage = string.Format("{0}{1}：X\n", _fileListMessage, fileName);
             }
         }
-        _debugMessage = string.Format("{0}共轉換 {1}個檔案成功，{2}個檔案失敗\n", _debugMessage, successFileCount, GLOBALCONST.DataConvertList.Length - successFileCount);
+        _debugMessage = string.Format("{0}共轉換 {1}個檔案成功，{2}個檔案失敗\n", _debugMessage, successFileCount, dataLoadTags.Length - successFileCount);
         _currentlyTransfering = false;
     }
 

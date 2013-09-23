@@ -13,6 +13,7 @@ public enum ReadExcelToJsonStringError
     NONE = 0, // 沒有問題
     FILE_NOT_EXIST = 1, // 檔案不存在        debugMsg = string.Format("{0} 轉換失敗：檔案不存在\n", filePath);
     FILE_OPEN_ERROR = 2, // 檔案開啟有問題    debugMsg = string.Format("{0} 轉換失敗：打開有問題\n", dci.FileName);
+    ENUM_ATTRIBUTE_ERROR = 3, // 列舉的屬性宣告有問題
     // 開始符號
     CANT_FIND_START_TOKEN = 10, // 找不到開始符號   debugMsg = string.Format("{0} 轉換失敗：找不到開始符號[{1}]\n", dci.FileName, START_OF_TABLE);
     // COLUMN相關

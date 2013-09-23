@@ -48,15 +48,21 @@ public class ExcelToJsonString
     /// <summary>
     /// 讀取excel檔案，不論是否有錯誤，回傳前都會關閉檔案
     /// </summary>
-    /// <param name="dci">資料轉換的資訊</param>
+    /// <param name="directoryPath">資料夾路徑</param>
+    /// <param name="dlt">資料轉換的資訊</param>
     /// <param name="needReadSite">轉出資料是哪方（Server/Client）需要</param>
     /// <param name="jsonString">對應輸出的json字串</param>
     /// <param name="debugString">偵錯字串</param>
     /// <returns>可能有的錯誤訊息</returns>
-    public ReadExcelToJsonStringError ReadExcelFile(string directoryPath, DataConvertInfomation dci, NeedReadSite needReadSite, out string jsonString, out string debugString)
+    public ReadExcelToJsonStringError ReadExcelFile(string directoryPath, GLOBALCONST.DataLoadTag dlt, NeedReadSite needReadSite, out string jsonString, out string debugString)
     {
+        string fileName = EnumClassValue.GetFileName(dlt);
+        Type dataType = EnumClassValue.GetClassType(dlt);
         jsonString = null;
-        ReadExcelToJsonStringError readExcelError = _excelToTable.OpenExcelFile(directoryPath, dci.FileName);
+        debugString = _debugMessage;
+        if (string.IsNullOrEmpty(fileName) || dataType == null) { return ReadExcelToJsonStringError.ENUM_ATTRIBUTE_ERROR; }
+
+        ReadExcelToJsonStringError readExcelError = _excelToTable.OpenExcelFile(directoryPath, fileName);
         if (readExcelError != ReadExcelToJsonStringError.NONE)
         {
             _excelToTable.Close();
@@ -72,12 +78,12 @@ public class ExcelToJsonString
             return readExcelError;
         }
         #region 確認各欄位和要被寫入的物件欄位Type有對應
-        object checkObject = Activator.CreateInstance(dci.DataType);
+        object checkObject = Activator.CreateInstance(dataType);
         List<string>.Enumerator tableTypeEnumerator = allType.GetEnumerator();
-        bool isConform = CheckObjectTypeCorrect(dci.DataType, checkObject, ref tableTypeEnumerator);
+        bool isConform = CheckObjectTypeCorrect(dataType, checkObject, ref tableTypeEnumerator);
         if (!isConform)
         {
-            _debugMessage = string.Format("{0}{1} 轉換失敗：表格與資料結構({2})內容不符\n", _debugMessage, dci.FileName, dci.DataType);
+            _debugMessage = string.Format("{0}{1} 轉換失敗：表格與資料結構({2})內容不符\n", _debugMessage, fileName, dataType);
             _excelToTable.Close();
             debugString = _debugMessage;
             return ReadExcelToJsonStringError.TABLE_TYPE_IS_NOT_CONFORM;
@@ -102,9 +108,9 @@ public class ExcelToJsonString
                 debugString = _debugMessage;
                 return ReadExcelToJsonStringError.HAS_EMPTY_ROW;
             }
-            object obj = Activator.CreateInstance(dci.DataType);
+            object obj = Activator.CreateInstance(dataType);
             List<string>.Enumerator rowDataEnumerator = tableRowData.GetEnumerator();
-            ReadExcelToJsonStringError error = GetObjectTypeDataFromExcel(dci.DataType, ref obj, ref rowDataEnumerator);
+            ReadExcelToJsonStringError error = GetObjectTypeDataFromExcel(dataType, ref obj, ref rowDataEnumerator);
             if (error != ReadExcelToJsonStringError.NONE)
             {
                 _excelToTable.Close();

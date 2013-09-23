@@ -161,30 +161,6 @@ public class EnumClassValue : System.Attribute
     }
 }
 
-// TODO: 轉成用Enum的屬性定義
-/// <summary>
-/// 描述資料轉換用的資訊用的class，描述資料結構和檔名之間的對應
-/// </summary>
-public class DataConvertInfomation
-{
-    public System.Type DataType
-    {
-        get;
-        protected set;
-    }
-    public string FileName
-    {
-        get;
-        protected set;
-    }
-
-    public DataConvertInfomation(System.Type setDataType, string setFileName)
-    {
-        DataType = setDataType;
-        FileName = setFileName;
-    }
-}
-
 // TODO: 測試用
 /// <summary>
 /// 從表格來的場景資料
