@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System;
-
+using System.IO;
 /// <summary>
 /// 全域 const 變數皆放置於此
 /// </summary>
@@ -39,7 +39,13 @@ public class GLOBALCONST
     #region 檔名相關常數（無副檔名）
     public const string FILENAME_SCENE = "SceneData"; // 場景資料
     #endregion
+    #region 路徑相關常數
 
+    public static readonly string DIR_DATA_ROOT = Application.streamingAssetsPath + Path.DirectorySeparatorChar;
+    public static readonly string DIR_DATA_JSON = DIR_DATA_ROOT + "JSON" + Path.DirectorySeparatorChar;
+
+    public static readonly string EXT_JSON = ".json";
+    #endregion
     // for test
     public enum DataLoadTag
     {
