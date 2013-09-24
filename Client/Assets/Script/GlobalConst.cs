@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using System.IO;
+
 /// <summary>
 /// 全域 const 變數皆放置於此
 /// </summary>
