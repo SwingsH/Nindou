@@ -23,6 +23,7 @@ public class AnimationData
 			return new Dictionary<string, int>();
 	}
 
+	//取得clip中所有eventTag的數量
 	public static int GetAnimClipTriggerEventCount(BoneAnimation anim, string clipName, string eventTag)
 	{
 		if (anim == null)
@@ -33,6 +34,7 @@ public class AnimationData
 		return result;
 	}
 
+	//計算BoneAnimation中各別clip包含的userTriggerTag的數量
 	static void GenerateTriggerEventInfo(BoneAnimation anim)
 	{
 		Dictionary<AnimationClipSM_Lite, Dictionary<string, int>> temp = new Dictionary<AnimationClipSM_Lite, Dictionary<string, int>>();

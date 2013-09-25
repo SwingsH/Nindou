@@ -7,6 +7,7 @@ using System.Text;
 using System.Xml.Serialization;
 using SmoothMoves;
 using Resources = UnityEngine.Resources;
+using System.Reflection;
 /// <summary>
 /// 中文
 /// </summary>
@@ -271,19 +272,78 @@ public static class Tools {
 	[MenuItem("Tools/Rebuild Class Xml For Excel")]
 	public static void RebuildXml()
 	{
-		XmlSerializer xml = new XmlSerializer(typeof(List<SkillData>));
 
-		List<SkillData> silist = new List<SkillData>();
-		silist.Add(new SkillData());
-		silist.Add(new SkillData());
+		System.Type T = System.Type.GetType("SkillData, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
+		
+		object[] objs = System.Array.CreateInstance(T, 2) as object[];
+		objs.SetValue(System.Activator.CreateInstance(T), 0);
+		objs.SetValue(System.Activator.CreateInstance(T), 1);
+		XmlSerializer xml = new XmlSerializer(objs.GetType());
 
 		StringWriter sw = new StringWriter();
-		xml.Serialize(sw, silist);
+		xml.Serialize(sw, objs);
 		Debug.Log(sw);
 
-		FileStream fs = new FileStream(Application.dataPath + "/Test/Resources/Data/BasicSkillData.xml", FileMode.Create);
-		xml.Serialize(fs, silist);
+		FileStream fs = new FileStream(Application.dataPath + "/Test/Resources/Data/NewBasicSkillData.xml", FileMode.Create);
+		xml.Serialize(fs, objs);
 		fs.Close();
+	}
+	[MenuItem("Tools/Translate Old Class To New Class")]
+	public static void TranslateDatas()
+	{
+		System.Type oldType = typeof(OldSkillData);
+		System.Type newType = typeof(SkillData);
+		
+		TextAsset ta = Resources.Load("Data/TestSkillData", typeof(TextAsset)) as TextAsset;
+		if (ta != null)
+		{
+			//System.IO.FileStream fs = new System.IO.FileStream("D:\\Test2.xml", System.IO.FileMode.Open);
+			System.IO.StringReader sr = new System.IO.StringReader(ta.text);
+			XmlSerializer xs = new XmlSerializer(oldType.MakeArrayType(1));
+			
+			try
+			{
+				object[] sd = xs.Deserialize(sr) as object[];
+				object[] nsd = System.Array.CreateInstance(newType, sd.Length) as object[];
+				
+				for (int i = 0; i < sd.Length; i++)
+				{
+					nsd[i] = TranslateType(sd[i], newType);
+				}
+
+				xs = new XmlSerializer(nsd.GetType());
+				using (TextWriter writer = new StreamWriter(Application.dataPath + "/Test/Resources/Data/TestSkillData.xml"))
+				{
+					xs.Serialize(writer, nsd);
+				}
+			}
+			catch (System.Exception e)
+			{
+				Debug.Log(e.Message);
+				Debug.Log(e.StackTrace);
+			}
+			
+			//Resources.UnloadAsset(ta);
+		}
+	}
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <typeparam name="OT">OldType</typeparam>
+	/// <typeparam name="NT">NewType</typeparam>
+	public static object TranslateType(object obj,System.Type newType)
+	{
+		System.Type oldType = obj.GetType();
+		
+		
+		object newobj = System.Activator.CreateInstance(newType);
+		foreach (FieldInfo fi in oldType.GetFields())
+		{
+			FieldInfo newfi = newType.GetField(fi.Name);
+			if(newfi != null)
+				newfi.SetValue(newobj, fi.GetValue(obj));
+		}
+		return newobj;
 	}
 	#endregion
 
