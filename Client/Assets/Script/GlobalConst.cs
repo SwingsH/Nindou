@@ -14,6 +14,8 @@ public class GLOBALCONST
 		public const float UNIT_CAMERA_SIZE = 768;
 		public const int LAYER_UNIT = 8;
 		public const int LAYER_BACKGROUND = 9;
+
+		public const float TELEPORT_DELAY = 3.5f;
 	}
 
 	public const string HAND_LEFT = "HandL";

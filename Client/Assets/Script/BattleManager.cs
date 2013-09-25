@@ -59,12 +59,27 @@ public class BattleManager : MonoBehaviour
 		{
 			if (groundObject.GetComponent<ColiderPosReciver>())
 				groundObject.GetComponent<ColiderPosReciver>().Regiester(this);
-			Mesh m = groundObject.GetComponent<MeshFilter>().sharedMesh;
-			Vector3 op = groundObject.transform.TransformPoint(new Vector3(m.bounds.min.x, 0, m.bounds.min.z));
-			Vector3 size = groundObject.transform.TransformPoint(m.bounds.size);
-			g = new GridInfo(op, size.x, size.z, Mathf.FloorToInt(groundObject.transform.lossyScale.x / 6), Mathf.FloorToInt(groundObject.transform.lossyScale.z / 6));
+			g = new GridInfo(groundObject.transform.position, gridSize, WCounts, LCounts);
 		}
 		Generater = new UnitGenerater();
+	}
+
+	void LateUpdate()
+	{
+		foreach (Unit eu in Enemys)
+			if(eu!=null)
+				eu.Run();
+		foreach (Unit eu in Players)
+			if (eu != null)
+				eu.Run();
+	}
+
+	void BattleStart()
+	{
+		Unit_Clear();
+		EnemyInfos.Clear();
+		PlayerInfos.Clear();
+
 		PlayerInfos.AddRange(TestDataBase.Instance.playerInfo);
 		UnitInfo info = new UnitInfo();
 		info.MoveSpeed = 9;
@@ -83,16 +98,6 @@ public class BattleManager : MonoBehaviour
 			IniPlayers();
 			RandomEnemy(5, 0);
 		}
-	}
-
-	void LateUpdate()
-	{
-		foreach (Unit eu in Enemys)
-			if(eu!=null)
-				eu.Run();
-		foreach (Unit eu in Players)
-			if (eu != null)
-				eu.Run();
 	}
 
 	void AddPlayer(GridPos pos, int index)
@@ -168,12 +173,17 @@ public class BattleManager : MonoBehaviour
 	{
 		if (Players != null)
 			System.Array.Resize<Unit>(ref Players, PlayerInfos.Count);
+		else
+			Players = new Unit[PlayerInfos.Count];
 		List<GridPos> emptyGrid = Get_EmptyGrid();
 		for (int i = 0; i < PlayerInfos.Count; i++)
 		{
 			if (Players[i] != null)
 				continue;
+			if (emptyGrid.Count == 0)
+				break;
 			int r = Random.Range(0, emptyGrid.Count);
+			
 			AddPlayer(emptyGrid[r], i);
 			emptyGrid.RemoveAt(r);
 		}
@@ -196,7 +206,6 @@ public class BattleManager : MonoBehaviour
 	{
 		if (Instance != null)
 		{
-
 			switch (unit.Group)
 			{
 				case eGroup.Player:
@@ -231,6 +240,23 @@ public class BattleManager : MonoBehaviour
 	}
 	void Unit_Clear()
 	{
+		if(Generater != null)
+		{
+			foreach (Unit u in Enemys)
+			{
+				Generater.Recycle(u);
+				g.Left(u.Pos);
+			}
+			foreach (Unit u in Players)
+			{
+				if (u == null)
+					continue;
+				Generater.Recycle(u);
+				g.Left(u.Pos);
+			}
+			Enemys.Clear();
+			Players = new Unit[Players.Length];
+		}
 	}
 	
 	void AllDeadEvent(eGroup group)
@@ -238,10 +264,11 @@ public class BattleManager : MonoBehaviour
 		switch (group)
 		{
 			case eGroup.Enemy:
-				RandomEnemy(5, 0);
+				//RandomEnemy(5, 0);
+				BattleIsStart = false;
 				break;
 			case eGroup.Player:
-				IniPlayers();
+				BattleIsStart = false;
 				break;
 		}
 		
@@ -387,6 +414,13 @@ public class BattleManager : MonoBehaviour
 	public bool AreaPreview = false;
 	public bool NewPreview = false;
 	public eDirection Dir = eDirection.Left;
+
+	public Vector2 gridSize = new Vector2(1, 1);
+	public int WCounts = 1;
+	public int LCounts = 1;
+
+	public bool BattleIsStart = false;
+
 	void OnDrawGizmos()
 	{
 		if (g != null)
@@ -492,7 +526,14 @@ public class BattleManager : MonoBehaviour
 				}
 			}
 		}
-
+		if (!BattleIsStart)
+		{
+			if (GUI.Button(new Rect(Screen.width / 2 - 30, Screen.height / 2 - 20, 60, 40), "Start"))
+			{
+				BattleStart();
+				BattleIsStart = true;
+			}
+		}
 		if (!DisplayGUI)
 			return;
 		//GUI.skin.box.alignment = TextAnchor.UpperRight;
@@ -652,10 +693,20 @@ public class GridInfo
 	{
 		InitGrid(width, length, widthGrids, lengthGrids);
 	}
-	public GridInfo(Vector3 startPoint, float width, float length, int widthGrids, int lengthGrids)
+	public GridInfo(Vector3 startPoint, float width, float length, int widthGridCounts, int lengthGridCounts)
 	{
 		StartPoint = startPoint;
-		InitGrid(width, length, widthGrids, lengthGrids);
+		InitGrid(width, length, widthGridCounts, lengthGridCounts);
+	}
+	public GridInfo(Vector3 centerPoint, Vector2 gridSize, int widthGridCounts, int lengthGridCounts)
+	{
+
+		GridSize = gridSize;
+		Grids = new Unit[Mathf.Clamp(widthGridCounts, 0, int.MaxValue), Mathf.Clamp(lengthGridCounts, 0, int.MaxValue)];
+
+		StartPoint = centerPoint;
+		StartPoint.x -= (widthGridCounts / 2 + widthGridCounts % 2 / 2f) * gridSize.x;
+		StartPoint.z -= (lengthGridCounts / 2 + lengthGridCounts % 2 / 2f) * gridSize.y;
 	}
 	public void InitGrid(float width, float length, int widthGrids, int lengthGrids)
 	{
@@ -958,7 +1009,6 @@ public class GridInfo
 	}
 	bool CheckInRange_AreaGrid_Mode3(GridPos pos, eDirection dir, int range, GridPos targetPos)
 	{
-		int d = 0;
 		int xd = targetPos.x - pos.x;
 		int yd = Mathf.Abs(pos.y - targetPos.y);
 		switch (dir)
@@ -1046,7 +1096,7 @@ public class GridInfo
 		int gy = Grids.GetUpperBound(1)+1;
 
 		Gizmos.color = new Color(0.5f, 0.5f, 0.5f, 0.2f);
-		Vector3 SizeV3 = new Vector3(GridSize.x * gx, 0, GridSize.y * gy);
+		//Vector3 SizeV3 = new Vector3(GridSize.x * gx, 0, GridSize.y * gy);
 		//Gizmos.DrawCube(StartPoint + new Vector3(gx / 2.0f * GridSize.x, 0, gy / 2.0f * GridSize.y), SizeV3);
 
 		Gizmos.color = Color.black;

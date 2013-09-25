@@ -84,11 +84,6 @@ public class AnimUnit : Unit
 		{
 			base.Entity = value;
 			Anim = Entity.GetComponentInChildren<BoneAnimation>();
-			if (Entity != null && BeHitParticle != null)
-			{
-				BeHitParticle.transform.parent = Entity.transform;
-				BeHitParticle.transform.transform.localPosition = Vector3.zero;
-			}
 		}
 	}
 	public virtual BoneAnimation Anim
@@ -122,26 +117,6 @@ public class AnimUnit : Unit
 		}
 	}
 
-	protected ParticleSystem _beHitParticle;
-	public ParticleSystem BeHitParticle
-	{
-		set
-		{
-			if(value)
-			{
-				_beHitParticle = value;
-				if (Entity != null)
-				{
-					_beHitParticle.transform.parent = Entity.transform;
-					_beHitParticle.transform.transform.localPosition = Vector3.zero;
-				}
-			}
-		}
-		get
-		{
-			return _beHitParticle;
-		}
-	}
 	/// <summary>
 	/// 播放warpmode為Once的動畫
 	/// </summary>
@@ -268,13 +243,6 @@ public class ActionUnit : AnimUnit
 			_normalAttack = value;
 			if (AttackAction != null)
 				AttackAction.normalAttack = _normalAttack;
-			if (_normalAttack != null)
-			{
-				if (MoveAction is MoveInRangeComponent)
-				{
-					MoveInRangeComponent mrc = MoveAction as MoveInRangeComponent;
-				}
-			}
 		}
 	}
 	List<MainSkill> _triggerSkills = new List<MainSkill>();
@@ -497,7 +465,6 @@ public class ActionUnit : AnimUnit
 			switch (triggerEvent.tag)
 			{
 				case AnimationSetting.HIT_TAG:
-					Debug.Log(triggerEvent.tag);
 					DamageInfo di = CurrentCast.skill.GenerateDamageInfo(this);
 					if (CurrentCast.Target != null)
 					{
