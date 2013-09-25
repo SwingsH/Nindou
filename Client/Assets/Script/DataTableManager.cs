@@ -61,19 +61,20 @@ public class DataTableManager
 
     bool DeserializeObject(string encodingString, ref object refObj)
     {
-        try
-        {
-            Newtonsoft.Json.JsonSerializerSettings settings = new Newtonsoft.Json.JsonSerializerSettings();
-            settings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-            settings.CheckAdditionalContent = false;
-            Newtonsoft.Json.JsonConvert.PopulateObject(encodingString, refObj); // 將encoding的資料填充到refObj內
-            return true;
-        }
-        catch (Exception e)
-        {
-            CommonFunction.DebugMsgFormat("JSONDeserializeObject error!(type = {0})\n{1}\n{2}\n", refObj.GetType().ToString(), e.Message, e.StackTrace);
-            return false;
-        }
+        //try
+        //{
+        //    Newtonsoft.Json.JsonSerializerSettings settings = new Newtonsoft.Json.JsonSerializerSettings();
+        //    settings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+        //    settings.CheckAdditionalContent = false;
+        //    Newtonsoft.Json.JsonConvert.PopulateObject(encodingString, refObj); // 將encoding的資料填充到refObj內
+        //    return true;
+        //}
+        //catch (Exception e)
+        //{
+        //    CommonFunction.DebugMsgFormat("JSONDeserializeObject error!(type = {0})\n{1}\n{2}\n", refObj.GetType().ToString(), e.Message, e.StackTrace);
+        //    return false;
+        //}
+        return DataUtility.DeserializeObject(encodingString, ref refObj);
     }
 
     // 得處理一下非同步狀況處理

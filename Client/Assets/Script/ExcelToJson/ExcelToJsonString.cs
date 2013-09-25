@@ -49,15 +49,15 @@ public class ExcelToJsonString
     /// 讀取excel檔案，不論是否有錯誤，回傳前都會關閉檔案
     /// </summary>
     /// <param name="directoryPath">資料夾路徑</param>
-    /// <param name="dlt">資料轉換的資訊</param>
+    /// <param name="dataLoadTag">資料轉換的資訊</param>
     /// <param name="needReadSite">轉出資料是哪方（Server/Client）需要</param>
     /// <param name="jsonString">對應輸出的json字串</param>
     /// <param name="debugString">偵錯字串</param>
     /// <returns>可能有的錯誤訊息</returns>
-    public ReadExcelToJsonStringError ReadExcelFile(string directoryPath, GLOBALCONST.DataLoadTag dlt, NeedReadSite needReadSite, out string jsonString, out string debugString)
+    public ReadExcelToJsonStringError ReadExcelFile(string directoryPath, GLOBALCONST.DataLoadTag dataLoadTag, NeedReadSite needReadSite, out string jsonString, out string debugString)
     {
-        string fileName = EnumClassValue.GetFileName(dlt);
-        Type dataType = EnumClassValue.GetClassType(dlt);
+        string fileName = EnumClassValue.GetFileName(dataLoadTag);
+        Type dataType = EnumClassValue.GetClassType(dataLoadTag);
         jsonString = null;
         debugString = _debugMessage;
         if (string.IsNullOrEmpty(fileName) || dataType == null) { return ReadExcelToJsonStringError.ENUM_ATTRIBUTE_ERROR; }

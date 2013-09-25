@@ -40,12 +40,26 @@ public class GLOBALCONST
     #region 檔名相關常數（無副檔名）
     public const string FILENAME_SCENE = "SceneData"; // 場景資料
     #endregion
-    #region 路徑相關常數
-
-    public static readonly string DIR_DATA_ROOT = Application.streamingAssetsPath + Path.DirectorySeparatorChar;
-    public static readonly string DIR_DATA_JSON = DIR_DATA_ROOT + "JSON" + Path.DirectorySeparatorChar;
-
+    #region 副檔名相關常數
+    public static readonly string EXT_ASSETBUNDLE = ".unity3d";
     public static readonly string EXT_JSON = ".json";
+    public static readonly string EXT_BYTES = ".bytes";
+    public static readonly string EXT_ASSET = ".asset";
+    #endregion
+    #region 路徑相關常數
+    public static readonly string DIR_ASSETS = "Assets/";
+    // AssetBundle路徑
+    public static readonly string DIR_ASSETBUNDLE = "assetbundles" + Path.AltDirectorySeparatorChar;
+    public static readonly string DIR_ASSETBUNDLE_JSON = DIR_ASSETBUNDLE + "JSON" + Path.AltDirectorySeparatorChar;
+    // 資料路徑
+    public static readonly string DIR_DATA_ROOT = Application.dataPath +  Path.AltDirectorySeparatorChar;
+    public static readonly string DIR_DATA_TEMP = DIR_DATA_ROOT + "TEMP" + Path.AltDirectorySeparatorChar;
+    public static readonly string DIR_DATA_JSON = DIR_DATA_ROOT + "JSON" + Path.AltDirectorySeparatorChar;
+
+    // 編輯器輸出路徑
+    public static readonly string DIR_EDITOR_OUTPUT = "NindouOutput" + Path.AltDirectorySeparatorChar;
+    public static readonly string DIR_EDITOR_ASSETBUNDLE_OUTPUT = DIR_EDITOR_OUTPUT +  DIR_ASSETBUNDLE;
+
     #endregion
     // for test
     public enum DataLoadTag
