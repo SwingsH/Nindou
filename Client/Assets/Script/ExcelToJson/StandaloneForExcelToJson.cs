@@ -12,7 +12,8 @@ public class StandaloneForExcelToJson : MonoBehaviour
 {
     readonly string EXCEL_DIRECTORY = "EXCEL"; // excel檔案所在的資料夾
     readonly string JSON_DIRECTORY = "JSON";   // json檔案存放資料夾
-    readonly string JSON_EXT = ".json";       // json檔案副檔名
+    readonly string JSON_EXT = ".json";        // json檔案副檔名
+    readonly string EXCEL_EXT = ".xlsx";       // excel檔案副檔名
 
     GUIStyle _uiStyle;
     Rect _fileListWindowRect;
@@ -46,6 +47,11 @@ public class StandaloneForExcelToJson : MonoBehaviour
 	void Update () {
 	
 	}
+
+    void OnDestroy()
+    {
+        excelToJsonString = null;
+    }
 
     void OnGUI()
     {
@@ -95,6 +101,8 @@ public class StandaloneForExcelToJson : MonoBehaviour
     }
     #endregion
 
+
+    // TODO:產生server和client檔案的區別
     void TransferFilesFromExcelToJson()
     {
         string jsonDirectoryPath = Application.dataPath + Path.DirectorySeparatorChar + JSON_DIRECTORY;
@@ -110,25 +118,27 @@ public class StandaloneForExcelToJson : MonoBehaviour
         {
             string dataJsonString;
             string tempDebugMsg;
-            string fileName = EnumClassValue.GetFileName(dlt);
-            System.Type dataType = EnumClassValue.GetClassType(dlt);
-            
-            ReadExcelToJsonStringError error = excelToJsonString.ReadExcelFile(excelDirectoryPath, dlt, NeedReadSite.CLIENT, out dataJsonString, out tempDebugMsg);
+            EnumClassValue dataConvertInfo;
+            bool isSuccessGetAttr = CommonFunction.GetAttribute<EnumClassValue>(dlt, out dataConvertInfo);
+            if (!isSuccessGetAttr) { continue; }
+
+            ReadExcelToJsonStringError error = excelToJsonString.ReadExcelFile(excelDirectoryPath, dataConvertInfo, NeedReadSite.CLIENT, out dataJsonString, out tempDebugMsg);
             _debugMessage += tempDebugMsg;
+
+            string excelFilePath = excelDirectoryPath + Path.DirectorySeparatorChar + dataConvertInfo.FileName + EXCEL_EXT;
             if (error == ReadExcelToJsonStringError.NONE)
             {
-                string filePath = jsonDirectoryPath + Path.DirectorySeparatorChar + fileName + JSON_EXT;
-                WriteJsonStringToFile(dataJsonString, filePath);
+                string jsonFilePath = jsonDirectoryPath + Path.DirectorySeparatorChar + dataConvertInfo.FileName + JSON_EXT;
+                WriteJsonStringToFile(dataJsonString, jsonFilePath);
 
-                _debugMessage = string.Format("{0}將 {1} 資料轉換成json成功\n", _debugMessage, filePath);
-                _fileListMessage = string.Format("{0}{1}：O\n", _fileListMessage, fileName);
+                _debugMessage = string.Format("{0}將 {1} 資料轉換成json成功\n", _debugMessage, excelFilePath);
+                _fileListMessage = string.Format("{0}{1}：O\n", _fileListMessage, dataConvertInfo.FileName);
                 ++successFileCount;
             }
             else
             {
-                string excelFilePath = excelDirectoryPath + Path.DirectorySeparatorChar + fileName + ".xlsx";
-                _debugMessage = string.Format("{0}取得{1}內資料(型別為{2})失敗：失敗原因：{3}\n", _debugMessage, excelFilePath, dataType, error);
-                _fileListMessage = string.Format("{0}{1}：X\n", _fileListMessage, fileName);
+                _debugMessage = string.Format("{0}取得{1}內資料(型別為{2})失敗：失敗原因：{3}\n", _debugMessage, excelFilePath, dataConvertInfo.ClassType, error);
+                _fileListMessage = string.Format("{0}{1}：X\n", _fileListMessage, dataConvertInfo.FileName);
             }
         }
         _debugMessage = string.Format("{0}共轉換 {1}個檔案成功，{2}個檔案失敗\n", _debugMessage, successFileCount, dataLoadTags.Length - successFileCount);

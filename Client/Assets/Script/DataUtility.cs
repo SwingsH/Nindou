@@ -8,6 +8,18 @@ using System.Collections;
 public class DataUtility
 {
     /// <summary>
+    /// 將物件內的資料序列化為字串
+    /// </summary>
+    /// <param name="ob">要序列化的物件</param>
+    /// <returns>序列化後的字串</returns>
+    public static string SerializeObject(object ob)
+    {
+        Newtonsoft.Json.JsonSerializerSettings settings = new Newtonsoft.Json.JsonSerializerSettings();
+        settings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+        settings.CheckAdditionalContent = false;
+        return Newtonsoft.Json.JsonConvert.SerializeObject(ob, settings);
+    }
+    /// <summary>
     /// 將encoding後的字串所含有的資料反序列化存入refObj
     /// </summary>
     /// <returns>是否反序列化成功</returns>

@@ -38,8 +38,8 @@ public class GLOBALCONST
 		WEAPON_RIGHT,
 	};
 
-    // TODO: 下面目前都是為了測試用
     #region 檔名相關常數（無副檔名）
+    // TODO: 下面目前都是為了測試用
     public const string FILENAME_SCENE = "SceneData"; // 場景資料
     #endregion
     #region 副檔名相關常數
@@ -63,9 +63,9 @@ public class GLOBALCONST
     public static readonly string DIR_EDITOR_ASSETBUNDLE_OUTPUT = DIR_EDITOR_OUTPUT +  DIR_ASSETBUNDLE;
 
     #endregion
-    // for test
     public enum DataLoadTag
     {
+        // for test
         [EnumClassValue(typeof(SceneData), FILENAME_SCENE)]        Scene = 0, // 場景
     };
 }
