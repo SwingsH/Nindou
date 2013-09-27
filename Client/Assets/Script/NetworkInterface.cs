@@ -53,13 +53,12 @@ public class NetworkInterface
     private const int SOCKET_PORT = 17480;
     private const string HTTP_HEAD = "http";
     private const string HTTP_IP = "127.0.0.1";
-    private const int HTTP_PORT = 8000;
+    private const int HTTP_PORT = 80;
 
     private HTTPProtocolEvent[,] _httpProtocolEvents     = new HTTPProtocolEvent[PROTOCAL_KIND_MAX, PROTOCAL_SUBKIND_MAX];
     private SocketProtocolEvent[,] _socketProtocolEvents   = new SocketProtocolEvent[PROTOCAL_KIND_MAX, PROTOCAL_SUBKIND_MAX];
 
     private bool _socketEnable = false; // socket 功能目前預設不開啟
-    private float _tryConnectTime = 0.0f;
     private static NetworkSocket _gameSocket = null;
     private static NetworkHTTP _gameHTTP = null;
 
@@ -68,7 +67,7 @@ public class NetworkInterface
     {
         _gameSocket = new NetworkSocket(NetworkSocketBuffer.Identify);
         _gameHTTP = new NetworkHTTP();
-        _gameHTTP.SetConfig( string.Format("{0}://{1}:{2}/protocol/", HTTP_HEAD, HTTP_IP, HTTP_PORT) );
+        _gameHTTP.SetConfig( string.Format("{0}://{1}/protocol/", HTTP_HEAD, HTTP_IP) );
         SetAllProtocolEvent();
     }
 
@@ -247,7 +246,6 @@ public class NetworkInterface
     /// </summary>
     public void DoDisconnect()
     {
-        _tryConnectTime = 0.0f;
         _gameSocket.Disconnect();
     }
 

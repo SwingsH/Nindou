@@ -35,13 +35,14 @@ public class NetworkHTTP
 		CommonFunction.DebugMsg(_currentURL);
 		//_currentURL = "http://tw.knowledge.yahoo.com/question/question?qid=1610082401742";
         _currentWWW = new WWW(_currentURL, postForm);
+        //_currentWWW = new WWW(_currentURL);
 
         while (!_currentWWW.isDone)
         {
             yield return null;
         }
 
-        CommonFunction.DebugMsg(_currentWWW.text);
+        CommonFunction.DebugMsg( " text : " + _currentWWW.text);
         yield break;
     }
 }

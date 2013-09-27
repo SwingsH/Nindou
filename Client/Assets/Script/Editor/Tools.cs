@@ -11,7 +11,8 @@ using System.Reflection;
 /// <summary>
 /// 中文
 /// </summary>
-public static class Tools {
+
+public static class CustomTools { // class name conlict, Tool 已經是保留字, 可能造成 compile error, mod sh20130926
 
 	static object buffer;
 

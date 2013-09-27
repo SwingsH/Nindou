@@ -13,7 +13,7 @@ public class GameMain : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         _control = GameControl.Instance; // initialize
-		_control.test();
+		//_control.test();
         DontDestroyOnLoad(gameObject);
 	}
 	
@@ -22,4 +22,12 @@ public class GameMain : MonoBehaviour {
         if (_control != null)
             _control.Update();
 	}
+
+    void OnGUI()
+    {
+        if (GUI.Button(new Rect(10, 10, 100, 40), "Protocol Test"))
+        {
+            _control.DoLogin();
+        }
+    }
 }

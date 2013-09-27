@@ -44,31 +44,67 @@ class DBManager:
         }
     
     def __init__(self, deviceID, loginSession):
-        self._deviceID = deviceID
+        self._deviceID = str(deviceID)
         self._loginSession = loginSession
         
     def ConnectToMongo(self):
         return Connection();
-    
+  
+    def GetDatabase(self):
+        connection = Connection()
+        return connection[DATABASE_NAME]; # 若 DATABASE_NAME 不存在, 此時就會自動建立 new db 了
+      
     def UpdateLoginSession(self, newSession):
-        db = self.ConnectToMongo()
+        #return self.PrintAllDatabaseName()
         
-        mon_db = db.Account
-
-        cols = mon_db.collection_names()
-        all = ''
-        for c in cols:
-            all = all + c + ','
-        return str( len(cols) ) + ':' + all
+        db  = self.GetDatabase()
     
-        if db.Account is None : # new player login !!
-            newAccount = {PROTOCOL_ATTR_DEVICE_ID : self._deviceID}
-            db.Account.Insert(newAccount)
-            return coll
-        else:
-            #db.Account.find_one({PROTOCOL_ATTR_DEVICE_ID: self._deviceID})
-            return coll
+        #if db.Account is None : # new player login !!
+        account = db[COLL_ACCOUNT].find_one({PROTOCOL_ATTR_DEVICE_ID: self._deviceID })
+        if account is None: # 該帳號第一次登入
+            newAccount = {PROTOCOL_ATTR_DEVICE_ID : self._deviceID, 'session': newSession}
+            db[COLL_ACCOUNT].save(newAccount)
+        else: # 該帳號非第一次登入, update session
+            db[COLL_ACCOUNT].update({PROTOCOL_ATTR_DEVICE_ID: account[PROTOCOL_ATTR_DEVICE_ID]}, {"$set":{"session":newSession}})
+        account = db[COLL_ACCOUNT].find_one({PROTOCOL_ATTR_DEVICE_ID: self._deviceID })
+        return newSession
 
+    def GetAllDatabaseName(self):
+        connection   = self.ConnectToMongo()
+        return connection.database_names()
+    
+    def GetAllCollectionName(self, database):
+        return self.GetDatabase().collection_names()
+    
+    def PrintAllDatabaseName(self):
+        allNames = self.GetAllDatabaseName()
+        out = 'PrintAllDatabaseName : '
+        for name in allNames:
+            out = out + name + ','
+        return out
+    
+    def PrintAllCollectionName(self):
+        db = self.GetDatabase()
+        allNames = self.GetAllCollectionName(db)
+        out = 'PrintAllCollectionName : '
+        for name in allNames:
+            out = out + name + ','
+        return out
+    
+    def IsCollectionExist(self, collectName):
+        db = self.GetDatabase()
+        allNames = self.GetAllCollectionName(db)
+        if collectName in allNames and connection[collectName].count() != 0 : #Check if collection named 'posts' is empty
+            return True
+        return False
+    
+    def IsCollectionEmpty(self, collectName):
+        if not self.IsCollectionExist(collectName):
+            return True
+        db = self.GetDatabase()
+        if db[collectName].find({}).count() == 0:
+            return True
+    
     def DumpAll(self):
         mon_con = Connection('localhost', 27017)
         mon_db = mon_con.dh

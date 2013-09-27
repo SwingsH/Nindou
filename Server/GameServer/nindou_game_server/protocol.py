@@ -48,7 +48,7 @@ class Protocol:
         if PROTOCOL_ATTR_MAINKIND in request.POST :
             mainkind = int( request.POST[PROTOCOL_ATTR_MAINKIND])
             subkind = int( request.POST[PROTOCOL_ATTR_SUBKIND])
-            return DispatchHandle(mainkind, subkind, request.POST)
+            return self.DispatchHandle(mainkind, subkind, request.POST)
         elif PROTOCOL_ATTR_MAINKIND in request.GET : # GET method only for debug
             mainkind = int( request.GET[PROTOCOL_ATTR_MAINKIND])
             subkind = int( request.GET[PROTOCOL_ATTR_SUBKIND])
@@ -62,18 +62,17 @@ class Protocol:
         # 403
     
     # 指派處理 method
-    def DispatchHandle(self, mainkind, subkind, postDatas):
-        
+    def DispatchHandle(self, mainkind, subkind, postDatas):  
         # 取得驗證登入需要的資訊
         deviceID = ''
         loginSession = ''
         if PROTOCOL_ATTR_DEVICE_ID in postDatas :
-            deviceID = int( postDatas[PROTOCOL_ATTR_DEVICE_ID]) # 裝置唯一識別 id
+            deviceID =  postDatas[PROTOCOL_ATTR_DEVICE_ID] # 裝置唯一識別 id
         if PROTOCOL_ATTR_LOGIN_SESSION in postDatas :
-            loginSession = int( request.POST[PROTOCOL_ATTR_LOGIN_SESSION])
+            loginSession =  request.POST[PROTOCOL_ATTR_LOGIN_SESSION]
         if not deviceID :
             return HttpResponse('error DispatchHandle')
-        
+    
         self._database = DBManager(deviceID, loginSession)
  
         if mainkind == 1 and subkind == 1:

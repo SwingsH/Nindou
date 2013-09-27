@@ -14,8 +14,10 @@ public class NetworkHTTPBuffer
     {
          if (_currentPostForm == null)
             _currentPostForm = new WWWForm();
-        _currentPostForm.AddField("MainKind", kind);
-        _currentPostForm.AddField("SubKind", subKind);
+        _currentMainKind = kind;
+        _currentSubKind = subKind;
+        _currentPostForm.AddField("MainKind", _currentMainKind);
+        _currentPostForm.AddField("SubKind", _currentSubKind);
     }
 
     public static void ClearSendBuffer()
@@ -28,6 +30,8 @@ public class NetworkHTTPBuffer
         if (_currentPostForm == null)
             _currentPostForm = new WWWForm();
         _currentPostForm.AddField(fieldName, fieldvalue);
+
+        CommonFunction.DebugMsg(string.Format("Add String {0} {1} ", fieldName, fieldvalue));
     }
 
     public static void AddInteger(string fieldName, int fieldvalue)

@@ -2,6 +2,12 @@
 
 DIR_PROJECT_ROOT = 'nindou_game_server'
 
+DATABASE_NAME = 'nindou'
+
+COLL_ACCOUNT = 'account'
+COLL_CARD = 'card'
+COLL_PLAYERCARD = 'player_card'
+
 # 協定溝通 POST 欄位相關
 PROTOCOL_ATTR_MAINKIND = 'MainKind'
 PROTOCOL_ATTR_SUBKIND = 'SubKind'

@@ -13,9 +13,6 @@ public class NetworkSocketBuffer
 {
     private const int BUFFER_LENGTH = 128; //原本預設 max 8192, 先縮減, 不夠使用的話再開
 
-    private static bool mInitialized = false;
-    private float _tryConnectTime = 0.0f;
-
     private static byte[] _decodeBuffer = new byte[BUFFER_LENGTH];
     private static byte[] _encodeBuffer = new byte[BUFFER_LENGTH];	
 	private static MemoryStream _encodeStream = new MemoryStream();
@@ -548,7 +545,7 @@ public class NetworkSocketBuffer
 		    return false;
 		
 		// 囧WebPlayer無法使用 Marshal.SizeOf()
-		int size = obj.GetType().StructLayoutAttribute.Size;
+		//int size = obj.GetType().StructLayoutAttribute.Size;
 	    
 	    FieldInfo[] infos = obj.GetType().GetFields();		
 	    for (int i = 0; i < infos.Length; i++)
@@ -591,7 +588,8 @@ public class NetworkSocketBuffer
 	    if (obj == null)
 		    return;
 		
-	    int size = obj.GetType().StructLayoutAttribute.Size;
+	    //int size = obj.GetType().StructLayoutAttribute.Size;
+
 	    FieldInfo[] infos = obj.GetType().GetFields();		
 	    for (int i = 0; i < infos.Length; i++)
 	    {

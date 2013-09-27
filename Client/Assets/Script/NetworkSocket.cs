@@ -63,15 +63,15 @@ public class NetworkSocket
 		Monitor.Enter(_socket);
 		Monitor.Enter(_Connecting);
 		
-		string Msg=string.Empty;
+		//string Msg=string.Empty;
 		
 		try{
 			for(int i=0; i<2; i++)
 			if(!_PolicyAuthorize)
 				_PolicyAuthorize=PolicyAuthorizaton();
 			
-			if(!_PolicyAuthorize)			
-				Msg="Policy Error!";
+            //if(!_PolicyAuthorize)			
+            //    Msg="Policy Error!";
 			
 			if(_PolicyAuthorize){
 				IAsyncResult result = _socket.BeginConnect( _IPAddress, _Port, null, null );  
@@ -79,7 +79,7 @@ public class NetworkSocket
 				_socket.EndConnect(result);
 			}
 		}catch(Exception e){
-			Msg=e.Message;			
+			//Msg=e.Message;			
 		}finally{
 			_Connecting=false;	
 			Monitor.Exit(_Connecting);
@@ -88,13 +88,13 @@ public class NetworkSocket
 	}
 	
 	public void Connect(){
-		string Msg=string.Empty;
+		//string Msg=string.Empty;
 		try{
 			if(_IPAddress==string.Empty)
 				return;
 			
 			if(Enable()||_Connecting){
-				Msg="Connect Duplicate!";
+				//Msg="Connect Duplicate!";
 				return;
 			}
 			
@@ -106,7 +106,7 @@ public class NetworkSocket
 			_Connecting=true;
 
 		}catch(Exception e){
-			Msg=e.Message;			
+			//Msg=e.Message;			
 		}
 		finally{
 //			if(Msg!=string.Empty)

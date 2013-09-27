@@ -9,17 +9,21 @@ public class GameControl{
     private static GameControl _instance = null;
     private GameMain _main = null;
     private NetworkInterface _networkInterface = null;
+    private IGameState _gameState = null; // 遊戲進行狀態
+    private string _deviceID = string.Empty;
 
     private GameControl(GameMain main)
     {
         _main = main;
+        _networkInterface = new NetworkInterface();
+
+        //a36ec54e961ee79e8d92247f8a081b47a4c52e55
+        _deviceID = SystemInfo.deviceUniqueIdentifier;
     }
 	
 	public void test()
 	{
-	        _networkInterface = new NetworkInterface();
-
-        _networkInterface.PushString(1, 1, "ss", "aa");
+	    _networkInterface.PushString(1, 1, "ss", "aa");
 		
 		CommonFunction.DebugMsg("PushString");
         _networkInterface.Send(1, 1);	
@@ -42,6 +46,30 @@ public class GameControl{
     // update per-frame
     public void Update()
     {
+    }
+
+    // 一般登入
+    public void DoLogin()
+    {
+        CommonFunction.DebugMsg(_deviceID);
+        _networkInterface.PushString(1, 1, "DeviceID", _deviceID);
+        _networkInterface.Send(1, 1);
+    }
+
+    public void ChangeGameState(IGameState newState)
+    {
+        if (newState == CurrentState)
+            return;
+        CommonFunction.DebugMsg(string.Format("GameState Changed. {0}--->{1}", CurrentState, newState));
+        _gameState = null;
+        _gameState = newState;
+        _gameState.OnChangeIn(this);
+    }
+
+    //取得遊戲狀態
+    public IGameState CurrentState
+    {
+        get { return _gameState; }
     }
 
     /// <summary>
