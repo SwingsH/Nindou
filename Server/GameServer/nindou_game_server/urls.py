@@ -20,5 +20,5 @@ urlpatterns = patterns('',
     # url(r'^admin/', include(admin.site.urls)),
     
     # For client communication interface
-    url(r'^protocol/', DIR_PROJECT_ROOT + '.protocol.handle'),
+    url(r'^protocol/', DIR_PROJECT_ROOT_DIR + '.protocol.handle'),
 )

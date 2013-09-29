@@ -1,6 +1,10 @@
 # encoding: utf-8
 
-DIR_PROJECT_ROOT = 'nindou_game_server'
+import os.path
+from common_func import *
+
+DIR_PROJECT_PATH = GetProjectPath()
+DIR_PROJECT_ROOT_DIR = GetProjectRootDir()
 
 DATABASE_NAME = 'nindou'
 

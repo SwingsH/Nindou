@@ -10,7 +10,7 @@ import datetime
 import json
 
 @csrf_exempt # exempt Cross Site Request Forgery protection , 因為 C 端不用 http form 方式處理帳密， 每個 call stack 都要此標籤
-def handle(request):
+def handle(request):    
     protocol = Protocol()
     return protocol.HandleClientRequest(request)
         
