@@ -9,11 +9,9 @@ using System.Collections;
 public class GameMain : MonoBehaviour {
     private GameControl _control = null;
 
-
 	// Use this for initialization
 	void Start () {
         _control = GameControl.Instance; // initialize
-		//_control.test();
         DontDestroyOnLoad(gameObject);
 	}
 	
@@ -25,9 +23,14 @@ public class GameMain : MonoBehaviour {
 
     void OnGUI()
     {
-        if (GUI.Button(new Rect(10, 10, 100, 40), "Protocol Test"))
+        
+        // todo: 此區是 NGUI 未完成前暫代
+        if( _control.CurrentGameState == GameLoginNone.Instance)
         {
-            _control.DoLogin();
+            if (GUI.Button(new Rect((Screen.width - 100) / 2, (Screen.height - 40)/2, 100, 40), GLOBAL_STRING.UI_BUTTON_1))
+            {
+                _control.DoLogin();
+            }
         }
     }
 }

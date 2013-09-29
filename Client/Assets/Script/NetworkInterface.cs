@@ -5,21 +5,21 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-public delegate void OnHTTPHandling(); // 等待 http server 回應中要處理的 method
+public delegate void OnHTTPWaiting(); // 等待 http server 回應中要處理的 method
 public delegate void OnHTTPResponse(string responseText); // http server 回應後要處理的 method
 
-public delegate void OnSocketHandling(); // 等待 socket server 回應中要處理的 method
+public delegate void OnSocketWaiting(); // 等待 socket server 回應中要處理的 method
 public delegate void OnSocketResponse(MemoryStream Message); // socket server 回應後要處理的 method
 
 struct HTTPProtocolEvent
 {
-    public OnHTTPHandling OnHandling;
+    public OnHTTPWaiting OnWaiting;
     public OnHTTPResponse OnResponse;
 }
 
 struct SocketProtocolEvent
 {
-    public OnSocketHandling OnHandling;
+    public OnSocketWaiting OnWaiting;
     public OnSocketResponse OnResponse;
 }
 
@@ -61,12 +61,17 @@ public class NetworkInterface
     private bool _socketEnable = false; // socket 功能目前預設不開啟
     private static NetworkSocket _gameSocket = null;
     private static NetworkHTTP _gameHTTP = null;
+    private GameControl _control = null;
+
+    private byte _currentHTTPKind = 0;
+    private byte _currentHTTPSubKind = 0;
 
     //constructor
-    public NetworkInterface()
+    public NetworkInterface(GameControl control)
     {
+        _control = control;
         _gameSocket = new NetworkSocket(NetworkSocketBuffer.Identify);
-        _gameHTTP = new NetworkHTTP();
+        _gameHTTP = new NetworkHTTP( OnHTTPReceive);
         _gameHTTP.SetConfig( string.Format("{0}://{1}/protocol/", HTTP_HEAD, HTTP_IP) );
         SetAllProtocolEvent();
     }
@@ -85,12 +90,12 @@ public class NetworkInterface
     /// <summary>
     /// 加入一組 HTTP 協定設定
     /// </summary>
-    private void AddHTTPProtocol(int kind, int subKind, OnHTTPHandling onHandle, OnHTTPResponse onResponse)
+    private void AddHTTPProtocol(int kind, int subKind, OnHTTPWaiting onWait, OnHTTPResponse onResponse)
     {
         if (!HTTPExist(kind, subKind) && !SocketExist(kind, subKind))
         {
             HTTPProtocolEvent eve = new HTTPProtocolEvent();
-            eve.OnHandling = onHandle;
+            eve.OnWaiting = onWait;
             eve.OnResponse = onResponse;
             _httpProtocolEvents[kind, subKind] = eve;
         }
@@ -103,12 +108,12 @@ public class NetworkInterface
     /// <summary>
     /// 加入一組 Socket 協定設定
     /// </summary>
-    private void AddSocketProtocol(int kind, int subKind, OnSocketHandling onHandle, OnSocketResponse onResponse)
+    private void AddSocketProtocol(int kind, int subKind, OnSocketWaiting onWait, OnSocketResponse onResponse)
     {
         if (!HTTPExist(kind, subKind) && !SocketExist(kind, subKind))
         {
             SocketProtocolEvent eve = new SocketProtocolEvent();
-            eve.OnHandling = onHandle;
+            eve.OnWaiting = onWait;
             eve.OnResponse = onResponse;
             _socketProtocolEvents[kind, subKind] = eve;
         }
@@ -163,7 +168,7 @@ public class NetworkInterface
     /// </summary>
     private bool HTTPExist(int kind, int subKind)
     {
-        if ((_httpProtocolEvents[kind, subKind].OnHandling != null) && (_httpProtocolEvents[kind, subKind].OnResponse != null))
+        if ((_httpProtocolEvents[kind, subKind].OnWaiting != null) && (_httpProtocolEvents[kind, subKind].OnResponse != null))
             return true;
         return false;
     }
@@ -173,10 +178,34 @@ public class NetworkInterface
     /// </summary>
     private bool SocketExist(int kind, int subKind)
     {
-        if ((_socketProtocolEvents[kind, subKind].OnHandling != null) && (_socketProtocolEvents[kind, subKind].OnResponse != null))
+        if ((_socketProtocolEvents[kind, subKind].OnWaiting != null) && (_socketProtocolEvents[kind, subKind].OnResponse != null))
             return true;
         return false;
     }
+
+    /// <summary>
+    /// http 處理完畢後回傳 
+    /// </summary>
+    public void OnHTTPReceive(string responseText)
+    {
+        CommonFunction.DebugMsg(string.Format("OnHTTPReceive {0},{1}", _currentHTTPKind, _currentHTTPSubKind));
+        if (_httpProtocolEvents[_currentHTTPKind, _currentHTTPSubKind].OnResponse != null)
+            _httpProtocolEvents[_currentHTTPKind, _currentHTTPSubKind].OnResponse(responseText);
+        else
+            CommonFunction.DebugMsg(" OnHTTPReceive ProtocolEvents null.");
+
+        NetworkHTTPBuffer.ClearSendBuffer();
+    }
+
+    /// <summary>
+    /// http 處理中
+    /// </summary>
+    public void OnHTTPWait()
+    {
+        if (_httpProtocolEvents[_currentHTTPKind, _currentHTTPSubKind].OnWaiting != null)
+            _httpProtocolEvents[_currentHTTPKind, _currentHTTPSubKind].OnWaiting();
+    }
+
 
     /// <summary>
     /// 檢查 os network 緩衝區是否有 socket 準備接收的資料 
@@ -274,12 +303,12 @@ public class NetworkInterface
     /// <summary>
     /// 送出資料給 socket server
     /// </summary>
-    private void SendToSocketServer(byte mainKind, byte iSubKind)
+    private void SendToSocketServer(byte mainKind, byte subKind)
     {
         if (!_gameSocket.Enable())
             return;
 
-        NetworkSocketBuffer.Packaging(mainKind, iSubKind);
+        NetworkSocketBuffer.Packaging(mainKind, subKind);
         _gameSocket.Send(NetworkSocketBuffer.EncodeStream);
         NetworkSocketBuffer.ClearSendBuffer();
     }
@@ -287,11 +316,13 @@ public class NetworkInterface
     /// <summary>
     /// 送出資料給 http server
     /// </summary>
-    private void SendToHTTPServer(byte mainKind, byte iSubKind)
+    private void SendToHTTPServer(byte mainKind, byte subKind)
     {
         CommonFunction.DebugMsg("SendToHTTPServer");
 
-        NetworkHTTPBuffer.Packaging(mainKind, iSubKind);
+        _currentHTTPKind = mainKind;
+        _currentHTTPSubKind = subKind;
+        NetworkHTTPBuffer.Packaging(mainKind, subKind);
         _gameHTTP.Send(NetworkHTTPBuffer.Form);
         //NetworkHTTPBuffer.ClearSendBuffer();
     }
@@ -299,14 +330,17 @@ public class NetworkInterface
     // 協定集中處理區
     #region Protocol Event
 
+    //C: 1-1 登入
     private void HTTPHandling_Login_1()
     {
         //show 個 loading bar
     }
 
+    //S: 1-1 登入
     private void HTTPResponse_Login_1(string responseText)
     {
-        CommonFunction.DebugMsg(responseText);
+        CommonFunction.DebugMsg("登入成功 : " + responseText);
+        _control.SetLoginSession(responseText);
     }
 
     #endregion

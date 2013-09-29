@@ -27,7 +27,7 @@ public class GameEmpty : IGameState
     }
     public void Update(GameControl control)
     {
-        control.ChangeGameState(GameConnectNone.Instance); //尚未連線狀態
+        control.ChangeGameState(GameDetectUpdate.Instance); //尚未連線狀態
     }
     public static GameEmpty Instance
     {
@@ -40,12 +40,49 @@ public class GameEmpty : IGameState
     }
 }
 
-// 尚未連線到 game server
-public class GameConnectNone : IGameState
-{
-    private static GameConnectNone _instance = null;
+// 檢查是否有檔案更新
+public class GameDetectUpdate : IGameState
+ {
+    private static GameDetectUpdate _instance = null;
 
-    ~GameConnectNone()
+    ~GameDetectUpdate()
+    {
+        _instance = null;
+    }
+
+    //game server 進入沒有連線階段, 顯示伺服器選擇
+    public void OnChangeIn(GameControl control)
+    {
+        control.DownloadUpdateInfo();
+    }
+
+    public void Update(GameControl control)
+    {
+        if (!control.IsUpdateInfoReady) //更新資訊尚未取得
+            return;
+        if (control.IsNeedToUpdate) // 需要更新, 切換至更新狀態
+            control.ChangeGameState(GameResourceUpdating.Instance);
+        else // 不需要更新, 切換至 尚未登入狀態
+            control.ChangeGameState(GameLoginNone.Instance);
+    }
+
+    public static GameDetectUpdate Instance
+    {
+        get
+        {
+            if (_instance == null)
+                _instance = new GameDetectUpdate();
+            return _instance;
+        }
+    }
+}
+
+// 進行檔案更新
+public class GameResourceUpdating : IGameState
+{
+    private static GameResourceUpdating _instance = null;
+
+    ~GameResourceUpdating()
     {
         _instance = null;
     }
@@ -57,71 +94,50 @@ public class GameConnectNone : IGameState
 
     public void Update(GameControl control)
     {
+        if (!control.IsUpdateFinished)
+            return;
+        // 更新 over, 切換至 尚未登入狀態
+        control.ChangeGameState(GameLoginNone.Instance);
     }
 
-    public static GameConnectNone Instance
+    public static GameResourceUpdating Instance
     {
         get
         {
             if (_instance == null)
-                _instance = new GameConnectNone();
+                _instance = new GameResourceUpdating();
             return _instance;
         }
     }
 }
 
-// game server 連線中, 等待回應
-public class GameConnecting : IGameState
+// 檔案已經就緒, 尚未從 game server 取得 login session
+public class GameLoginNone : IGameState
 {
-    private static GameConnecting _instance = null;
+    private static GameLoginNone _instance = null;
 
-    ~GameConnecting()
+    ~GameLoginNone()
     {
         _instance = null;
     }
 
+    //game server 進入沒有連線階段, 顯示伺服器選擇
     public void OnChangeIn(GameControl control)
     {
     }
 
     public void Update(GameControl control)
     {
-        control.ChangeGameState(GameLogin.Instance);
+        if (control.IsLoginSessionValid)
+            control.ChangeGameState(GameEntered.Instance);
     }
 
-    public static GameConnecting Instance
+    public static GameLoginNone Instance
     {
         get
         {
             if (_instance == null)
-                _instance = new GameConnecting();
-            return _instance;
-        }
-    }
-}
-
-// game server 已經連線, 尚未驗證登入
-public class GameLogin : IGameState
-{
-    private static GameLogin _instance = null;
-
-    ~GameLogin()
-    {
-        _instance = null;
-    }
-
-    public void OnChangeIn(GameControl control)
-    {
-    }
-    public void Update(GameControl control)
-    {
-    }
-    public static GameLogin Instance
-    {
-        get
-        {
-            if (_instance == null)
-                _instance = new GameLogin();
+                _instance = new GameLoginNone();
             return _instance;
         }
     }
@@ -139,7 +155,7 @@ public class GameEntered : IGameState
 
     public void OnChangeIn(GameControl control)
     {
-        //進入遊戲, 下載玩家動作
+        //進入遊戲
     }
     public void Update(GameControl control)
     {

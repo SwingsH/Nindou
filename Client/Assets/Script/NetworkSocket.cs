@@ -79,7 +79,8 @@ public class NetworkSocket
 				_socket.EndConnect(result);
 			}
 		}catch(Exception e){
-			//Msg=e.Message;			
+			//Msg=e.Message;	
+            Debug.LogError(e.Message);
 		}finally{
 			_Connecting=false;	
 			Monitor.Exit(_Connecting);
@@ -105,8 +106,10 @@ public class NetworkSocket
 			Connthread.Start();
 			_Connecting=true;
 
-		}catch(Exception e){
-			//Msg=e.Message;			
+		}
+        catch(Exception e){
+			//Msg=e.Message;
+            Debug.LogError(e.Message);
 		}
 		finally{
 //			if(Msg!=string.Empty)

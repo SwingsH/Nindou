@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+public delegate void ResponseMethod(string responseText); // 所有資料的回應處理 method
+
 /// <summary>
 /// HTTP Request & Recieve 連線方式處理, 該 class 只能被 NetworkInterface 使用
 /// 主要使用 Unity WWW
@@ -9,10 +11,12 @@ public class NetworkHTTP
 {
     private WWW _currentWWW = null;
     private string _currentURL = string.Empty;
+    private ResponseMethod _responseMethod = null;
 
     //constructor
-    public NetworkHTTP()
+    public NetworkHTTP(ResponseMethod target)
     {
+        _responseMethod = target;
     }
 
     // destructor
@@ -42,7 +46,7 @@ public class NetworkHTTP
             yield return null;
         }
 
-        CommonFunction.DebugMsg( " text : " + _currentWWW.text);
+        _responseMethod.Invoke(_currentWWW.text);
         yield break;
     }
 }

@@ -6,7 +6,6 @@ using System.Collections;
 /// </summary>
 public class ResourceUpdater
 {
-
     //constructor
     public ResourceUpdater()
     {

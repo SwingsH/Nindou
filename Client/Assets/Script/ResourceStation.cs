@@ -10,17 +10,30 @@ using Resources = UnityEngine.Resources;
 /// 統一使用此介面, 索取者可以不用得知資源來源 : Resources/ , unity caching, file system
 /// </summary>
 public class ResourceStation {
+    private ResourceUpdater _updater;
 
     //constructor
     public ResourceStation()
     {
+        _updater = new ResourceUpdater();
     }
 
     // destructor
     ~ResourceStation()
     {
+        _updater = null;
     }
 
+    /// <summary>
+    /// 是否需要下載更新資源
+    /// </summary>
+    public bool IsNeedToUpdate
+    {
+        get
+        {
+            return false;
+        }
+    }
 
 	#region ParticleSystem
 	static Dictionary<string, ParticleSystem> particles = new Dictionary<string, ParticleSystem>();
