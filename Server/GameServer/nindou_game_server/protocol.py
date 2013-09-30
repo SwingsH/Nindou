@@ -7,16 +7,19 @@ from config import *
 from dbmanager import * 
 from common_func import *  
 import datetime
-import json
 
 @csrf_exempt # exempt Cross Site Request Forgery protection , 因為 C 端不用 http form 方式處理帳密， 每個 call stack 都要此標籤
-def handle(request):    
-    protocol = Protocol()
-    return protocol.HandleClientRequest(request)
-        
-#test 區
-# http://127.0.0.1/protocol/?MainKind=1&SubKind=1&DeviceID=123
+def handle(request):
+    # jstring = ReadFile(DIR_PROJECT_PARENT_PATH + '\\' + DIR_PROJECT_DATA_DIR + '\\' + 'scenedata.json')
+    # ec = LoadJsonString(jstring)
+    # return HttpResponse(ec)
+    
+    global g_Protocol
+    if g_Protocol is None:
+        g_Protocol = Protocol()
+    return g_Protocol.HandleClientRequest(request)
 
+g_Protocol = None;
 class Protocol:
     _database = None
     
@@ -39,6 +42,10 @@ class Protocol:
         }, [ip_address_processor])
         return HttpResponse(t.render(Context({"my_name": "Swings"})))
     
+    def __init__(self):
+        if self._database is None:
+            self._database = DBManager()
+        
     @csrf_exempt  # exempt Cross Site Request Forgery protection , 因為 C 端不用 http form 方式處理帳密， 每個 call stack 都要此標籤
     def HandleClientRequest(self, request):
         responseText = ''
@@ -73,7 +80,8 @@ class Protocol:
         if not deviceID :
             return HttpResponse('error DispatchHandle')
     
-        self._database = DBManager(deviceID, loginSession)
+        #self._database = DBManager(deviceID, loginSession)
+        self._database.SwitchUser(deviceID, loginSession)
  
         if mainkind == 1 and subkind == 1:
             return self.Protocal_1_1_Login(postDatas, deviceID)

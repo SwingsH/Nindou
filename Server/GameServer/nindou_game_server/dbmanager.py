@@ -3,6 +3,7 @@
 from config import * 
 from pymongo import Connection
 
+g_DataBaseManager = None
 class DBManager:
     _deviceID = '' #存取 http 者的 device id    
     _loginSession = '' #存取 http 者的  登入 session  
@@ -42,10 +43,6 @@ class DBManager:
         'dict': {'x':1, 'y':2},
         'tuple': (3, 'a')
         }
-    
-    def __init__(self, deviceID, loginSession):
-        self._deviceID = str(deviceID)
-        self._loginSession = loginSession
         
     def ConnectToMongo(self):
         return Connection();
@@ -104,6 +101,11 @@ class DBManager:
         db = self.GetDatabase()
         if db[collectName].find({}).count() == 0:
             return True
+    
+    #切換目前登入的使用者資料
+    def SwitchUser(self, deviceID, loginSession):
+        self._deviceID = str(deviceID)
+        self._loginSession = loginSession
     
     def DumpAll(self):
         mon_con = Connection('localhost', 27017)
