@@ -9,19 +9,20 @@ public class UnitGenerater{
 	public Unit GenerateUnit(UnitInfo info)
 	{
 		SimpleMoveUnit su = new SimpleMoveUnit();
-
-		su.NormalAttack = new MainSkill(TestDataBase.Instance.SkillDataBase[info.AttackID]);
+		List<MainSkill> activeSkill = new List<MainSkill>();
+		su.NormalAttack = new MainSkill(TestDataBase.Instance.GetSkillData(info.AttackID));
 		foreach (ushort skillID in info.SkillID)
 		{
-			su.triggerSkills.Add(new MainSkill(TestDataBase.Instance.SkillDataBase[skillID]));
+			activeSkill.Add(new MainSkill(TestDataBase.Instance.GetSkillData(skillID)));
 		}
+		su.triggerSkills = activeSkill;
 		su.MaxLife = info.MaxLife;
 		su.Life = info.MaxLife;
 		su.MoveSpeed = info.MoveSpeed;
 		if (info.MoveMode == 1)
 			su.MoveAction = new TeleportInRangeComponent();
 
-		su.Entity = GenerateEntity(info.ModelName, info.spriteNames);
+		su.Entity = GenerateEntity(info.BoneName, info.spriteNames);
 
 		return su;
 	}
@@ -35,6 +36,7 @@ public class UnitGenerater{
 			ba = tempList[0];
 			ba.gameObject.SetActive(true);
 			tempList.RemoveAt(0);
+			ba.gameObject.name = BoneAnimName;
 		}
 		else
 			ba = ResourceStation.GetBone(BoneAnimName);
@@ -43,13 +45,11 @@ public class UnitGenerater{
 		ba.transform.parent = go.transform;
 		ba.transform.localRotation = Quaternion.identity;
 		ba.transform.localPosition = new Vector3(0, 125, 0);
-
 		return go;
 	}
 
 	public void Recycle(Unit unit)
 	{
-
 		AnimUnit au = unit as AnimUnit;
 		if (au == null || au.Anim == null)
 			return;
@@ -65,10 +65,11 @@ public class UnitGenerater{
 			tempList = new List<SmoothMoves.BoneAnimation>();
 			UnitGrave.Add(au.Anim.name, tempList);
 		}
-		tempList.Add(au.Anim);
+		if(!tempList.Contains(au.Anim))
+			tempList.Add(au.Anim);
+		//au.Anim.name = au.Anim.GetInstanceID().ToString();
 		au.Anim.transform.localScale = Vector3.one;
 		au.Anim.gameObject.SetActive(false);
-
 		if(au.Entity != null)
 			GameObject.Destroy(au.Entity);
 

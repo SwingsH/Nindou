@@ -16,8 +16,16 @@ public class GLOBALCONST
 		public const int LAYER_BACKGROUND = 9;
 
 		public const float TELEPORT_DELAY = 3.5f;
+		public static readonly Vector2 GRID_SIZE = new Vector2(8, 6);
+		public const int GRID_COUNT_W = 9;
+		public const int GRID_COUNT_L = 5;
 	}
-
+	public class BattleSettingValue
+	{
+		public const ushort DEFAULT_NORMAL_ATTACK = 0;
+		public const float CriticalBonus = 2;
+		public const int AllInRangeModeGroup = 10;
+	}
 	public const string HAND_LEFT = "HandL";
 	public const string HAND_RIGHT = "HandR";
 	public const string HEAD = "Head";
@@ -41,6 +49,8 @@ public class GLOBALCONST
     #region 檔名相關常數（無副檔名）
     // TODO: 下面目前都是為了測試用
     public const string FILENAME_SCENE = "SceneData"; // 場景資料
+	public const string FILENAME_SKILL = "SkillData"; // 
+	public const string FILENAME_NPC = "NpcData"; // NpcData
     #endregion
     #region 副檔名相關常數
     public static readonly string EXT_ASSETBUNDLE = ".unity3d";
@@ -67,6 +77,8 @@ public class GLOBALCONST
     {
         // for test
         [EnumClassValue(typeof(SceneData), FILENAME_SCENE)]        Scene = 0, // 場景
+		[EnumClassValue(typeof(SkillData), FILENAME_SKILL)]	       Skill, // 技能（暫
+		[EnumClassValue(typeof(NpcData), FILENAME_NPC)]     	   NPC, // NpcData
     };
 }
 

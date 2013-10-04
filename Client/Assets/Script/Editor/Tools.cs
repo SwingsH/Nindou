@@ -11,8 +11,7 @@ using System.Reflection;
 /// <summary>
 /// 中文
 /// </summary>
-
-public static class CustomTools { // class name conlict, Tool 已經是保留字, 可能造成 compile error, mod sh20130926
+public static class Tools {
 
 	static object buffer;
 
@@ -189,6 +188,29 @@ public static class CustomTools { // class name conlict, Tool 已經是保留字
 	}
 
 	#region AnimationData
+	[MenuItem("Assets/AnimationData/Set StartEnd Tag")]
+	public static void SetTag()
+	{
+		BoneAnimationData baData = Selection.activeObject as BoneAnimationData;
+		if (baData)
+		{
+			foreach (AnimationClipSM acsm in baData.animationClips)
+			{
+				AnimationClipBone acb = acsm.GetAnimationClipBone(baData.GetBoneDataIndexFromName(GLOBALCONST.BODY,true));
+
+					if (acb.keyframes.Count >= 1)
+					{
+						acb.keyframes[0].userTriggerCallback = true;
+						acb.keyframes[0].userTriggerTag =AnimationSetting.START_TAG;
+					}
+					if (acb.keyframes.Count > 1)
+					{
+						acb.keyframes[acb.keyframes.Count-1].userTriggerCallback = true;
+						acb.keyframes[acb.keyframes.Count-1].userTriggerTag = AnimationSetting.END_TAG;
+					}
+			}
+		}
+	}
 	[MenuItem("Assets/AnimationData/TransFormOnly")]
 	public static void SetAnimationData_TransFormOnly()
 	{
@@ -289,44 +311,6 @@ public static class CustomTools { // class name conlict, Tool 已經是保留字
 		xml.Serialize(fs, objs);
 		fs.Close();
 	}
-	[MenuItem("Tools/Translate Old Class To New Class")]
-	public static void TranslateDatas()
-	{
-		System.Type oldType = typeof(OldSkillData);
-		System.Type newType = typeof(SkillData);
-		
-		TextAsset ta = Resources.Load("Data/TestSkillData", typeof(TextAsset)) as TextAsset;
-		if (ta != null)
-		{
-			//System.IO.FileStream fs = new System.IO.FileStream("D:\\Test2.xml", System.IO.FileMode.Open);
-			System.IO.StringReader sr = new System.IO.StringReader(ta.text);
-			XmlSerializer xs = new XmlSerializer(oldType.MakeArrayType(1));
-			
-			try
-			{
-				object[] sd = xs.Deserialize(sr) as object[];
-				object[] nsd = System.Array.CreateInstance(newType, sd.Length) as object[];
-				
-				for (int i = 0; i < sd.Length; i++)
-				{
-					nsd[i] = TranslateType(sd[i], newType);
-				}
-
-				xs = new XmlSerializer(nsd.GetType());
-				using (TextWriter writer = new StreamWriter(Application.dataPath + "/Test/Resources/Data/TestSkillData.xml"))
-				{
-					xs.Serialize(writer, nsd);
-				}
-			}
-			catch (System.Exception e)
-			{
-				Debug.Log(e.Message);
-				Debug.Log(e.StackTrace);
-			}
-			
-			//Resources.UnloadAsset(ta);
-		}
-	}
 	/// <summary>
 	/// 
 	/// </summary>
@@ -352,15 +336,15 @@ public static class CustomTools { // class name conlict, Tool 已經是保留字
 	[MenuItem("Tools/QuickTest1")]
 	public static void QuickTest1()
 	{
-		BoneAnimation ba = Selection.activeGameObject.GetComponent<BoneAnimation>();
-		if (ba)
+		object obj = new List<SkillData>();
+		TextAsset ta = Resources.Load("Data/skilldata", typeof(TextAsset)) as TextAsset;
+		
+		DataUtility.DeserializeObject(ta.text,ref obj);
+		Debug.Log((obj as List<SkillData>).Count);
+		foreach (SkillData sd in obj as List<SkillData>)
 		{
-			AnimationState AS = ba.PlayQueued("Attack");
-			Debug.Log(AS.length);
-			Debug.Log(AS.speed);
-			Debug.Log(AS.length / AS.speed);
+			Debug.Log(sd.Name);
 		}
-	
 	}
 	[MenuItem("Tools/QuickTest2")]
 	public static void QuickTest2()

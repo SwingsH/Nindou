@@ -55,11 +55,13 @@ public class BattleManager : MonoBehaviour
 	}
 	void Start()
 	{
+		if (Application.isPlaying)
+			TestDataBase.IniInstance();
 		if (groundObject)
 		{
 			if (groundObject.GetComponent<ColiderPosReciver>())
 				groundObject.GetComponent<ColiderPosReciver>().Regiester(this);
-			g = new GridInfo(groundObject.transform.position, gridSize, WCounts, LCounts);
+			g = new GridInfo(groundObject.transform.position, GLOBALCONST.GameSetting.GRID_SIZE, GLOBALCONST.GameSetting.GRID_COUNT_W, GLOBALCONST.GameSetting.GRID_COUNT_L);
 		}
 		Generater = new UnitGenerater();
 	}
@@ -76,6 +78,8 @@ public class BattleManager : MonoBehaviour
 
 	void BattleStart()
 	{
+		
+		BattleIsStart = true;
 		Unit_Clear();
 		EnemyInfos.Clear();
 		PlayerInfos.Clear();
@@ -162,11 +166,14 @@ public class BattleManager : MonoBehaviour
 		if (EnemyInfos.Count == 0)
 			return;
 		List<GridPos> eg = Get_EmptyGrid();
-		for (int i = 0; i < number; i++)
+		if (eg.Count > 0)
 		{
-			int rindex = Random.Range(0, eg.Count);
-			AddEnemy(eg[rindex]);
-			eg.RemoveAt(rindex);
+			for (int i = 0; i < number; i++)
+			{
+				int rindex = Random.Range(0, eg.Count);
+				AddEnemy(eg[rindex]);
+				eg.RemoveAt(rindex);
+			}
 		}
 	}
 	void IniPlayers()
@@ -240,6 +247,7 @@ public class BattleManager : MonoBehaviour
 	}
 	void Unit_Clear()
 	{
+		Profiler.BeginSample("Unit_Clear");
 		if(Generater != null)
 		{
 			foreach (Unit u in Enemys)
@@ -257,6 +265,7 @@ public class BattleManager : MonoBehaviour
 			Enemys.Clear();
 			Players = new Unit[Players.Length];
 		}
+		Profiler.EndSample();
 	}
 	
 	void AllDeadEvent(eGroup group)
@@ -421,6 +430,11 @@ public class BattleManager : MonoBehaviour
 
 	public bool BattleIsStart = false;
 
+	void OnDrawGizmosSelected()
+	{
+		if(!Application.isPlaying)
+			g = new GridInfo(groundObject.transform.position, gridSize, WCounts, LCounts);
+	}
 	void OnDrawGizmos()
 	{
 		if (g != null)
@@ -516,13 +530,27 @@ public class BattleManager : MonoBehaviour
 					continue;
 				ActionUnit au = Players[i] as ActionUnit;
 				r.x = i * r.width;
-				string content = au.MoveState.ToString();
-				if (GUI.Button(r, content))
+				
+				if (au.ExtrimSkill != null)
 				{
-					if (au.MoveState == eMoveState.Closer)
-						au.MoveState = eMoveState.KeepRange;
+					string content = au.ExtrimSkill.Name;
+					if (au.ExtrimSkill.Castable)
+					{
+						if (GUI.Button(r, content))
+						{
+							au.CastExtrimSkill();
+							//if (au.MoveState == eMoveState.Closer)
+							//    au.MoveState = eMoveState.KeepRange;
+							//else
+							//    au.MoveState = eMoveState.Closer;
+						}
+					}
 					else
-						au.MoveState = eMoveState.Closer;
+					{
+						GUIStyle gs = GUI.skin.label;
+						gs.alignment = TextAnchor.MiddleCenter;
+						GUI.Label(r, content,gs);
+					}
 				}
 			}
 		}
@@ -531,7 +559,7 @@ public class BattleManager : MonoBehaviour
 			if (GUI.Button(new Rect(Screen.width / 2 - 30, Screen.height / 2 - 20, 60, 40), "Start"))
 			{
 				BattleStart();
-				BattleIsStart = true;
+				
 			}
 		}
 		if (!DisplayGUI)
@@ -558,7 +586,8 @@ public class BattleManager : MonoBehaviour
 			//    AddPlayer(eg[r]);
 			//    eg.RemoveAt(r);
 			//}
-			Time.timeScale = Time.timeScale == 1 ? 10 : (Time.timeScale == 10 ? 100 : 1);
+			TimeMachine.SetTimeScale(Time.timeScale == 1 ? 10 : (Time.timeScale == 10 ? 0 : 1));
+
 		}
 
 		if (GUI.Button(new Rect(10, 50, 100, 40), "AddPlayer"))
@@ -584,6 +613,10 @@ public class BattleManager : MonoBehaviour
 				break;
 		}
 #if UNITY_EDITOR
+		if (UnityEditor.Selection.activeGameObject)
+		{
+			GUI.Label(new Rect(610, 10, 100, 40), UnityEditor.Selection.activeGameObject.GetInstanceID().ToString());
+		}
 		if (UnityEditor.Selection.activeGameObject && UnityEditor.Selection.activeGameObject.GetComponent<SmoothMoves.BoneAnimation>() != null)
 		{
 			SmoothMoves.BoneAnimation anim = UnityEditor.Selection.activeGameObject.GetComponent<SmoothMoves.BoneAnimation>();
@@ -623,8 +656,6 @@ public class BattleManager : MonoBehaviour
 	}
 	void UserTriggerDelegate(SmoothMoves.UserTriggerEvent triggerEvent)
 	{
-		if (triggerEvent.tag == "Damage")
-			Debug.Log(triggerEvent.tag);
 	}
 
 	#endregion
@@ -803,7 +834,7 @@ public class GridInfo
 
 	public List<GridPos> Get_AreaGridPos(int mode,GridPos pos,eDirection dir, int range)
 	{
-		switch(mode % BattleSettingValue.AllInRangeModeGroup)
+		switch(mode % GLOBALCONST.BattleSettingValue.AllInRangeModeGroup)
 		{
 			case 0:
 				return Get_AreaGrid_Mode0(pos, range);
@@ -847,7 +878,7 @@ public class GridInfo
 	public bool CheckInRange(int mode, GridPos pos, eDirection dir, int range, GridPos targetPos)
 	{
 
-		switch (mode % BattleSettingValue.AllInRangeModeGroup)
+		switch (mode % GLOBALCONST.BattleSettingValue.AllInRangeModeGroup)
 		{
 			case 0:
 				return CheckInRange_AreaGrid_Mode0(pos, range,targetPos);

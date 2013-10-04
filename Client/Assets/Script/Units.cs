@@ -22,12 +22,12 @@ public abstract class Unit
 	public Color c = Color.white;
 	public eGroup Group;
 
-	public virtual int MaxLife
+	public virtual uint MaxLife
 	{
 		get;
 		set;
 	}
-	public virtual int Life
+	public virtual float Life
 	{
 		get;
 		set;
@@ -92,7 +92,7 @@ public class AnimUnit : Unit
 		protected set;
 	}
 
-	public override int MaxLife
+	public override uint MaxLife
 	{
 		get
 		{
@@ -105,7 +105,7 @@ public class AnimUnit : Unit
 			Life = Mathf.Clamp(Life, 0, MaxLife);
 		}
 	}
-	public override int Life
+	public override float Life
 	{
 		get
 		{
@@ -156,8 +156,8 @@ public class AnimUnit : Unit
 	}
 	public override void Damaged(DamageInfo info)
 	{
-		if (Life > 0)
-		{
+		//if (Life > 0)
+		//{
 			if (Random.value < info.Accuracy)
 			{
 				float rate = 1;
@@ -165,14 +165,17 @@ public class AnimUnit : Unit
 				{
 					rate = 1 + info.CriticalBonus;
 				}
-				Life -= Mathf.CeilToInt(rate * info.Power);
+				Damaged(Mathf.Ceil(rate * info.Power));
 				if(Entity)
 					ParticleManager.Emit(info.HitParticle, Entity.transform.position + Vector3.back*10, Entity.transform.up);
-				if (Life <= 0)
-					BattleManager.Unit_Dead(this);
 			}
-		}
-		
+		//}
+	}
+	protected void Damaged(float value)
+	{
+		Life -= value;
+		if (Life <= 0)
+			BattleManager.Unit_Dead(this);
 	}
 }
 
@@ -223,10 +226,10 @@ public class ActionUnit : AnimUnit
 		protected set
 		{
 			if (Anim != null)
-				Anim.UnregisterUserTriggerDelegate(UserTriggerDelegate);
+				Anim.UnregisterUserTriggerDelegate(AnimUserTriggerDelegate);
 			base.Anim = value;
 			if(value !=null)
-				Anim.RegisterUserTriggerDelegate(UserTriggerDelegate);
+				Anim.RegisterUserTriggerDelegate(AnimUserTriggerDelegate);
 			StopWalk();
 		}
 	}
@@ -240,9 +243,37 @@ public class ActionUnit : AnimUnit
 		}
 		set
 		{
-			_normalAttack = value;
-			if (AttackAction != null)
-				AttackAction.normalAttack = _normalAttack;
+			if (value.Type == SkillType.Weapon)
+			{
+				foreach(SpecialEffect spe in value.SPEffect)
+					if (spe.EffectType == (byte)SPEffectType.ExtrimSkill)
+					{
+						ExtrimSkill = new MainSkill(TestDataBase.Instance.GetSkillData(spe.EffectPower));
+					}
+				_normalAttack = value;
+				if (AttackAction != null)
+					AttackAction.normalAttack = _normalAttack;
+			}
+			else
+			{
+				Debug.LogError("NormalAttack Type Error");
+				_normalAttack = new MainSkill(GLOBALCONST.BattleSettingValue.DEFAULT_NORMAL_ATTACK);
+			}
+		}
+	}
+	MainSkill _extrimSkill;
+	public MainSkill ExtrimSkill
+	{
+		get
+		{
+			return _extrimSkill;
+		}
+		protected set
+		{
+			if (value.Type == SkillType.Extrim)
+				_extrimSkill = value;
+			else
+				_extrimSkill = null;
 		}
 	}
 	List<MainSkill> _triggerSkills = new List<MainSkill>();
@@ -250,24 +281,51 @@ public class ActionUnit : AnimUnit
 	{
 		get
 		{
-			return _triggerSkills;
+			return new List<MainSkill>(_triggerSkills);
 		}
 		set
 		{
 			_triggerSkills = value;
+			CheckSkillList(ref _triggerSkills, SkillType.Active);
 			if (AttackAction != null)
+			{
 				AttackAction.triggerSkills = _triggerSkills;
+			}
 		}
 	}
 
-	CastInfo CurrentCast;
+	List<MainSkill> _passiveSkill = new List<MainSkill>();
+
+	public List<MainSkill> PassiveSkill
+	{
+		get
+		{
+			return new List<MainSkill>(_passiveSkill);
+		}
+		set
+		{
+			_passiveSkill = value;
+			CheckSkillList(ref _passiveSkill, SkillType.Passive);
+			if (Passive != null)
+			{
+				Passive.Reset();
+				Passive.AddPassiveSkills(_passiveSkill);
+			}
+		}
+	}
+	public PassiveEffectInfo Passive = new PassiveEffectInfo();
+	public StateInfo State = new StateInfo();
+
+	Queue<CastInfo> CurrentCast = new Queue<CastInfo>();
+	
 	public bool IsCasting
 	{
 		get
 		{
-			if (CurrentCast == null)
+			if (CurrentCast.Count == 0)
 				return false;
-			return CurrentCast.Casting;
+			else
+				return true;
 		}
 	}
 
@@ -306,16 +364,26 @@ public class ActionUnit : AnimUnit
 				return 0;
 		}
 	}
+	public int _moveSpeed;
 	public int MoveSpeed
 	{
-		get;
-		set;
+		get
+		{
+			return _moveSpeed;
+		}
+		set
+		{
+			_moveSpeed = value;
+		}
 	}
 
 	public override void Run()
 	{
 		//if (mc.State == ActionState.Idle)
 		//    RandomMove();
+		this.State.Reflash();
+		Damaged(this.State.DoT);
+
 		TargetUnit = FindTarget(eTargetMode.Closest);
 		AttackAction.Target = TargetUnit;
 		if (TargetUnit != null)
@@ -324,6 +392,7 @@ public class ActionUnit : AnimUnit
 		}
 		else
 			MoveAction.Target = GridPos.Null;
+		
 		if (Entity)
 		{
 			Entity.transform.position =BattleManager.GetRealWorldPos(WorldPos);
@@ -338,6 +407,7 @@ public class ActionUnit : AnimUnit
 					break;
 			}
 		}
+
 		if (currentAction != null && currentAction.State == ActionState.Busy)
 		{
 			currentAction.Active();
@@ -387,6 +457,8 @@ public class ActionUnit : AnimUnit
 	}
 	protected ActionComponent DecideAction(eMoveState state)
 	{
+		if (IsCasting)
+			return null;
 		switch (state)
 		{
 			case eMoveState.Closer:
@@ -417,34 +489,62 @@ public class ActionUnit : AnimUnit
 		if (Anim != null)
 			Anim.Blend(AnimationSetting.WALK_ANIM, 0, 0.1f);
 	}
+	//播放技能，差別只在於沒有施放目標，為了要放particle所以也要建CastInfo
 	public void PlaySkill(MainSkill skill)
 	{
 		PlayAnim(skill.GenerateAnimInfo());
-		CurrentCast = new CastInfo();
-		CurrentCast.skill = skill;
+		CurrentCast.Clear();
+		CurrentCast.Enqueue(new CastInfo(skill));
 	}
 	public void CastSkill(MainSkill skill)
 	{
-		if (IsCasting)
-		{
-			Debug.Log("CastError");
+		if (skill == null)
 			return;
-		}
-		skill.CastableTime = Time.time + skill.CoolDown;
-		PlayAnim(skill.GenerateAnimInfo());
-		CurrentCast = new CastInfo();
-		CurrentCast.skill = skill;
-		CurrentCast.EndCount = skill.AnimPlayTimes;
-		CurrentCast.Target =GetTarget(skill);
+		CastInfo info = new CastInfo(skill);
+		
+		CurrentCast.Enqueue(info);
+		if (CurrentCast.Count == 1)
+			StartCast();
 	}
+	void StartCast()
+	{
+		while (CurrentCast.Count > 0)
+		{
+			CastInfo info = CurrentCast.Peek();
+			if (info.skill == null || !info.skill.Castable)
+			{
+				CurrentCast.Dequeue();
+				continue;
+			}
+			info.Target = GetTarget(info.skill);
+			if (info.Target.Count > 0)
+			{
+				info.skill.CastableTime = Time.time + info.skill.CoolDown;
+				PlayAnim(info.skill.GenerateAnimInfo());
+				break;
+			}
+			else
+			{
+				CurrentCast.Dequeue();
+			}
+		}
+	}
+	public void CastExtrimSkill()
+	{
+		if (ExtrimSkill != null && ExtrimSkill.Castable)
+			CastSkill(ExtrimSkill);
+	}
+
 	public List<Unit> GetTarget(MainSkill skill)
 	{
+		if (skill == null)
+			return new List<Unit>();
 		List<Unit> units;
 		if (skill.DamageType == SkillDamageType.Damage)
 			units = BattleManager.Get_EnemyUnitsInRange(Group, skill.range, Pos, Direction, skill.range);
 		else
 			units = BattleManager.Get_FriendUnitsInRange(Group, skill.range, Pos, Direction, skill.range);
-		if (skill.rangeMode <= BattleSettingValue.AllInRangeModeGroup)
+		if (skill.rangeMode <= GLOBALCONST.BattleSettingValue.AllInRangeModeGroup)
 		{
 			if (!units.Contains(TargetUnit))
 			{
@@ -455,33 +555,58 @@ public class ActionUnit : AnimUnit
 		return units;
 	}
 
-	void UserTriggerDelegate(UserTriggerEvent triggerEvent)
+	void AnimUserTriggerDelegate(UserTriggerEvent triggerEvent)
 	{
-		if (CurrentCast != null)
+		if (CurrentCast.Count > 0)
 		{
-			if (triggerEvent.animationName != CurrentCast.skill.AnimClipName)
+			CastInfo info = CurrentCast.Peek();
+			if (triggerEvent.animationName != info.skill.AnimClipName)
 				return;
 
 			switch (triggerEvent.tag)
 			{
 				case AnimationSetting.HIT_TAG:
-					DamageInfo di = CurrentCast.skill.GenerateDamageInfo(this);
-					if (CurrentCast.Target != null)
+					DamageInfo di = info.skill.GenerateDamageInfo(this);
+					if (info.Target != null)
 					{
-						foreach (Unit u in CurrentCast.Target)
+						foreach (Unit u in info.Target)
 							u.Damaged(di);
 					}
 					break;
 				case AnimationSetting.ATKSTART_TAG:
-					ParticleManager.Emit(CurrentCast.skill.ParticleAttackStart, triggerEvent.boneTransform.position, WorldDirection);
+					ParticleManager.Emit(info.skill.ParticleAttackStart, triggerEvent.boneTransform.position, WorldDirection);
 					break;
 				case AnimationSetting.ATKEND_TAG:
-					ParticleManager.Emit(CurrentCast.skill.ParticleAttackEnd, triggerEvent.boneTransform.position,WorldDirection);
+					ParticleManager.Emit(info.skill.ParticleAttackEnd, triggerEvent.boneTransform.position, WorldDirection);
 					break;
 				case AnimationSetting.END_TAG:
-					CurrentCast.EndCount--;
+					info.EndCount--;
+					if (!CurrentCast.Peek().Casting)
+					{
+						CurrentCast.Dequeue();
+						if (CurrentCast.Count > 0)
+							StartCast();
+					}
+					break;
+				case AnimationSetting.START_TAG:
+					if (info.StartCount == 0)
+					{
+						if (info.skill.Type == SkillType.Extrim)
+							TimeMachine.ChangeTimeScale(0.1f,0.5f);
+					}
+					info.StartCount++;
 					break;
 			}
+		}
+	}
+
+	public override void Damaged(DamageInfo info)
+	{
+		base.Damaged(info);
+		foreach (SpecialEffect se in info.SPEffects)
+		{
+			if (Random.value < se.EffectChance)
+				State.AddState(se);
 		}
 	}
 
@@ -500,7 +625,24 @@ public class ActionUnit : AnimUnit
 	public override void ClearReference()
 	{
 		base.ClearReference();
-		Anim.UnregisterUserTriggerDelegate(UserTriggerDelegate);
+		Anim.UnregisterUserTriggerDelegate(AnimUserTriggerDelegate);
+	}
+	
+	public static void CheckSkillList(ref List<MainSkill> skills, SkillType specifiedType)
+	{
+		if(skills == null)
+			return;
+		int index = 0;
+
+		while (index < skills.Count)
+		{
+			if (skills[index].Type != specifiedType)
+			{
+				skills.RemoveAt(index);
+				continue;
+			}
+			index++;
+		}
 	}
 }
 public enum eGroup
@@ -534,5 +676,15 @@ public class CastInfo
 		get { return EndCount > 0; }
 	}
 	public List<Unit> Target;
+	public int StartCount;
 	public int EndCount;
+	public CastInfo(MainSkill sk)
+	{
+		skill = sk;
+		EndCount = skill.AnimPlayTimes;
+	}
+	public void CancelCast()
+	{
+		EndCount = 0;
+	}
 }

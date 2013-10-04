@@ -5,13 +5,36 @@ using System.Text;
 using UnityEngine;
 public class MainSkill
 {
+	public void ResetBuffer()
+	{
+	}
+	public void SetPassive(PassiveEffectInfo info)
+	{
+		Passive = info.GetBonusValue();
+	}
+	public void SetState(StateInfo info)
+	{
+		State = info.GetBonusValue();
+	}
+	AttrbuteBonus Passive;
+	AttrbuteBonus State;
+
 	public MainSkill()
 	{
 		SkillData = new SkillData();
 	}
+
+	public MainSkill(ushort SkillID)
+	{
+		SkillData = TestDataBase.Instance.GetSkillData(SkillID);
+		Passive.Reset();
+		State.Reset();
+	}
 	public MainSkill(SkillData skillData)
 	{
 		SkillData = skillData;
+		Passive.Reset();
+		State.Reset();
 	}
 	public global::SkillData SkillData
 	{
@@ -22,13 +45,22 @@ public class MainSkill
 	{
 		get { return SkillData.Name; }
 	}
-	public int Power
+	public SkillType Type
 	{
-		get { return SkillData.Power; }
+		get
+		{
+			if (Enum.IsDefined(typeof(SkillType), SkillData.SkillType))
+				return (SkillType)SkillData.SkillType;
+			else
+			{
+				Debug.LogError("Undefined SkillType Value");
+				return SkillType.None;
+			}
+		}
 	}
 	public SkillDamageType DamageType
 	{
-		get 
+		get
 		{
 			if (Enum.IsDefined(typeof(SkillDamageType), SkillData.DamageType))
 				return (SkillDamageType)SkillData.DamageType;
@@ -39,17 +71,22 @@ public class MainSkill
 			}
 		}
 	}
+
+	public int Power
+	{
+		get { return SkillData.Power + Passive.Power + State.Power; }
+	}
 	public float Accuracy
 	{
-		get { return SkillData.Accuracy / 100f; }
+		get { return SkillData.Accuracy / 100f + Passive.Accuracy + State.Accuracy; }
 	}
 	public float Critical
 	{
-		get { return SkillData.Critcal / 100f; }
+		get { return SkillData.Critical / 100f + Passive.Critical + State.Critical; }
 	}
 	public float CriticalBonus
 	{
-		get { return SkillData.Critcal / 100f * BattleSettingValue.CriticalBonus; }
+		get { return Critical * GLOBALCONST.BattleSettingValue.CriticalBonus; }
 	}
 	public int range
 	{
@@ -63,7 +100,7 @@ public class MainSkill
 
 	public float CoolDown
 	{
-		get { return SkillData.Cooldown / 100f; }
+		get { return SkillData.Cooldown / 100f * Passive.ASpeedRate * State.ASpeedRate; }
 	}
 	public float CastableTime;
 	public float CastTime //施展時間，技能動畫播放時間
@@ -88,6 +125,11 @@ public class MainSkill
 		get { return SkillData.ActiveRate / 100f; }
 	}
 
+	public SpecialEffect[] SPEffect
+	{
+		get { return SkillData.SPEffect; }
+	}
+
 	public string ParticleAttackStart
 	{
 		get { return SkillData.ParticleAttackStart; }
@@ -100,7 +142,11 @@ public class MainSkill
 	{
 		get { return SkillData.ParticleHit; }
 	}
-	public DamageInfo GenerateDamageInfo(Unit caster)
+	public DamageInfo GenerateDamageInfo()
+	{
+		return GenerateDamageInfo(null);
+	}
+	public DamageInfo GenerateDamageInfo(ActionUnit caster)
 	{
 		DamageInfo di = new DamageInfo();
 		di.Attacker = caster;
@@ -110,14 +156,18 @@ public class MainSkill
 		di.Critical = Critical;
 		di.CriticalBonus = CriticalBonus;
 		di.HitParticle = ParticleHit;
-		if (caster is AnimUnit)
+		di.SPEffects = new List<SpecialEffect>(SPEffect);
+		if (caster != null && caster.Passive != null)
 		{
-			int DamageTimes = AnimationData.GetAnimClipTriggerEventCount((caster as AnimUnit).Anim, AnimClipName, AnimationSetting.HIT_TAG);
-			if (DamageTimes != 0)
-				di.Power = Mathf.Clamp(Power / DamageTimes, 1, int.MaxValue);
+			di.SPEffects.AddRange(caster.Passive.attackEffect);
 		}
+		int DamageTimes = AnimationData.GetAnimClipTriggerEventCount((caster as AnimUnit).Anim, AnimClipName, AnimationSetting.HIT_TAG);
+		if (DamageTimes != 0)
+			di.Power = Mathf.Clamp(Power / DamageTimes, 1, int.MaxValue);
+
 		return di;
 	}
+
 	public AnimInfo GenerateAnimInfo()
 	{
 		AnimInfo info = new AnimInfo();
@@ -132,11 +182,200 @@ public class MainSkill
 	}
 }
 
-public class SlotSkill
+
+public class PassiveEffectInfo
 {
-	public global::SkillData SkillData
+	//List<MainSkill> passiveSkill = new List<MainSkill>();
+	public List<SpecialEffect> attackEffect = new List<SpecialEffect>();
+
+
+	protected AttrbuteBonus BonusValue;
+	public AttrbuteBonus GetBonusValue()
+	{
+		return BonusValue;
+	}
+
+	public ushort Power
+	{
+		get { return BonusValue.Power; }
+	}
+	public float Accuracy
+	{
+		get { return BonusValue.Accuracy; }
+	}
+	public float Critical
+	{
+		get { return BonusValue.Critical; }
+	}
+	public void AddPassiveSkills(List<MainSkill> skills)
+	{
+		foreach (MainSkill skill in skills)
+		{
+			
+			foreach(SpecialEffect se in skill.SPEffect)
+				switch ((SPEffectType)se.EffectType)
+				{
+					case SPEffectType.PowerBuffer:
+					case SPEffectType.AccuracyBuffer:
+					case SPEffectType.CriticalBuffer:
+						BonusValue.AddValue((SPEffectType)se.EffectType, se.EffectPower);
+						break;
+					default:
+						attackEffect.Add(se);
+						break;
+				}
+		}
+					
+	}
+	public void Reset()
+	{
+		//passiveSkill.Clear();
+		attackEffect.Clear();
+		BonusValue = new AttrbuteBonus();
+	}
+}
+public class StateInfo
+{
+	List<StateData> states = new List<StateData>();
+	public float DoT
 	{
 		get;
-		set;
+		protected set;
+	}
+	
+	protected AttrbuteBonus BonusValue;
+	public AttrbuteBonus GetBonusValue()
+	{
+		return BonusValue;
+	}
+	public ushort Power
+	{
+		get { return BonusValue.Power; }
+	}
+	public float Accuracy
+	{
+		get { return BonusValue.Accuracy; }
+	}
+	public float Critical
+	{
+		get { return BonusValue.Critical; }
+	}
+	public void Reflash()
+	{
+		BonusValue = new AttrbuteBonus();
+		BonusValue.ASpeedRate = 1;
+		BonusValue.MSpeedRate = 1;
+
+		int index = 0;
+		while (index < states.Count)
+		{
+			if (states[index].Duration <= 0)
+			{
+				states.RemoveAt(index);
+				continue;
+			}
+
+			index++;
+		}
+		DoT = 0;
+
+		foreach(StateData sd in states)
+		{
+			sd.Duration -= Time.deltaTime;
+			
+			switch (sd.EffectType)
+			{
+				case SPEffectType.PowerBuffer:
+				case SPEffectType.AccuracyBuffer:
+				case SPEffectType.CriticalBuffer:
+				case SPEffectType.Water:
+				case SPEffectType.Earth:
+					BonusValue.AddValue(sd.EffectType, sd.EffectPower);
+					break;
+				case SPEffectType.Posion:
+				case SPEffectType.Fire:
+					DoT += sd.EffectPower * Time.deltaTime;
+					break;
+
+			}
+		}
+	}
+	public void AddState(SpecialEffect se)
+	{
+		StateData sd = new StateData(se);
+		AddState(sd);
+	}
+	public void AddState(StateData sd)
+	{
+		states.Add(sd);
+	}
+}
+public struct AttrbuteBonus
+{
+	
+	public ushort Power;
+	public float Critical;
+	public float Accuracy;
+
+	public float ASpeedRate; //攻擊速度加成
+	public float MSpeedRate; //移動速度加成
+
+	public void AddValue(SPEffectType type, ushort value)
+	{
+		switch (type)
+		{
+			case SPEffectType.PowerBuffer:
+				Power += value;
+				break;
+			case SPEffectType.AccuracyBuffer:
+				Accuracy += value / 100f;
+				break;
+			case SPEffectType.CriticalBuffer:
+				Critical += value / 100f;
+				break;
+			case SPEffectType.Water:
+				if (value != 0)
+					ASpeedRate *= value / 100f;
+				break;
+			case SPEffectType.Earth:
+				if (value != 0)
+					MSpeedRate *= value / 100f;
+				break;
+		}
+	}
+	
+	public void Reset()
+	{
+		ASpeedRate = 1;
+		MSpeedRate = 1;
+		Power = 0;
+		Critical = 0;
+		Accuracy = 0;
+	}
+	public static AttrbuteBonus operator +(AttrbuteBonus b1,AttrbuteBonus b2)
+	{
+		AttrbuteBonus result= new AttrbuteBonus();
+		result.Power =(ushort)(b1.Power + b2.Power);
+		result.Accuracy = (b1.Accuracy + b2.Accuracy);
+		result.Critical = (b1.Critical + b2.Critical);
+		result.ASpeedRate = (b1.ASpeedRate * b2.ASpeedRate);
+		result.MSpeedRate = (b1.MSpeedRate * b2.MSpeedRate);
+
+		return result;
+	}
+}
+public class StateData
+{
+	public SPEffectType EffectType;
+	public ushort EffectPower;
+	public float Duration;
+	public StateData(SpecialEffect se)
+	{
+		if (Enum.IsDefined(typeof(SPEffectType), se.EffectType))
+			EffectType = (SPEffectType)se.EffectType;
+		else
+			EffectType = SPEffectType.None;
+		EffectPower = se.EffectPower;
+		Duration = se.EffectDuration;
 	}
 }

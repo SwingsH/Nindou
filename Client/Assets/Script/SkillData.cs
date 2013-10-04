@@ -2,33 +2,39 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.InteropServices;
 [Serializable]
+[StructLayout(LayoutKind.Sequential)]
 public class SkillData
 {
 	public ushort ID;
-	public byte SkillType;
 	public string Name = "";
+	public byte SkillType;
 	public byte DamageType;
-	public int Power;
-	public ushort Critcal;
+	public ushort Power;
+	public ushort Critical;
 	public ushort Accuracy;
 	public ushort ActiveRate;
-	public int Range;
-	public int RangeMode;
+	public ushort Range;
+	public ushort RangeMode;
 	public ushort Cooldown;
 	public SpecialEffect[] SPEffect = new SpecialEffect[3];
 	
 	public string AnimName = "";
-	public int AnimPlayTimes;
+	public ushort AnimPlayTimes;
 	public ushort CastTime;
 	public string ParticleAttackStart = "";
 	public string ParticleAttackEnd = "";
 	public string ParticleHit = "";
-	
-	public override string ToString()
-	{
-		return string.Format("ID:{0}\nName:{1}\nPower:{2}", ID, Name, Power);
-	}
+}
+
+[StructLayout(LayoutKind.Sequential)]
+public class SpecialEffect
+{
+	public byte EffectType;
+	public ushort EffectPower;
+	public ushort EffectChance;
+	public ushort EffectDuration;
 }
 
 public enum SkillDamageType: byte
@@ -42,42 +48,18 @@ public enum SkillType : byte
 	Weapon = 1,
 	Active,
 	Passive,
+	Extrim = 255,
 }
-[Serializable]
-public class SpecialEffect
+public enum SPEffectType : byte
 {
-	public ushort EffectType;
-	public ushort EffectPower;
-	public ushort EffectChance;
-	public ushort EffectDuration;
+	None = 0,
+	PowerBuffer,
+	CriticalBuffer,
+	AccuracyBuffer,
+	Posion = 10,
+	Fire,
+	Water,
+	Earth,
+	ExtrimSkill = 255,
 }
 
-[System.Xml.Serialization.XmlType(TypeName = "SkillData")]
-[Serializable]
-public class OldSkillData
-{
-	public ushort ID;
-	public string Name = "";
-	public byte DamageType;
-	public int Power;
-	public ushort Critcal;
-	public ushort Accuracy;
-	public ushort ActiveRate;
-	public int Range;
-	public int RangeMode;
-	public ushort Cooldown;
-	public SpecialEffect SP1 = new SpecialEffect();
-	public SpecialEffect SP2 = new SpecialEffect();
-
-	public string AnimName = "";
-	public int AnimPlayTimes;
-	public ushort CastTime;
-	public string ParticleAttackStart = "";
-	public string ParticleAttackEnd = "";
-	public string ParticleHit = "";
-
-	public override string ToString()
-	{
-		return string.Format("ID:{0}\nName:{1}\nPower:{2}", ID, Name, Power);
-	}
-}
