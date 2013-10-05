@@ -98,8 +98,8 @@ public class NinDoAttackComponent : ActionComponent
 				return ActionState.Unavailable;
 			if (BusyTime > Time.time)
 				return ActionState.Busy;
-			if (unit.IsCasting)
-				return ActionState.Busy;
+			//if (unit.IsCasting)
+			//    return ActionState.Busy;
 			//if (UnavailableTime > Time.time)
 			//    return ActionState.Unavailable;
 			if (normalAttack == null || !normalAttack.Castable || !BattleManager.CheckInRange(normalAttack.rangeMode, unit.Pos, (Target.Pos.x - unit.Pos.x) > 0 ? eDirection.Right : eDirection.Left, normalAttack.range, Target.Pos))

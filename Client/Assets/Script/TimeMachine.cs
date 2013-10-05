@@ -16,7 +16,7 @@ public class TimeMachine : MonoBehaviour {
 		}
 	}
 
-	public float TimeScaleSetting =1;
+	static float TimeScaleSetting =1;
 	
 	protected float stopTime;
 	
@@ -30,6 +30,12 @@ public class TimeMachine : MonoBehaviour {
 	void OnDisable()
 	{
 		Time.timeScale = TimeScaleSetting;
+	}
+	public static void SetTimeScale(float scale)
+	{
+		TimeScaleSetting = scale;
+		if (_instance == null || Time.realtimeSinceStartup > _instance.stopTime)
+			Time.timeScale = TimeScaleSetting;
 	}
 	public static void ChangeTimeScale(float scale, float duration)
 	{

@@ -13,32 +13,31 @@ public class TestDataBase{
 			return _Instance;
 		}
 	}
-	
-	public Dictionary<ushort, SkillData> SkillDataBase;
+	public static void IniInstance()
+	{
+		if (_Instance == null)
+			_Instance = new TestDataBase();
+	}
+	Dictionary<ushort, SkillData> SkillDataBase;
 	public TestDataBase()
 	{
-
+	
 		SkillDataBase = new Dictionary<ushort, SkillData>();
-		TextAsset ta = Resources.Load("Data/TestSkillData", typeof(TextAsset)) as TextAsset;
-		if (ta != null)
+		object obj = new List<SkillData>();
+		TextAsset ta = Resources.Load("Data/skilldata", typeof(TextAsset)) as TextAsset;
+		if(ta)
 		{
-			//System.IO.FileStream fs = new System.IO.FileStream("D:\\Test2.xml", System.IO.FileMode.Open);
-			System.IO.StringReader sr = new System.IO.StringReader(ta.text);
-			XmlSerializer xs = new XmlSerializer(typeof(SkillData[]));
-			try
+			Profiler.BeginSample("DeserilizeData");
+			DataUtility.DeserializeObject(ta.text, ref obj);
+			Profiler.EndSample();
+			Profiler.BeginSample("ManagerData");
+			foreach (SkillData sd in obj as List<SkillData>)
 			{
-				SkillData[] sd = xs.Deserialize(sr) as SkillData[];
-				foreach (SkillData sdi in sd)
-				{
-					if (!SkillDataBase.ContainsKey(sdi.ID))
-						SkillDataBase.Add(sdi.ID, sdi);
-				}
+				if (!SkillDataBase.ContainsKey(sd.ID))
+					SkillDataBase.Add(sd.ID, sd);
 			}
-			catch (System.Exception e)
-			{
-				Debug.Log(e.Message);
-			}
-			//Resources.UnloadAsset(ta);
+			
+			Profiler.EndSample();
 		}
 		int tempIndex = 0;
 		playerInfo[tempIndex] = new UnitInfo();
@@ -77,7 +76,14 @@ public class TestDataBase{
 		playerInfo[tempIndex].spriteNames = new string[] { TestDataBase.TestAtlasName[tempIndex], TestDataBase.TestAtlasName[tempIndex], TestDataBase.TestAtlasName[tempIndex],
 				TestDataBase.TestAtlasName[tempIndex], TestDataBase.TestAtlasName[tempIndex], TestDataBase.TestAtlasName[tempIndex] };
 	}
-
+	public SkillData GetSkillData(ushort SkillID)
+	{
+		SkillData result;
+		if (SkillDataBase == null)
+			return null;
+		SkillDataBase.TryGetValue(SkillID, out result);
+		return result;
+	}
 	public UnitInfo[] playerInfo = new UnitInfo[4];
 
 	public static string[] TestAtlasName = new string[] { "NindoTestSprite", "GrayKappa", "BlueKappa", "RedKappa" };

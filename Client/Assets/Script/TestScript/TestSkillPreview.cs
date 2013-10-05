@@ -37,11 +37,14 @@ public class TestSkillPreview : MonoBehaviour {
 			if (au.NormalAttack != null)
 				if (GUI.Button(new Rect(70, 10, 60, 40), au.NormalAttack.Name))
 					au.PlaySkill(au.NormalAttack);
+			if (au.ExtrimSkill != null)
+				if (GUI.Button(new Rect(70, 50, 60, 40), au.ExtrimSkill.Name))
+					au.PlaySkill(au.ExtrimSkill);
 			if(au.triggerSkills != null)
 				for (int i = 0; i < au.triggerSkills.Count; i++)
 				{
 					if(au.triggerSkills[i] != null)
-						if (GUI.Button(new Rect(70, 50 + i * 40, 60, 40), au.triggerSkills[i].Name))
+						if (GUI.Button(new Rect(70, 90 + i * 40, 60, 40), au.triggerSkills[i].Name))
 							au.PlaySkill(au.triggerSkills[i]);
 				}
 		}
