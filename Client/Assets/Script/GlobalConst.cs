@@ -51,6 +51,8 @@ public class GLOBALCONST
     public const string FILENAME_SCENE = "SceneData"; // 場景資料
 	public const string FILENAME_SKILL = "SkillData"; // 
 	public const string FILENAME_NPC = "NpcData"; // NpcData
+    public const string FILENAME_AREA = "Area"; // 場景資料
+
     #endregion
     #region 副檔名相關常數
     public static readonly string EXT_ASSETBUNDLE = ".unity3d";
@@ -79,6 +81,7 @@ public class GLOBALCONST
         [EnumClassValue(typeof(SceneData), FILENAME_SCENE)]        Scene = 0, // 場景
 		[EnumClassValue(typeof(SkillData), FILENAME_SKILL)]	       Skill, // 技能（暫
 		[EnumClassValue(typeof(NpcData), FILENAME_NPC)]     	   NPC, // NpcData
+        [EnumClassValue(typeof(Area), FILENAME_AREA)]              Area // 區域
     };
 }
 

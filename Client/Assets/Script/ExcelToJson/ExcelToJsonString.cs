@@ -392,11 +392,12 @@ public class ExcelToJsonString
                 try
                 {
                     retObj = realType.GetMethod("Parse", transferType).Invoke(null, para);
+                    CommonFunction.DebugMsgFormat("取得基本型別成功 {0}", type.ToString());
                     return ReadExcelToJsonStringError.NONE;
                 }
                 catch (Exception e)
                 {
-                    CommonFunction.DebugMsgFormat("取得基本型別時出錯\n{0}\n{1}", e.Message, e.StackTrace);
+                    CommonFunction.DebugMsgFormat("取得基本型別時出錯 {2} \n{0}\n{1}", e.Message, e.StackTrace, type.ToString());
                     retObj = null;
                     return ReadExcelToJsonStringError.GET_BASE_TYPE_ERROR;
                 }

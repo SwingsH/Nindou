@@ -11,7 +11,11 @@ using System.Reflection;
 /// <summary>
 /// 中文
 /// </summary>
-public static class Tools {
+/// 
+/// Assets/NGUI/Scripts/Editor/UIWidgetContainerEditor.cs(36,27): error CS0117: `Tools' does not contain a definition for `current'
+/// class name conlict, Tool 已經是保留字, 可能造成 compile error, mod sh20130926  ,remove shortly
+public static class CustomTools 
+{ 
 
 	static object buffer;
 

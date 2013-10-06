@@ -183,3 +183,29 @@ public class SceneData
         return sb.ToString();
     }
 }
+
+
+[StructLayout(LayoutKind.Sequential)]
+public class Area
+{
+    public ushort AreaID;       // 區域ID
+    public ushort AreaGroupID;       // 區域群組ID
+    public byte AreaLayer;       // 區域層級
+    public byte AreaType;     // 區域種類
+    public string AreaName;     // 區域名稱
+    public byte AreaLevel;    // 區域難度星數
+    public ushort Cost;         //區域消耗體力
+    // 進入所需完成的任務 , 型別應為 uint[], 但 excel to json 似乎有問題, 待查
+    public uint[] RequireMission = new uint[5];
+    public uint BeginDate;         //活動型任務開始日期
+    public uint CloseDate;         //活動型任務結束日期
+}
+
+/// <summary>
+/// 區域類型
+/// </summary>
+enum AreaType : byte
+{
+    Normal = 0, // 一般關卡
+    Activity = 1 //活動關卡
+}
