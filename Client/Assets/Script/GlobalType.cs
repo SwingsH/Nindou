@@ -184,7 +184,45 @@ public class SceneData
     }
 }
 
+/// <summary>
+/// 劇情對話資料 (主鍵 = 劇情 ID + 順序 ID)
+/// </summary>
+[StructLayout(LayoutKind.Sequential)]
+public class Story
+{
+    public uint ID; //劇情群組 ID
+    public uint ShowOrder; //執行順序 ID
+    public string Content; //對話內容
+}
 
+/// <summary>
+/// 區域類型
+/// </summary>
+enum AreaEventType : byte
+{
+    Battle = 1, // 戰鬥 (一般+ BOSS)
+    Item = 2,   // 發現物品
+    Card = 3,   // 發現技能卡片
+    Story = 4   // 觸發劇情
+}
+
+/// <summary>
+/// 區域事件資料
+/// </summary>
+[StructLayout(LayoutKind.Sequential)]
+public class AreaEvent
+{
+    public uint ID; //區域事件序號 ID
+    public ushort AreaID; //區域事件場景 ID
+    public ushort RatioProportion; //區域事件機率權重
+    public byte EventType; //區域事件類型
+    public uint EventValue; //區域事件共用欄位
+    public uint CompleteMissionID; //觸發後將會完成的任務 ID
+}
+
+/// <summary>
+/// 區域資料
+/// </summary>
 [StructLayout(LayoutKind.Sequential)]
 public class Area
 {
@@ -206,6 +244,6 @@ public class Area
 /// </summary>
 enum AreaType : byte
 {
-    Normal = 0, // 一般關卡
-    Activity = 1 //活動關卡
+    Normal = 1, // 一般關卡
+    Activity = 2 //活動關卡
 }
