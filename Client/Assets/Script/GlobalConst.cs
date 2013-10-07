@@ -54,6 +54,7 @@ public class GLOBALCONST
     public const string FILENAME_AREA = "Area";             // 區域資料
     public const string FILENAME_AREA_EVENT = "AreaEvent"; // 區域事件資料
     public const string FILENAME_STORY = "Story";           // 劇情資料
+    public const string FILENAME_BATTLE = "Battle";           // 戰鬥配置資料
 
     #endregion
     #region 副檔名相關常數
@@ -85,7 +86,9 @@ public class GLOBALCONST
 		[EnumClassValue(typeof(NpcData), FILENAME_NPC)]     	   NPC,         // NpcData
         [EnumClassValue(typeof(Area), FILENAME_AREA)]              Area,        // 區域
         [EnumClassValue(typeof(AreaEvent), FILENAME_AREA_EVENT)]   AreaEvent,   // 區域事件
-        [EnumClassValue(typeof(Story), FILENAME_STORY)]            Story        // 劇情
+        [EnumClassValue(typeof(Story), FILENAME_STORY)]            Story,       // 劇情
+        [EnumClassValue(typeof(Battle), FILENAME_BATTLE)]            Battle       // 戰鬥配置表       
+        
     };
 }
 

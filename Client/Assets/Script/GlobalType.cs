@@ -185,6 +185,27 @@ public class SceneData
 }
 
 /// <summary>
+/// 區域類型
+/// </summary>
+enum BattleType : byte
+{
+    Nonrmal = 1, // 一般戰鬥
+    Boss = 2     // 一般 BOSS
+}
+
+/// <summary>
+/// 戰鬥配置表
+/// </summary>
+[StructLayout(LayoutKind.Sequential)]
+public class Battle
+{
+    public uint ID;         //劇情群組 ID
+    public uint NPCID;      //NPC ID
+    public byte Type;       //戰鬥類型
+    public byte Numbers;    //出現數量
+}
+
+/// <summary>
 /// 劇情對話資料 (主鍵 = 劇情 ID + 順序 ID)
 /// </summary>
 [StructLayout(LayoutKind.Sequential)]
