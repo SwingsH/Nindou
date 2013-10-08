@@ -105,9 +105,10 @@ public class StandaloneForExcelToJson : MonoBehaviour
     // TODO:產生server和client檔案的區別
     void TransferFilesFromExcelToJson()
     {
-        string jsonDirectoryPath = Application.dataPath + Path.DirectorySeparatorChar + JSON_DIRECTORY;
-        // sh131006 檔案最好不要放置於 Application.dataPath 內, 因為 build 的時候 unity 會把整個 Application.dataPath 資料夾刪掉, 造成檔案遺失, remove shortly
-        string excelDirectoryPath = Application.dataPath + Path.DirectorySeparatorChar + EXCEL_DIRECTORY; 
+        // fs:131008 將excel放置位置&json產生位置改成和執行檔同一層，免得重build執行檔時，資料整個被清除
+        string jsonDirectoryPath = Directory.GetParent(Application.dataPath).FullName + Path.DirectorySeparatorChar + JSON_DIRECTORY;
+        string excelDirectoryPath = Directory.GetParent(Application.dataPath).FullName + Path.DirectorySeparatorChar + EXCEL_DIRECTORY;
+
         if (!Directory.Exists(jsonDirectoryPath)) // 如果資料夾不存在
         {
             Directory.CreateDirectory(jsonDirectoryPath); // 建立目錄

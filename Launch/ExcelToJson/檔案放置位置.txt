@@ -1,8 +1,0 @@
-將excel檔案放在 「（執行檔所在資料夾）\ExcelToJson_Data\EXCEL\ 」底下
-產出的json檔案將會在「（執行檔所在資料夾）\ExcelToJson_Data\JSON\」底下
-
-檔名和資料對應：
-EventData：遊戲事件資料
-PlantData：種植檔資料
-SceneData：場景資料
-NPCTableData：NPC表格資料
