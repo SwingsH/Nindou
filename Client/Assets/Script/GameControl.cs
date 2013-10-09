@@ -59,6 +59,8 @@ public class GameControl{
         if (newState == CurrentGameState)
             return;
         CommonFunction.DebugMsg(string.Format("GameState Changed. {0}--->{1}", CurrentGameState, newState));
+		if (_gameState != null)
+			_gameState.OnChangeOut(this);
         _gameState = null;
         _gameState = newState;
         _gameState.OnChangeIn(this);

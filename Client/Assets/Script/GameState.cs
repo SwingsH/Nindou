@@ -10,6 +10,7 @@ public interface IGameState
 {
     void OnChangeIn(GameControl control); // 切換狀態後, 只做一次的 method
     void Update(GameControl control); // 切換狀態後, 持續執行的 method
+	void OnChangeOut(GameControl control); // 切換成其他狀態後, 只做一次的 method
 }
 
 // 什麼都沒有
@@ -38,6 +39,11 @@ public class GameEmpty : IGameState
             return _instance;
         }
     }
+
+	public void OnChangeOut(GameControl control)
+	{
+		//throw new System.NotImplementedException();
+	}
 }
 
 // 檢查是否有檔案更新
@@ -75,6 +81,11 @@ public class GameDetectUpdate : IGameState
             return _instance;
         }
     }
+
+	public void OnChangeOut(GameControl control)
+	{
+		//throw new System.NotImplementedException();
+	}
 }
 
 // 進行檔案更新
@@ -109,6 +120,11 @@ public class GameResourceUpdating : IGameState
             return _instance;
         }
     }
+
+	public void OnChangeOut(GameControl control)
+	{
+		//throw new System.NotImplementedException();
+	}
 }
 
 // 檔案已經就緒, 尚未從 game server 取得 login session
@@ -141,6 +157,11 @@ public class GameLoginNone : IGameState
             return _instance;
         }
     }
+
+	public void OnChangeOut(GameControl control)
+	{
+		//throw new System.NotImplementedException();
+	}
 }
 
 // game server 已經登入, 遊戲中
@@ -169,4 +190,9 @@ public class GameEntered : IGameState
             return _instance;
         }
     }
+
+	public void OnChangeOut(GameControl control)
+	{
+		//throw new System.NotImplementedException();
+	}
 }

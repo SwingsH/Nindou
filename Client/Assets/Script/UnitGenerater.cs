@@ -8,23 +8,28 @@ public class UnitGenerater{
 	
 	public Unit GenerateUnit(UnitInfo info)
 	{
-		SimpleMoveUnit su = new SimpleMoveUnit();
+		return GenerateUnit(info, false);
+	}
+	public Unit GenerateUnit(UnitInfo info, bool isPreview)
+	{
+		ActionUnit au = new ActionUnit(isPreview);
 		List<MainSkill> activeSkill = new List<MainSkill>();
-		su.NormalAttack = new MainSkill(TestDataBase.Instance.GetSkillData(info.AttackID));
+		au.NormalAttack = new MainSkill(TestDataBase.Instance.GetSkillData(info.AttackID));
 		foreach (ushort skillID in info.SkillID)
 		{
 			activeSkill.Add(new MainSkill(TestDataBase.Instance.GetSkillData(skillID)));
 		}
-		su.triggerSkills = activeSkill;
-		su.MaxLife = info.MaxLife;
-		su.Life = info.MaxLife;
-		su.MoveSpeed = info.MoveSpeed;
+		au.triggerSkills = activeSkill;
+		au.MaxLife = info.MaxLife;
+		au.Life = info.MaxLife;
+		au.MoveSpeed = info.MoveSpeed;
 		if (info.MoveMode == 1)
-			su.MoveAction = new TeleportInRangeComponent();
+			au.MoveAction = new TeleportInRangeComponent();
+		else
+			au.MoveAction = new MoveInRangeComponent();
+		au.Entity = GenerateEntity(info.BoneName, info.spriteNames);
 
-		su.Entity = GenerateEntity(info.BoneName, info.spriteNames);
-
-		return su;
+		return au;
 	}
 	public GameObject GenerateEntity(string BoneAnimName, string[] spriteInfo)
 	{
@@ -74,5 +79,17 @@ public class UnitGenerater{
 			GameObject.Destroy(au.Entity);
 
 		unit.ClearReference();
+	}
+
+	public void ClearGrave()
+	{
+		foreach (List<SmoothMoves.BoneAnimation> baLIst in UnitGrave.Values)
+		{
+			foreach (SmoothMoves.BoneAnimation ba in baLIst)
+			{
+				GameObject.Destroy(ba);
+			}
+		}
+		UnitGrave.Clear();
 	}
 }

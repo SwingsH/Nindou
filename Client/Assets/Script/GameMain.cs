@@ -7,6 +7,7 @@ using System.Collections;
 /// 可以透過 game control, 才利於掌控code流程
 /// </summary>
 public class GameMain : MonoBehaviour {
+	
     private GameControl _control = null;
 
 	// Use this for initialization
@@ -32,5 +33,10 @@ public class GameMain : MonoBehaviour {
                 _control.DoLogin();
             }
         }
+		#if UNITY_EDITOR
+		if (_control.CurrentGameState != null)
+			GUI.Box(new Rect((Screen.width - 200), 0, 200, 30), _control.CurrentGameState.ToString());
+		#endif
+		
     }
 }

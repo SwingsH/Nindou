@@ -70,7 +70,8 @@ public class ResourceStation {
 	public static TextureAtlas GetAtlas(string prefabName)
 	{
 		TextureAtlas atlas;
-
+		if (string.IsNullOrEmpty(prefabName))
+			return null;
 		if (!Atlases.TryGetValue(prefabName, out atlas))
 		{
 			Atlas_LoadFromeResource(prefabName);

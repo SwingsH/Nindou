@@ -46,17 +46,10 @@ public class UnitInfo
 	public string[] spriteNames = new string[8];
 }
 
-public class StageInfo
-{
-	public ushort StageID;
-	public string SceneName;
-	public ushort[] EnemyData = new ushort[5];
-}
-
 [StructLayout(LayoutKind.Sequential)]
-public class NpcData
+public class NPCData
 {
-	public ushort NpcID;
+	public uint NPCID;
 	public string Name;
 	public UnitInfo Info;
 }

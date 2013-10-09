@@ -60,6 +60,16 @@ public enum SPEffectType : byte
 	Fire,
 	Water,
 	Earth,
+	//以下為觸發類效果，目前只有攻擊時觸發
+	AdditionalEffect = 100,
+	AddPowerBuffer,
+	AddCriticalBuffer,
+	AddAccuracyBuffer,
+	AddPosion = 110,
+	AddFire,
+	AddWater,
+	AddEarth,
+	//武器技能上附加的特殊技能
 	ExtrimSkill = 255,
 }
 

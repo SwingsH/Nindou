@@ -25,7 +25,7 @@ public class TestSkillPreview : MonoBehaviour {
 				{
 					generater.Recycle(currentUnit);
 				}
-				currentUnit = generater.GenerateUnit(TestDataBase.Instance.playerInfo[i]);
+				currentUnit = generater.GenerateUnit(TestDataBase.Instance.playerInfo[i],true);
 			}
 		
 		}

@@ -11,11 +11,7 @@ using System.Reflection;
 /// <summary>
 /// 中文
 /// </summary>
-/// 
-/// Assets/NGUI/Scripts/Editor/UIWidgetContainerEditor.cs(36,27): error CS0117: `Tools' does not contain a definition for `current'
-/// class name conlict, Tool 已經是保留字, 可能造成 compile error, mod sh20130926  ,remove shortly
-public static class CustomTools 
-{ 
+public static class EditorTools {
 
 	static object buffer;
 
@@ -77,24 +73,7 @@ public static class CustomTools
 	[MenuItem("Tools/QuickTest")]
 	public static void QuickTest()
 	{
-		BoneAnimation ba = Selection.activeGameObject.GetComponent<BoneAnimation>();
-		if (ba)
-		{
-			TextureAtlas ta = UnityEngine.Resources.Load("Atlas/KappaRed", typeof(ScriptableObject)) as TextureAtlas;
-			string[] boneName = new string[]{"Body","HandL","HandR","Head","LegL","LegR"};
-			for (int i = 0; i < boneName.Length; i++)
-			{
-				
-			
-				Sprite s = ba.GetSpriteTransform(boneName[i]).GetComponent<Sprite>();
-				if(!s)
-					s = ba.GetSpriteTransform(boneName[i]).gameObject.AddComponent<Sprite>();
-				s.SetAtlas(ta);
-				s.SetPivotOffset(Vector2.zero, true);
-				s.SetTextureName(boneName[i]);
-				
-			}
-		}
+	
 	}
 
 

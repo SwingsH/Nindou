@@ -10,58 +10,103 @@ public class TestUI : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		Vector3 acc = Input.acceleration;
-		
-		Quaternion target;
-		if (acc.x < acc.y)
-			target = Quaternion.Euler(0, 0, 90);
-		else
-			target= Quaternion.identity;
-		Camera.main.transform.rotation = Quaternion.RotateTowards(Camera.main.transform.rotation, target, 20);
 	}
 
 	void OnGUI()
 	{
-		Vector2 center = new Vector2(Screen.width/2,Screen.height/2);
-		Rect r = new Rect();
-		r.x = center.x - 100;
-		r.y =  center.y - Input.accelerationEventCount * 20;
-		r.xMax = center.x + 100;
-		r.yMax = center.y + Input.accelerationEventCount * 20;
-
-		string content = "";
-		foreach (AccelerationEvent ae in Input.accelerationEvents)
+		if (GUI.Button(new Rect(210, 10, 100, 40), Time.timeScale.ToString()))
 		{
-			content += (ae.acceleration).ToString() + "\n";
+			TimeMachine.SetTimeScale(Time.timeScale == 1 ? 5 : (Time.timeScale == 5 ? 10 : 1));
 		}
-		GUI.Box(r, content);
+		if (BattleManager.Instance != null )
+		{
+			if (BattleManager.IsBattleStart)
+			{
+				#region 臨時大招施放按鈕
 
-		r.x = 40;
-		r.y = 0;
-		r.xMax = Screen.width - 40;
-		r.yMax = 40;
-		if(GUI.Button(r, ScreenOrientation.PortraitUpsideDown.ToString()))
-			Screen.orientation = ScreenOrientation.PortraitUpsideDown;
+				if (BattleManager.Instance.Players != null)
+				{
+					Rect r = new Rect(10, Screen.height * 0.85f, Screen.width * 0.25f, Screen.height * 0.15f);
+					for (int i = 0; i < BattleManager.Instance.Players.Length; i++)
+					{
+						if (BattleManager.Instance.Players[i] == null)
+							continue;
+						ActionUnit au = BattleManager.Instance.Players[i] as ActionUnit;
+						r.x = i * r.width;
 
-		r.x = 40;
-		r.y = Screen.height - 40;
-		r.xMax = Screen.width - 40;
-		r.yMax = Screen.height;
-		if(GUI.Button(r, ScreenOrientation.Portrait.ToString()))
-			Screen.orientation = ScreenOrientation.Portrait;
+						if (au.ExtrimSkill != null)
+						{
+							string content = au.ExtrimSkill.Name;
+							if (au.ExtrimSkill.Castable)
+							{
+								if (GUI.Button(r, content))
+									au.CastExtrimSkill();
+							}
+							else
+							{
+								GUIStyle gs = GUI.skin.label;
+								gs.alignment = TextAnchor.MiddleCenter;
+								GUI.Label(r, content, gs);
+							}
+						}
+					}
+				}
+			#endregion
+			}
+			else
+			{
+				uint battleID = 0;
+				for (uint i = 1; i <= 3; i++)
+				{
+					if (GUI.Button(new Rect(Screen.width / 2 - 90, Screen.height / 2 - 40 - 3 * 20 + i * 40, 60, 40), "Battle" + i.ToString()))
+					{
+						battleID = i;
+					}
+				}
+				if (battleID != 0)
+				{
+					BattleState.BattleID = battleID;
+					GameControl.Instance.ChangeGameState(BattleState.instance);
+				}
+			}
+		}
+		
+		if (UnityEditor.Selection.activeGameObject)
+		{
+			GUI.Label(new Rect(610, 10, 100, 40), UnityEditor.Selection.activeGameObject.GetInstanceID().ToString());
+		}
+		if (UnityEditor.Selection.activeGameObject && UnityEditor.Selection.activeGameObject.GetComponent<SmoothMoves.BoneAnimation>() != null)
+		{
+			SmoothMoves.BoneAnimation anim = UnityEditor.Selection.activeGameObject.GetComponent<SmoothMoves.BoneAnimation>();
+			if (GUI.Button(new Rect(510, 10, 100, 40), "Play Walk"))
+			{
+				anim.CrossFade("Walk");
+			}
+			if (GUI.Button(new Rect(510, 50, 100, 40), "Stop Walk"))
+			{
+				anim.CrossFade("Idle");
+			}
+			if (GUI.Button(new Rect(510, 90, 100, 40), "Play Atk 3"))
+			{
+				anim.PlayQueued("Attack2");
+			}
+			if (GUI.Button(new Rect(510, 130, 100, 40), "Walk Speed"))
+			{
+				anim["Walk"].speed *= 2;
+			}
+			if (GUI.Button(new Rect(510, 170, 100, 40), "Walk normalizedSpeed"))
+			{
+				anim["Walk"].normalizedSpeed *= 2;
+			}
+			int line = 0;
 
-		r.x = 0;
-		r.y = 40;
-		r.xMax = 40;
-		r.yMax = Screen.height -40;
-		if(GUI.Button(r, ScreenOrientation.LandscapeLeft.ToString()))
-			Screen.orientation = ScreenOrientation.LandscapeLeft;
+			foreach (AnimationState AS in UnityEditor.Selection.activeGameObject.animation)
+			{
+				GUI.Box(new Rect(610, 10 + line, 300, 40), AS.name + " " + anim.IsPlaying(AS.name) + "\n " + AS.speed.ToString() + " " + AS.normalizedSpeed.ToString() + " " + AS.length.ToString() + " " + AS.time.ToString());
+				line += 30;
+			}
+		}
 
-		r.x = Screen.width - 40;
-		r.y = 40;
-		r.xMax = Screen.width;
-		r.yMax = Screen.height - 40;
-		if (GUI.Button(r, ScreenOrientation.LandscapeRight.ToString()))
-			Screen.orientation = ScreenOrientation.LandscapeRight;
 	}
+
 }

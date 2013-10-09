@@ -182,6 +182,7 @@ public class AnimUnit : Unit
 public class ActionUnit : AnimUnit
 {
 	public static int totalCount = 0;
+	public bool PreviewUnit =false;
 	protected ActionComponent currentAction;
 	SimpleMoveComponent _moveAction;
 	public SimpleMoveComponent MoveAction
@@ -207,7 +208,7 @@ public class ActionUnit : AnimUnit
 			}
 			return eMoveState.Closer;
 		}
-		set
+		protected set
 		{
 			if (_moveAction is MoveInRangeComponent)
 				(_moveAction as MoveInRangeComponent).MoveState = value;
@@ -251,13 +252,20 @@ public class ActionUnit : AnimUnit
 						ExtrimSkill = new MainSkill(TestDataBase.Instance.GetSkillData(spe.EffectPower));
 					}
 				_normalAttack = value;
-				if (AttackAction != null)
-					AttackAction.normalAttack = _normalAttack;
 			}
 			else
 			{
 				Debug.LogError("NormalAttack Type Error");
 				_normalAttack = new MainSkill(GLOBALCONST.BattleSettingValue.DEFAULT_NORMAL_ATTACK);
+			}
+			if (AttackAction != null)
+				AttackAction.normalAttack = _normalAttack;	
+			if (_normalAttack != null)
+			{
+				if (_normalAttack.range > 2)
+					MoveState = eMoveState.KeepRange;
+				else
+					MoveState = eMoveState.Closer;
 			}
 		}
 	}
@@ -331,9 +339,18 @@ public class ActionUnit : AnimUnit
 
 	public ActionUnit()
 	{
+		AttackAction = new NinDoAttackComponent();
+		AttackAction.normalAttack = NormalAttack;
+		AttackAction.triggerSkills = triggerSkills;
+		AttackAction.unit = this;
+
 		totalCount++;
 	}
-
+	public ActionUnit(bool isPreview):this()
+	{
+		totalCount++;
+		PreviewUnit = isPreview;
+	}
 	public int ActionRangeMode
 	{
 		get
@@ -492,9 +509,12 @@ public class ActionUnit : AnimUnit
 	//播放技能，差別只在於沒有施放目標，為了要放particle所以也要建CastInfo
 	public void PlaySkill(MainSkill skill)
 	{
-		PlayAnim(skill.GenerateAnimInfo());
-		CurrentCast.Clear();
-		CurrentCast.Enqueue(new CastInfo(skill));
+		if (PreviewUnit)
+		{
+			PlayAnim(skill.GenerateAnimInfo());
+			CurrentCast.Clear();
+			CurrentCast.Enqueue(new CastInfo(skill));
+		}
 	}
 	public void CastSkill(MainSkill skill)
 	{
@@ -649,23 +669,6 @@ public enum eGroup
 {
 	Player,
 	Enemy,
-}
-
-public class SimpleMoveUnit : ActionUnit
-{
-
-	public SimpleMoveUnit()
-	{
-		MoveSpeed = 1;
-		MoveAction = new MoveInRangeComponent();
-		MoveAction.unit = this;
-		AttackAction = new NinDoAttackComponent();
-		AttackAction.normalAttack = NormalAttack;
-		AttackAction.triggerSkills = triggerSkills;
-		AttackAction.unit = this;
-	}
-
-
 }
 
 public class CastInfo

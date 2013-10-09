@@ -68,7 +68,7 @@ public class AnimationData
 				triggerEventData.Add(kvp.Key, kvp.Value);
 		}
 	}
-
+	
 }
 
 public struct AnimInfo

@@ -391,22 +391,12 @@ public class MoveInRangeComponent : SimpleMoveComponent
 	}
 	public override ActionState State
 	{
-		//沒有目標就閒
-		//格子跟格子移動中為忙碌
 		get
 		{
-			//if (SubTarget != GridPos.Null && SubTarget != unit.Pos)
-			//    return ActionState.Busy;
 			if (BusyTime > Time.time)
 				return ActionState.Busy;
 			return ActionState.Idle;
 		}
-	}
-
-	public override void DrawInfo()
-	{
-		BattleManager.DrawGrid(Target, Color.yellow);
-		BattleManager.DrawGrid(SubTarget, Color.green);
 	}
 
 	protected virtual float Get_UnavailableTime()

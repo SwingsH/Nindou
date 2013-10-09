@@ -7,66 +7,58 @@ using System.Collections.Generic;
  * 戰鬥單位出現跟消失和戰鬥結果管理 
  * 單位移動是個自移動，不過要透
  */
-public class BattleManager : MonoBehaviour
+public class BattleManager : BattleState
 {
 	static BattleManager _instance;
+	public new static BattleState instance
+	{
+		get
+		{
+			if (_instance == null)
+				_instance = new BattleManager();
+			return _instance;
+		}
+	}
 	public static BattleManager Instance
 	{
-		get { return _instance; }
+		get
+		{
+			if (_instance == null)
+				_instance = new BattleManager();
+			return _instance;
+		}
 		protected set { _instance = value; }
 	}
 
 	public static Camera UnitCamera;
 	GridInfo g;
-	public GameObject groundObject;
 	
 	List<UnitInfo> PlayerInfos = new List<UnitInfo>();
-	List<UnitInfo> EnemyInfos = new List<UnitInfo>();
-	Unit[] Players = new Unit[0];
+	List<EnemyNumbers> EnemyInfos = new List<EnemyNumbers>();
+	public Unit[] Players = new Unit[0];
 	List<Unit> Enemys = new List<Unit>();
 
-	StageInfo stage;
-
+	static bool _isBattleStart;
+	public static bool IsBattleStart
+	{
+		get
+		{
+			if (Instance == null)
+			{
+				return false;
+			}
+			return _isBattleStart;
+		}
+		protected set
+		{
+			_isBattleStart = value;
+		}
+	}
 	UnitGenerater Generater;
-	
-	void Awake()
-	{
-		if (Instance != null)
-		{
-			Debug.LogError("重複的BattleManager元件");
-			Destroy(this);
-			return;
-		}
-		Instance = this;
-		if (UnitCamera == null)
-		{
-			UnitCamera = new GameObject("UnitCamera").AddComponent<Camera>();
-		}
-		if(Camera.main)
-		{
-			Camera.main.cullingMask = 1 << GLOBALCONST.GameSetting.LAYER_BACKGROUND;
-			UnitCamera.transform.position = Camera.main.transform.position;
-			UnitCamera.transform.rotation = Camera.main.transform.rotation;
-		}
-		UnitCamera.orthographic = true;
-		UnitCamera.cullingMask = ~(1 << GLOBALCONST.GameSetting.LAYER_BACKGROUND);
-		UnitCamera.clearFlags = CameraClearFlags.Depth;
-		UnitCamera.orthographicSize = GLOBALCONST.GameSetting.UNIT_CAMERA_SIZE;
-	}
-	void Start()
-	{
-		if (Application.isPlaying)
-			TestDataBase.IniInstance();
-		if (groundObject)
-		{
-			if (groundObject.GetComponent<ColiderPosReciver>())
-				groundObject.GetComponent<ColiderPosReciver>().Regiester(this);
-			g = new GridInfo(groundObject.transform.position, GLOBALCONST.GameSetting.GRID_SIZE, GLOBALCONST.GameSetting.GRID_COUNT_W, GLOBALCONST.GameSetting.GRID_COUNT_L);
-		}
-		Generater = new UnitGenerater();
-	}
 
-	void LateUpdate()
+	float EffectCountDown;
+
+	void UnitRun()
 	{
 		foreach (Unit eu in Enemys)
 			if(eu!=null)
@@ -76,34 +68,44 @@ public class BattleManager : MonoBehaviour
 				eu.Run();
 	}
 
-	void BattleStart()
+	public void BattleStart()
 	{
-		
-		BattleIsStart = true;
+		if (BattleID == 0)
+			return;
+		if (IsBattleStart)
+			return;
+		IsBattleStart = true;
 		Unit_Clear();
 		EnemyInfos.Clear();
 		PlayerInfos.Clear();
 
+		EffectCountDown = 3f;
+
 		PlayerInfos.AddRange(TestDataBase.Instance.playerInfo);
-		UnitInfo info = new UnitInfo();
-		info.MoveSpeed = 9;
-		info.MoveMode = 0;
-		info.MaxLife = 100;
-		info.AttackID = 0;
-		EnemyInfos.Add(info);
-		info = new UnitInfo();
-		info.MoveSpeed = 2;
-		info.MoveMode = 1;
-		info.MaxLife = 50;
-		info.AttackID = 0;
-		EnemyInfos.Add(info);
+		
 		if (Application.isPlaying)
 		{
 			IniPlayers();
-			RandomEnemy(5, 0);
+			IniEnemyData(BattleID);
+			IniEnemy();
 		}
 	}
+	void IniEnemyData(uint battleID)
+	{
+		EnemyInfos.Clear();
+		List<Battle> battleList = TestDataBase.Instance.GetBattleData(battleID);
 
+		foreach (Battle bt in battleList)
+		{
+			NPCData npcData = TestDataBase.Instance.GetNPCData(bt.NPCID);
+			if (npcData == null)
+				continue;
+			EnemyNumbers en = new EnemyNumbers();
+			en.npcData = npcData;
+			en.Numbers = bt.Numbers;
+			EnemyInfos.Add(en);
+		}
+	}
 	void AddPlayer(GridPos pos, int index)
 	{
 		if (g.CheckEmpty(pos))
@@ -124,7 +126,10 @@ public class BattleManager : MonoBehaviour
 	{
 		if (index < EnemyInfos.Count)
 		{
-			AddEnemy(pos, EnemyInfos[index]);
+			AddEnemy(pos, EnemyInfos[index].npcData.Info);
+			EnemyInfos[index].Numbers--;
+			if (EnemyInfos[index].Numbers == 0)
+				EnemyInfos.RemoveAt(index);
 		}
 	}
 	void AddEnemy(GridPos pos, UnitInfo info)
@@ -132,13 +137,6 @@ public class BattleManager : MonoBehaviour
 
 		if (g.CheckEmpty(pos))
 		{
-			//Test-------------
-			info.spriteNames = new string[6];
-			for(int i = 0 ;i < info.spriteNames.Length;i++)
-			{
-				info.spriteNames[i] = TestDataBase.TestAtlasName[Random.Range(0,TestDataBase.TestAtlasName.Length)];
-			}
-			//-----------------
 			Unit su = Generater.GenerateUnit(info);
 			su.Group = eGroup.Enemy;
 			su.Pos = pos;
@@ -165,7 +163,18 @@ public class BattleManager : MonoBehaviour
 		}
 		if (EnemyInfos.Count == 0)
 			return;
-		List<GridPos> eg = Get_EmptyGrid();
+		List<GridPos> eg= new List<GridPos>();
+		switch (mode)
+		{
+			case 0:
+				eg = g.GetEmptyGrid_LeftColumn(2);
+				break;
+			case 1:
+				eg = g.GetEmptyGrid();
+				break;
+			default:
+				break;
+		}
 		if (eg.Count > 0)
 		{
 			for (int i = 0; i < number; i++)
@@ -175,6 +184,10 @@ public class BattleManager : MonoBehaviour
 				eg.RemoveAt(rindex);
 			}
 		}
+	}
+	void IniEnemy()
+	{
+		RandomEnemy(3, 0);
 	}
 	void IniPlayers()
 	{
@@ -195,6 +208,7 @@ public class BattleManager : MonoBehaviour
 			emptyGrid.RemoveAt(r);
 		}
 	}
+	
 	void AppearUnit(Unit unit, GridPos pos)
 	{
 		if (g.CheckEmpty(pos))
@@ -242,12 +256,11 @@ public class BattleManager : MonoBehaviour
 		else
 		{
 			if (unit != null && unit.Entity != null)
-				Destroy(unit.Entity);
+				GameObject.Destroy(unit.Entity);
 		}
 	}
 	void Unit_Clear()
 	{
-		Profiler.BeginSample("Unit_Clear");
 		if(Generater != null)
 		{
 			foreach (Unit u in Enemys)
@@ -265,7 +278,6 @@ public class BattleManager : MonoBehaviour
 			Enemys.Clear();
 			Players = new Unit[Players.Length];
 		}
-		Profiler.EndSample();
 	}
 	
 	void AllDeadEvent(eGroup group)
@@ -273,14 +285,18 @@ public class BattleManager : MonoBehaviour
 		switch (group)
 		{
 			case eGroup.Enemy:
-				//RandomEnemy(5, 0);
-				BattleIsStart = false;
+				if(EnemyInfos.Count != 0)
+					RandomEnemy(3, 0);
+				else
+					IsBattleStart = false;
 				break;
 			case eGroup.Player:
-				BattleIsStart = false;
+				IsBattleStart = false;
 				break;
 		}
-		
+		if(!IsBattleStart)
+			GameControl.Instance.ChangeGameState(BattleLeaving.instance);
+
 	}
 
 	public static Vector3 GetRealWorldPos(Vector3 worldPos)
@@ -298,6 +314,9 @@ public class BattleManager : MonoBehaviour
 		return result;
 	}
 
+	public void BattleResult(bool Win)
+	{
+	}
 
 	#region Grid Control
 	public static bool Get_IsGridEmpty(GridPos pos)
@@ -318,6 +337,7 @@ public class BattleManager : MonoBehaviour
 			return new List<GridPos>();
 		return Instance.g.GetEmptyGrid();
 	}
+
 	public static List<GridPos> Get_EmptyGrid(int mode, GridPos pos, eDirection dir, int range)
 	{
 		if (Instance == null)
@@ -415,250 +435,44 @@ public class BattleManager : MonoBehaviour
 	}
 	#endregion
 
-	#region TestCode
-
-	Vector3 lastTouchPos;
-	public int AreaMode = 0;
-	public int AreaRange = 3;
-	public bool AreaPreview = false;
-	public bool NewPreview = false;
-	public eDirection Dir = eDirection.Left;
-
-	public Vector2 gridSize = new Vector2(1, 1);
-	public int WCounts = 1;
-	public int LCounts = 1;
-
-	public bool BattleIsStart = false;
-
-	void OnDrawGizmosSelected()
-	{
-		if(!Application.isPlaying)
-			g = new GridInfo(groundObject.transform.position, gridSize, WCounts, LCounts);
-	}
-	void OnDrawGizmos()
-	{
-		if (g != null)
-		{
-			g.DrawGrid();
-			if (AreaPreview)
-			{
-				if (NewPreview)
-				{
-					GridPos tempGP = g.Get_GridPos(lastTouchPos);
-					foreach (GridPos gpi in g.GetEmptyGrid())
-					{
-						if (g.CheckInRange(AreaMode, tempGP, Dir, AreaRange, gpi))
-							g.DrawGrid(gpi, new Color(0, 0, 1, 0.2f));
-					}
-				}
-				else
-				{
-					foreach (GridPos gpi in g.Get_AreaGridPos(AreaMode, g.Get_GridPos(lastTouchPos), Dir, AreaRange))
-						g.DrawGrid(gpi, new Color(0, 0, 1, 0.2f));
-				}
-				g.DrawGrid(g.Get_GridPos(lastTouchPos), new Color(1, 0, 0, 0.2f));
-			}
-			foreach (Unit eu in Enemys)
-			{
-				//eu.Draw(Color.red);
-				g.DrawGrid(eu.Pos, Color.red);
-			}
-			foreach (Unit eu in Players)
-			{
-				if (eu == null)
-					continue;
-				//eu.Draw(Color.blue);
-				g.DrawGrid(eu.Pos, Color.blue);
-			}
-			//switch (CurrentInfoGroup)
-			//{
-			//    case eGroup.Enemy:
-			//        if (CurrentInfoIndex >= 0 && CurrentInfoIndex < Enemys.Count)
-			//            Enemys[CurrentInfoIndex].Draw(Color.white);
-			//        break;
-			//    case eGroup.Player:
-			//        if (CurrentInfoIndex >= 0 && CurrentInfoIndex < Players.Length && Players[CurrentInfoIndex] != null)
-			//            Players[CurrentInfoIndex].Draw(Color.white);
-			//        break;
-			//}
-		}
-		else
-			Start();
-	}
-	public static void DrawGrid(GridPos pos, Color color)
-	{
-		if (Instance == null || Instance.g == null)
-			return;
-		Instance.g.DrawGrid(pos, color);
-	}
-	void ColliderReciver(Vector3 pos)
+	public override void OnChangeIn(GameControl control)
 	{
 
-		lastTouchPos = pos;
-
-		GridPos gp = g.Get_GridPos(lastTouchPos);
-		if (!g.CheckEmpty(gp))
+		if (UnitCamera == null)
 		{
-			Unit ud = g.Get_GridUnit(gp);
-			if (ud != null)
-			{
-				CurrentInfoGroup = ud.Group;
-				switch (CurrentInfoGroup)
-				{
-					case eGroup.Enemy:
-						CurrentInfoIndex = Enemys.IndexOf(ud);
-						break;
-					case eGroup.Player:
-						CurrentInfoIndex = System.Array.IndexOf<Unit>(Players, ud);
-						break;
-				}
-			}
+			UnitCamera = new GameObject("UnitCamera").AddComponent<Camera>();
 		}
+		if (Camera.main)
+		{
+			Camera.main.cullingMask = 1 << GLOBALCONST.GameSetting.LAYER_BACKGROUND;
+			UnitCamera.transform.position = Camera.main.transform.position;
+			UnitCamera.transform.rotation = Camera.main.transform.rotation;
+		}
+		UnitCamera.orthographic = true;
+		UnitCamera.cullingMask = ~(1 << GLOBALCONST.GameSetting.LAYER_BACKGROUND);
+		UnitCamera.clearFlags = CameraClearFlags.Depth;
+		UnitCamera.orthographicSize = GLOBALCONST.GameSetting.UNIT_CAMERA_SIZE;
+
+		IsBattleStart = false;
+
+		if (Application.isPlaying)
+			TestDataBase.IniInstance();
+		g = new GridInfo(Vector3.one, GLOBALCONST.GameSetting.GRID_SIZE, GLOBALCONST.GameSetting.GRID_COUNT_W, GLOBALCONST.GameSetting.GRID_COUNT_L);
+		Generater = new UnitGenerater();
+
+		BattleStart();
 	}
 
-	int CurrentInfoIndex = 0;
-	eGroup CurrentInfoGroup = eGroup.Player;
-	public bool DisplayGUI = false;
-	void OnGUI()
+	public override void Update(GameControl control)
 	{
-		if (Players != null)
-		{
-			Rect r = new Rect(10, Screen.height * 0.85f, Screen.width * 0.25f, Screen.height * 0.15f);
-			for (int i = 0; i < Players.Length; i++)
-			{
-				if (Players[i] == null)
-					continue;
-				ActionUnit au = Players[i] as ActionUnit;
-				r.x = i * r.width;
-				
-				if (au.ExtrimSkill != null)
-				{
-					string content = au.ExtrimSkill.Name;
-					if (au.ExtrimSkill.Castable)
-					{
-						if (GUI.Button(r, content))
-						{
-							au.CastExtrimSkill();
-							//if (au.MoveState == eMoveState.Closer)
-							//    au.MoveState = eMoveState.KeepRange;
-							//else
-							//    au.MoveState = eMoveState.Closer;
-						}
-					}
-					else
-					{
-						GUIStyle gs = GUI.skin.label;
-						gs.alignment = TextAnchor.MiddleCenter;
-						GUI.Label(r, content,gs);
-					}
-				}
-			}
-		}
-		if (!BattleIsStart)
-		{
-			if (GUI.Button(new Rect(Screen.width / 2 - 30, Screen.height / 2 - 20, 60, 40), "Start"))
-			{
-				BattleStart();
-				
-			}
-		}
-		if (!DisplayGUI)
-			return;
-		//GUI.skin.box.alignment = TextAnchor.UpperRight;
-		if (GUI.Button(new Rect(10, 10, 100, 40), "Clear All"))
-		{
-
-			foreach (Unit u in new List<Unit>(Players))
-				Unit_Dead(u);
-			foreach (Unit u in new List<Unit>(Enemys))
-				Unit_Dead(u);
-		}
-		GUI.Box(new Rect(110, 10, 100, 40), string.Format("Enemys Number {0}", Enemys.Count));
-		if (GUI.Button(new Rect(210, 10, 100, 40), Time.timeScale.ToString()))
-		{
-			//List<GridPos> eg = new List<GridPos>(Get_EmptyGrid());
-			//for (int i = 0; i < 50; i++)
-			//{
-			//    int r = Random.Range(0, eg.Count);
-			//    AddEnemy(eg[r]);
-			//    eg.RemoveAt(r);
-			//    r = Random.Range(0, eg.Count);
-			//    AddPlayer(eg[r]);
-			//    eg.RemoveAt(r);
-			//}
-			TimeMachine.SetTimeScale(Time.timeScale == 1 ? 10 : (Time.timeScale == 10 ? 0 : 1));
-
-		}
-
-		if (GUI.Button(new Rect(10, 50, 100, 40), "AddPlayer"))
-		{
-			IniPlayers();
-		}
-
-		if (GUI.Button(new Rect(110, 50, 100, 40), "AddEnemy"))
-		{
-			RandomEnemy(5, 0);
-		}
-
-
-		switch (CurrentInfoGroup)
-		{
-			case eGroup.Enemy:
-				if (CurrentInfoIndex >= 0 && CurrentInfoIndex < Enemys.Count)
-					GUI.Box(new Rect(210, 50, 200, GUI.skin.box.CalcHeight(new GUIContent(Enemys[CurrentInfoIndex].ToString()), 200)), Enemys[CurrentInfoIndex].ToString());
-				break;
-			case eGroup.Player:
-				if (CurrentInfoIndex >= 0 && CurrentInfoIndex < Players.Length && Players[CurrentInfoIndex] != null)
-					GUI.Box(new Rect(210, 50, 200, GUI.skin.box.CalcHeight(new GUIContent(Players[CurrentInfoIndex].ToString()), 200)), Players[CurrentInfoIndex].ToString());
-				break;
-		}
-#if UNITY_EDITOR
-		if (UnityEditor.Selection.activeGameObject)
-		{
-			GUI.Label(new Rect(610, 10, 100, 40), UnityEditor.Selection.activeGameObject.GetInstanceID().ToString());
-		}
-		if (UnityEditor.Selection.activeGameObject && UnityEditor.Selection.activeGameObject.GetComponent<SmoothMoves.BoneAnimation>() != null)
-		{
-			SmoothMoves.BoneAnimation anim = UnityEditor.Selection.activeGameObject.GetComponent<SmoothMoves.BoneAnimation>();
-			anim.RegisterUserTriggerDelegate(UserTriggerDelegate);
-			if (GUI.Button(new Rect(510, 10, 100, 40), "Play Walk"))
-			{
-				anim.CrossFade("Walk");
-			}
-			if (GUI.Button(new Rect(510, 50, 100, 40), "Stop Walk"))
-			{
-				anim.CrossFade("Idle");
-			}
-			if (GUI.Button(new Rect(510, 90, 100, 40), "Play Atk 3"))
-			{
-				anim.PlayQueued("Attack2");
-
-				//UnityEditor.Selection.activeGameObject.animation.CrossFadeQueued("Attack");
-				//UnityEditor.Selection.activeGameObject.animation.CrossFadeQueued("Attack");
-			}
-			if (GUI.Button(new Rect(510, 130, 100, 40), "Walk Speed"))
-			{
-				anim["Walk"].speed *= 2;
-			}
-			if (GUI.Button(new Rect(510, 170, 100, 40), "Walk normalizedSpeed"))
-			{
-				anim["Walk"].normalizedSpeed *= 2;
-			}
-			int line = 0;
-
-			foreach (AnimationState AS in UnityEditor.Selection.activeGameObject.animation)
-			{
-				GUI.Box(new Rect(610, 10 + line, 300, 40), AS.name + " " + anim.IsPlaying(AS.name) + "\n " + AS.speed.ToString() + " " + AS.normalizedSpeed.ToString() + " " + AS.length.ToString() + " " + AS.time.ToString());
-				line += 30;
-			}
-		}
-#endif
+		UnitRun();
 	}
-	void UserTriggerDelegate(SmoothMoves.UserTriggerEvent triggerEvent)
+
+	public override void OnChangeOut(GameControl control)
 	{
+		Unit_Clear();
+		Generater.ClearGrave();
 	}
-
-	#endregion
 }
 public struct GridPos
 {
@@ -706,11 +520,11 @@ public class GridInfo
 		Occupied,
 	}
 	Unit[,] Grids;
-	int GridBoundX
+	int GridColBound
 	{
 		get{ return Grids.GetUpperBound(0); }
 	}
-	int GridBoundY
+	int GridRowBound
 	{
 		get { return Grids.GetUpperBound(1); }
 	}
@@ -720,29 +534,29 @@ public class GridInfo
 	{
 		InitGrid(1, 1, 1, 1);
 	}
-	public GridInfo(float width, float length, int widthGrids, int lengthGrids)
+	public GridInfo(float width, float length, int cols, int rows)
 	{
-		InitGrid(width, length, widthGrids, lengthGrids);
+		InitGrid(width, length, cols, rows);
 	}
-	public GridInfo(Vector3 startPoint, float width, float length, int widthGridCounts, int lengthGridCounts)
+	public GridInfo(Vector3 startPoint, float width, float length, int cols, int rows)
 	{
 		StartPoint = startPoint;
-		InitGrid(width, length, widthGridCounts, lengthGridCounts);
+		InitGrid(width, length, cols, rows);
 	}
-	public GridInfo(Vector3 centerPoint, Vector2 gridSize, int widthGridCounts, int lengthGridCounts)
+	public GridInfo(Vector3 centerPoint, Vector2 gridSize, int cols, int rows)
 	{
 
 		GridSize = gridSize;
-		Grids = new Unit[Mathf.Clamp(widthGridCounts, 0, int.MaxValue), Mathf.Clamp(lengthGridCounts, 0, int.MaxValue)];
+		Grids = new Unit[Mathf.Clamp(cols, 0, int.MaxValue), Mathf.Clamp(rows, 0, int.MaxValue)];
 
 		StartPoint = centerPoint;
-		StartPoint.x -= (widthGridCounts / 2 + widthGridCounts % 2 / 2f) * gridSize.x;
-		StartPoint.z -= (lengthGridCounts / 2 + lengthGridCounts % 2 / 2f) * gridSize.y;
+		StartPoint.x -= (cols / 2 + cols % 2 / 2f) * gridSize.x;
+		StartPoint.z -= (rows / 2 + rows % 2 / 2f) * gridSize.y;
 	}
-	public void InitGrid(float width, float length, int widthGrids, int lengthGrids)
+	public void InitGrid(float width, float length, int cols, int rows)
 	{
-		GridSize = new Vector2(width / widthGrids, length / lengthGrids);
-		Grids = new Unit[widthGrids, lengthGrids];
+		GridSize = new Vector2(width / cols, length / rows);
+		Grids = new Unit[cols, rows];
 	}
 
 	public bool Appear(GridPos pos, Unit unit)
@@ -799,13 +613,21 @@ public class GridInfo
 	public List<GridPos> GetEmptyGrid()
 	{
 		List<GridPos> result = new List<GridPos>();
-		for (int x = 0; x <= GridBoundX; x++)
-			for (int y = 0; y <= GridBoundY; y++)
+		for (int x = 0; x <= GridColBound; x++)
+			for (int y = 0; y <= GridRowBound; y++)
 				if (Grids[x, y] == null)
 					result.Add(new GridPos(x, y));
 		return result;
 	}
-
+	public List<GridPos> GetEmptyGrid_LeftColumn(int numbers)
+	{
+		List<GridPos> result = new List<GridPos>();
+		for (int i = 0; i < numbers && i <= GridColBound; i++)
+			for (int j = 0; j <= GridRowBound; j++)
+				if (Grids[i, j] == null)
+					result.Add(new GridPos(i, j));
+		return result;
+	}
 	public Vector3 Get_GridWorldPos(GridPos pos)
 	{
 		return Get_GridWorldPos(pos.x, pos.y);
@@ -903,7 +725,7 @@ public class GridInfo
 
 	bool PosCheck(GridPos pos)
 	{
-		return pos.x >= 0 && pos.y >= 0 && pos.x <= GridBoundX && pos.y <= GridBoundY;
+		return pos.x >= 0 && pos.y >= 0 && pos.x <= GridColBound && pos.y <= GridRowBound;
 	}
 	List<GridPos> Get_AreaGrid_Mode0(GridPos pos, int range)
 	{
@@ -925,7 +747,7 @@ public class GridInfo
 			{
 				int x = pos.x +i;
 				int y = pos.y + j;
-				if(x >= 0 && x <=  GridBoundX && y >= 0 && y <=  GridBoundY)
+				if(x >= 0 && x <=  GridColBound && y >= 0 && y <=  GridRowBound)
 					result.Add(new GridPos(x,y));
 			}
 		}
@@ -955,7 +777,7 @@ public class GridInfo
 			{
 				int x = pos.x + i;
 				int y = pos.y + j;
-				if (x >= 0 && x <= GridBoundX && y >= 0 && y <= GridBoundY)
+				if (x >= 0 && x <= GridColBound && y >= 0 && y <= GridRowBound)
 					result.Add(new GridPos(x, y));
 			}
 		}
@@ -985,11 +807,11 @@ public class GridInfo
 				continue;
 			int x = pos.x + i;
 			int y = pos.y;
-			if (x >= 0 && x <= GridBoundX && y >= 0 && y <= GridBoundY)
+			if (x >= 0 && x <= GridColBound && y >= 0 && y <= GridRowBound)
 				result.Add(new GridPos(x, y));
 			x = pos.x;
 			y = pos.y + i;
-			if (x >= 0 && x <= GridBoundX && y >= 0 && y <= GridBoundY)
+			if (x >= 0 && x <= GridColBound && y >= 0 && y <= GridRowBound)
 				result.Add(new GridPos(x, y));
 		}
 		result.Add(pos);
@@ -1033,7 +855,7 @@ public class GridInfo
 				continue;
 			int x = pos.x + i * d;
 			int y = pos.y;
-			if (x >= 0 && x <= GridBoundX && y >= 0 && y <= GridBoundY)
+			if (x >= 0 && x <= GridColBound && y >= 0 && y <= GridRowBound)
 				result.Add(new GridPos(x, y));
 		}
 		return result;
@@ -1092,7 +914,7 @@ public class GridInfo
 			for (int j = -1; j <= 1; j++)
 			{			
 				int y = pos.y +j;
-				if (x >= 0 && x <= GridBoundX && y >= 0 && y <= GridBoundY)
+				if (x >= 0 && x <= GridColBound && y >= 0 && y <= GridRowBound)
 					result.Add(new GridPos(x, y));
 			}
 		}
@@ -1160,4 +982,96 @@ public class GridInfo
 		Gizmos.DrawWireCube(Get_GridWorldPos(x, y), GridSizeV3);
 	}
 //#endif
+}
+
+public class EnemyNumbers
+{
+	public NPCData npcData;
+	public int Numbers;
+}
+
+/*
+ * 戰鬥分成進入、戰鬥中、離開戰鬥三種
+ * 為了方便使用，進入戰鬥只要用BattleState的instance就好了
+ */
+public abstract class BattleState : IGameState
+{
+	public static BattleState instance
+	{
+		get
+		{
+			return BattleEntering.instance;
+		}
+	}
+	public static uint BattleID;
+	public abstract void OnChangeIn(GameControl control);
+
+	public abstract void Update(GameControl control);
+
+	public abstract void OnChangeOut(GameControl control);
+}
+
+
+public class BattleEntering : BattleState
+{
+	private static BattleEntering _instance;
+
+	/*
+	 * 因為static無法override所以用new
+	 * 雖然new會有變數型別不同會有不同的結果的情況
+	 * 可是static不用變數直接用型別來存取的，所以應該是不會有誤用的問題
+	 */
+	public new static BattleState instance
+	{
+		get
+		{
+			if (_instance == null)
+				_instance = new BattleEntering();
+			return _instance;
+		}
+	}
+	public override void OnChangeIn(GameControl control)
+	{
+		Application.LoadLevel("BattleField");
+		
+	}
+
+	public override void Update(GameControl control)
+	{
+		if (Application.loadedLevelName == "BattleField")
+		{
+			GameControl.Instance.ChangeGameState(BattleManager.Instance);
+		}
+	}
+	public override void OnChangeOut(GameControl control)
+	{
+	}
+}
+
+public class BattleLeaving :BattleState
+{
+	private static BattleLeaving _instance;
+	public new static BattleState instance
+	{
+		get
+		{
+			if (_instance == null)
+				_instance = new BattleLeaving();
+			return _instance;
+		}
+	}
+	public override void OnChangeIn(GameControl control)
+	{
+		BattleID = uint.MinValue;
+		Application.LoadLevel("Empty");
+		GameControl.Instance.ChangeGameState(GameLoginNone.Instance);
+	}
+
+	public override void Update(GameControl control)
+	{
+	}
+
+	public override void OnChangeOut(GameControl control)
+	{
+	}
 }

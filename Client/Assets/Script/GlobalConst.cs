@@ -83,7 +83,7 @@ public class GLOBALCONST
         // for test
         [EnumClassValue(typeof(SceneData), FILENAME_SCENE)]        Scene = 0, // 場景
 		[EnumClassValue(typeof(SkillData), FILENAME_SKILL)]	       Skill,       // 技能（暫
-		[EnumClassValue(typeof(NpcData), FILENAME_NPC)]     	   NPC,         // NpcData
+		[EnumClassValue(typeof(NPCData), FILENAME_NPC)]     	   NPC,         // NpcData
         [EnumClassValue(typeof(Area), FILENAME_AREA)]              Area,        // 區域
         [EnumClassValue(typeof(AreaEvent), FILENAME_AREA_EVENT)]   AreaEvent,   // 區域事件
         [EnumClassValue(typeof(Story), FILENAME_STORY)]            Story,       // 劇情
