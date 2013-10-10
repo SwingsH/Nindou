@@ -1,4 +1,4 @@
-﻿//----------------------------------------------
+//----------------------------------------------
 //            NGUI: Next-Gen UI kit
 // Copyright © 2011-2013 Tasharen Entertainment
 //----------------------------------------------
@@ -44,6 +44,12 @@ public class UIPlayTween : MonoBehaviour
 	/// </summary>
 
 	public bool resetOnPlay = false;
+
+	/// <summary>
+	/// Whether the tween will be reset to the start if it's disabled when activated.
+	/// </summary>
+
+	public bool resetIfDisabled = false;
 
 	/// <summary>
 	/// What to do if the tweenTarget game object is currently disabled.
@@ -266,9 +272,15 @@ public class UIPlayTween : MonoBehaviour
 					++mActive;
 
 					// Toggle or activate the tween component
-					if (playDirection == Direction.Toggle) tw.Toggle();
-					else tw.Play(forward);
-					if (resetOnPlay) tw.Reset();
+					if (playDirection == Direction.Toggle)
+					{
+						tw.Toggle();
+					}
+					else
+					{
+						if (resetOnPlay || (resetIfDisabled && !tw.enabled)) tw.Reset();
+						tw.Play(forward);
+					}
 
 					// Listen for tween finished messages
 					EventDelegate.Add(tw.onFinished, OnFinished, true);

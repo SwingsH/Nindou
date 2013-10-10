@@ -148,4 +148,147 @@ public static class CommonFunction
         }
     }
     #endregion
+
+    #region UI相關
+    /// <summary>
+    /// 依據設定 建立一個UIButton
+    /// </summary>
+    /// <param name="parentObj">parent的gameObject</param>
+    /// <param name="btnName">按鈕名稱</param>
+    /// <param name="relativePos">按鈕位置（相對於preantObj）</param>
+    /// <param name="depth">深度</param>
+    /// <param name="atlas">使用的Atlas</param>
+    /// <param name="spriteName">使用的Sprite名稱</param>
+    /// <param name="width">按鈕寬度</param>
+    /// <param name="height">按鈕高度</param>
+    /// <returns>建出的UIButton</returns>
+    public static UIButton CreateUIButton(GameObject parentObj, string btnName, Vector3 relativePos, int depth, UIAtlas atlas, string spriteName, UIFont font, 
+        int width, int height)
+    {
+        GameObject retButtonObj = NGUITools.AddChild(parentObj);
+        retButtonObj.name = btnName;
+        retButtonObj.transform.localPosition = relativePos;
+        // 設定按鈕背景圖
+        UISprite bg = NGUITools.AddWidget<UISprite>(retButtonObj);
+        bg.type = UISprite.Type.Sliced;
+        bg.name = "Background";
+        bg.depth = depth;
+        bg.atlas = atlas;
+        bg.spriteName = spriteName;
+        bg.width = width;
+        bg.height = height;
+        bg.MakePixelPerfect();
+        // font
+        if (font != null)
+        {
+            UILabel lbl = NGUITools.AddWidget<UILabel>(retButtonObj);
+            lbl.font = font;
+            lbl.text = retButtonObj.name;
+            lbl.MakePixelPerfect();
+        }
+        // Add a Collider
+        NGUITools.AddWidgetCollider(retButtonObj);
+        // Add the scripts
+        retButtonObj.AddComponent<UIPlaySound>();
+        UIButton retBtn = retButtonObj.AddComponent<UIButton>();
+        retBtn.tweenTarget = bg.gameObject;
+
+        return retBtn;
+    }
+    /// <summary>
+    /// 設定UIButton的各種情況顏色
+    /// </summary>
+    /// <param name="btn">要設定的UIButton</param>
+    /// <param name="normalColor">沒任何事件時的顏色</param>
+    /// <param name="disableColor">Disable的顏色</param>
+    /// <param name="pressedColor">按下時的顏色</param>
+    /// <param name="hoverColor">滑鼠經過時的顏色</param>
+    public static void SetColor(this UIButton btn, Color normalColor, Color disableColor, Color pressedColor, Color hoverColor)
+    {
+        btn.defaultColor = normalColor;
+        btn.UpdateColor(true, true);
+        btn.disabledColor = disableColor;
+        btn.pressed = pressedColor;
+        btn.hover = hoverColor;
+    }
+    /// <summary>
+    /// 依據設定 建立一個Progress Bar
+    /// </summary>
+    /// <param name="parentObj">parent的gameObject</param>
+    /// <param name="progressBarName">Progress Bar名稱</param>
+    /// <param name="relativePos">Progress Bar位置（相對於preantObj）</param>
+    /// <param name="depth">深度</param>
+    /// <param name="atlas">使用的Atlas</param>
+    /// <param name="backgroundName">background使用的Sprite名稱</param>
+    /// <param name="foregroundName">foreground使用的Sprite名稱</param>
+    /// <param name="width">Progress Bar寬度</param>
+    /// <param name="height">Progress Bar高度</param>
+    /// <returns>建出的 ProgressBar</returns>
+    public static UISlider CreateProgressBar(GameObject parentObj, string progressBarName, Vector3 relativePos, int depth,
+        UIAtlas atlas, string backgroundName, string foregroundName, int width, int height)
+    {
+        GameObject progressBarObject = NGUITools.AddChild(parentObj);
+        progressBarObject.name = progressBarName;
+        progressBarObject.transform.localPosition = relativePos;
+        // Background sprite
+        //UIAtlas.Sprite bgs = atlas.GetSprite(backgroundName);
+        UISpriteData bgs = atlas.GetSprite(backgroundName);
+        UISprite back = (UISprite)NGUITools.AddWidget<UISprite>(progressBarObject);
+
+        back.type = bgs.hasBorder ? UISprite.Type.Sliced : UISprite.Type.Simple;
+        back.name = "Background";
+        back.depth = depth;
+        back.pivot = UIWidget.Pivot.Left;
+        back.atlas = atlas;
+        back.spriteName = backgroundName;
+        back.width = width;
+        back.height = height;
+        back.transform.localPosition = Vector3.zero;
+        back.MakePixelPerfect();
+
+        // Foreground sprite
+        UISpriteData fgs = atlas.GetSprite(foregroundName);
+        UISprite front = NGUITools.AddWidget<UISprite>(progressBarObject);
+        front.type = fgs.hasBorder ? UISprite.Type.Sliced : UISprite.Type.Simple;
+        front.name = "Foreground";
+        front.pivot = UIWidget.Pivot.Left;
+        front.atlas = atlas;
+        front.spriteName = foregroundName;
+        front.width = width;
+        front.height = height;
+        front.transform.localPosition = Vector3.zero;
+        front.MakePixelPerfect();
+
+        // Add the slider script
+        UISlider retSilder = progressBarObject.AddComponent<UISlider>();
+        retSilder.foreground = front.transform;
+        retSilder.value = 0.0f;
+
+        return retSilder;
+    }
+
+    /// <summary>
+    /// 依據設定 建立一個Label
+    /// </summary>
+    /// <param name="parentObj">parent的gameObject</param>
+    /// <param name="labelName">label名稱</param>
+    /// <param name="relativePos">label位置（相對於preantObj）</param>
+    /// <param name="depth">深度</param>
+    /// <param name="font">使用的Font</param>
+    /// <param name="labelColor">文字顏色</param>
+    /// <param name="labelText">文字內容</param>
+    /// <returns>建出的Label</returns>
+    public static UILabel CreateLabel(GameObject parentObj, string labelName, Vector3 relativePos, int depth, UIFont font, Color labelColor, string labelText)
+    {
+        UILabel retLabel = NGUITools.AddWidget<UILabel>(parentObj);
+        retLabel.transform.localPosition = relativePos;
+        retLabel.name = labelName;
+        retLabel.depth = depth;
+        retLabel.font = font;
+        retLabel.text = labelText;
+        retLabel.color = labelColor;
+        retLabel.MakePixelPerfect();
+        return retLabel;
+    }
+    #endregion
 }

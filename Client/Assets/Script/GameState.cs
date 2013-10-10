@@ -60,6 +60,8 @@ public class GameDetectUpdate : IGameState
     public void OnChangeIn(GameControl control)
     {
         control.DownloadUpdateInfo();
+        // Show開始介面
+        control.GUIStation.Form<UI_Start>().Show();
     }
 
     public void Update(GameControl control)

@@ -11,6 +11,7 @@ public class GameControl{
     private NetworkInterface _networkInterface = null;
     private IGameState _gameState = null; // 遊戲進行狀態
     private ResourceStation _resource = null;
+    private GUIStation _guiStation = null;
     private string _deviceID = string.Empty;
     private string _loginSession = string.Empty;
 
@@ -20,6 +21,7 @@ public class GameControl{
         _gameState = GameEmpty.Instance;
         _networkInterface = new NetworkInterface(this);
         _resource = new ResourceStation();
+        _guiStation = new GUIStation(this);
 
         //a36ec54e961ee79e8d92247f8a081b47a4c52e55
         _deviceID = SystemInfo.deviceUniqueIdentifier;
@@ -72,6 +74,14 @@ public class GameControl{
         get { return _gameState; }
     }
 
+    /// <summary>
+    /// 取得UI管理者
+    /// </summary>
+    public GUIStation GUIStation
+    {
+        get { return _guiStation; }
+    }
+    
     /// <summary>
     /// 為了掌握整個遊戲 Coroutine 使用量, 請集中使用此 method 進行 Coroutine
     /// todo: 可以考慮使用 CoroutineManager

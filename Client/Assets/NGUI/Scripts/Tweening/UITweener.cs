@@ -1,4 +1,4 @@
-﻿//----------------------------------------------
+//----------------------------------------------
 //            NGUI: Next-Gen UI kit
 // Copyright © 2011-2013 Tasharen Entertainment
 //----------------------------------------------
@@ -106,7 +106,7 @@ public abstract class UITweener : MonoBehaviour
 	bool mStarted = false;
 	float mStartTime = 0f;
 	float mDuration = 0f;
-	float mAmountPerDelta = 1f;
+	float mAmountPerDelta = 1000f;
 	float mFactor = 0f;
 
 	/// <summary>
