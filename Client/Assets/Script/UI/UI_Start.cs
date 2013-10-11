@@ -5,12 +5,9 @@ using System.Collections;
 /// 開始畫面
 /// </summary>
 public class UI_Start : GUIFormBase 
-{
-    // 因為NGUI內部的EventDelegate只接受MonoBehaviour，故多用一個delegate
-    // 使得按鈕被點擊時可以呼叫非MonoBehaviour的methods
-    public delegate void BtnClick();
-    BtnClick _inheritBtnClick;
-    BtnClick _loginBtnClick;
+{    
+    public BtnClick InheritBtnClick;
+    public BtnClick LoginBtnClick;
     
     UISlider _progress;
     UIButton _inheritBtn;
@@ -34,13 +31,13 @@ public class UI_Start : GUIFormBase
         _loginHint = CommonFunction.CreateLabel(panel.gameObject, "LoginHint", new Vector3(0, -106, 0), 7,
             (Resources.Load("TestUI/MSJH_25", typeof(UIFont)) as UIFont), new Color(1.0f, 0.2f, 0.3f), "點選畫面進入遊戲");
         // 加上event
-        _loginBtn.onClick.Add(new EventDelegate(this, "LoginBtnClick"));
+        _loginBtn.onClick.Add(new EventDelegate(this, "LoginClick"));
         // 繼承按鈕
         _inheritBtn = CommonFunction.CreateUIButton(panel.gameObject, "Inhert Button", new Vector3(294, -159, 0), 1, (Resources.Load("TestUI/TestAtlas", typeof(UIAtlas)) as UIAtlas),
             "fb_300_main", null, 40, 40);
         _inheritBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         // 加上event
-        _inheritBtn.onClick.Add(new EventDelegate(this, "InheritBtnClick"));
+        _inheritBtn.onClick.Add(new EventDelegate(this, "InheritClick"));
 
         // 進度條
         _progress = CommonFunction.CreateProgressBar(panel.gameObject, "Progress Bar_Build", new Vector3(-346, -167, 0), 2,
@@ -146,8 +143,10 @@ public class UI_Start : GUIFormBase
         NGUITools.SetActive(_progress.gameObject, isVisible);
         _loginBtn.isEnabled = !isVisible;
     }
-
-    public void LoginBtnClick()
+    /// <summary>
+    /// 按下登入按鈕（背景圖）的反應函式
+    /// </summary>
+    private void LoginClick()
     {
         CommonFunction.DebugMsg("test");
         if (!IsShowLoading)
@@ -156,13 +155,15 @@ public class UI_Start : GUIFormBase
             progressPercent = 0.0f;
             SetProgressVisible(true);
         }
-        if (_loginBtnClick != null) { _loginBtnClick(); }
+        if (LoginBtnClick != null) { LoginBtnClick(); }
     }
-
-    public void InheritBtnClick()
+    /// <summary>
+    /// 按下繼承按鈕的反應函式
+    /// </summary>
+    private void InheritClick()
     {
         CommonFunction.DebugMsg("Click Inherit Button");
-        if (_inheritBtnClick != null) { _inheritBtnClick(); }
+        if (InheritBtnClick != null) { InheritBtnClick(); }
         //if (progress_test != null)
         //{
         //    NGUITools.Destroy(progress_test.gameObject);

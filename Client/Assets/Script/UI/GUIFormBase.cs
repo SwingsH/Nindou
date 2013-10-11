@@ -9,6 +9,10 @@ using System.Collections;
 /// </summary>
 public abstract class GUIFormBase : MonoBehaviour 
 {
+    // 因為NGUI內部的EventDelegate只接受MonoBehaviour，故多用一個delegate
+    // 使得按鈕被點擊時可以呼叫非MonoBehaviour的methods
+    public delegate void BtnClick();
+
     #region 固定method
     // Use this for initialization
 	void Start () 
