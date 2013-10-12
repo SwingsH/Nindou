@@ -113,7 +113,32 @@ public class UI_Main_WorldMap : GUIFormBase
             ResourceStation.GetUIAtlas("TestAtlas"),
             "button_back", UIWidget.Pivot.Center, 418, 84);
         pointBasePic.transform.localPosition = new Vector3(347, 328, 0);
-        //_pointText
+        UISprite pointGraphPic = CommonFunction.CreateUISprite(pointBasePic.gameObject, "PointGraph", UISprite.Type.Simple, 7,
+            ResourceStation.GetUIAtlas("TestAtlas"),
+            "gold", UIWidget.Pivot.Center, 50, 50);
+        pointGraphPic.transform.localPosition = new Vector3(-155.85f, 0, 0);
+        _pointText = CommonFunction.CreateUILabel(pointBasePic.gameObject, "PointText", UIWidget.Pivot.Left, new Vector3(-107.25f, -5.65f, 0), 10,
+            ResourceStation.GetUIFont("MSJH_30"),
+            Color.red, string.Format("目前點數：{0}", _gamePoint));
+        // 「選單」按鈕
+        _menuBtn = CommonFunction.CreateUIButton(worldMap.gameObject, "Menu", new Vector3(669.55f, 330.39f, 0), 2,
+            ResourceStation.GetUIAtlas("TestAtlas"),
+            "button_back", 100, 100,
+            ResourceStation.GetUIFont("MSJH_30"),
+            Color.red, GLOBAL_STRING.MENU_BTN_TEXT);
+        _menuBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
+        _menuBtn.onClick.Add(new EventDelegate(this, "MenuBtnClick"));
+        // 「強敵發現！！」文字
+        _warningText = CommonFunction.CreateUILabel(worldMap.gameObject, "Warnging", UIWidget.Pivot.Center, new Vector3(-621.16f, 195.26f, 0), 11,
+            ResourceStation.GetUIFont("MSJH_30"),
+            Color.red, GLOBAL_STRING.WARNING_LABEL_TEXT);
+        // 「關卡」按鈕
+        _stageBtn = CommonFunction.CreateUIButton(worldMap.gameObject, "Stage", new Vector3(-9, -97, 0), 4,
+            ResourceStation.GetUIAtlas("TestAtlas2"),
+            "babel", 456, 576, 
+            null, Color.white, string.Empty);
+        _stageBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
+        _stageBtn.onClick.Add(new EventDelegate(this, "StageBtnClick"));
         #endregion
         foreach (UIButton btn in GetComponentsInChildren<UIButton>())
         {
@@ -122,15 +147,15 @@ public class UI_Main_WorldMap : GUIFormBase
             //if (btn.name.Equals("Shop")) { _shopBtn = btn; }
             //if (btn.name.Equals("Friend")) { _friendBtn = btn; }
             //if (btn.name.Equals("HeadPicture")) { _headPictureBtn = btn; }
-            if (btn.name.Equals("Menu")) { _menuBtn = btn; }
-            if (btn.name.Equals("Stage")) { _stageBtn = btn; }
+            //if (btn.name.Equals("Menu")) { _menuBtn = btn; }
+            //if (btn.name.Equals("Stage")) { _stageBtn = btn; }
         }
 
         foreach (UILabel label in GetComponentsInChildren<UILabel>())
         {
             //if (label.name.Equals("StaminaText")) { _staminaText = label; }
-            if (label.name.Equals("PointText")) { _pointText = label; }
-            if (label.name.Equals("Warning")) { _warningText = label; }
+            //if (label.name.Equals("PointText")) { _pointText = label; }
+            //if (label.name.Equals("Warning")) { _warningText = label; }
         }
         foreach (UISlider slider in GetComponentsInChildren<UISlider>())
         {
@@ -244,7 +269,8 @@ public class UI_Main_WorldMap : GUIFormBase
     /// 按下「選單」按鈕的反應函式
     /// TODO : public 只是暫時為了確認用，之後要改成private
     /// </summary>
-    public void MenuBtnClick()
+    //public 
+        void MenuBtnClick()
     {
         CommonFunction.DebugMsg("按下「選單」按鈕");
         // test : 增加遊戲點數
@@ -258,7 +284,8 @@ public class UI_Main_WorldMap : GUIFormBase
     /// 按下「關卡」按鈕的反應函式
     /// TODO : public 只是暫時為了確認用，之後要改成private
     /// </summary>
-    public void StageBtnClick()
+    //public 
+        void StageBtnClick()
     {
         CommonFunction.DebugMsg("按下「關卡」按鈕");
     }

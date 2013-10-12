@@ -15,4 +15,8 @@ public static class GLOBAL_STRING
     public const string SHOP_BTN_TEXT = "商店";
     public const string FRIEND_BTN_TEXT = "好友";
     #endregion
+    #region UI_Main_WorldMap (顯示世界地圖的主介面)
+    public const string MENU_BTN_TEXT = "選單";
+    public const string WARNING_LABEL_TEXT = "強敵發現！！";
+    #endregion
 }
