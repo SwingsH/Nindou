@@ -16,37 +16,42 @@ public class UI_Start : GUIFormBase
     UILabel _progressShow;
 
     #region 繼承自GUIFormBase的method
-    protected override void CreateAllComponent(Camera uiCamera)
+    protected override void CreateAllComponent()
     {
         UIAnchor anchor = NGUITools.AddChild<UIAnchor>(gameObject);
-        anchor.uiCamera = uiCamera;
+        anchor.uiCamera = _guistation.GUICamera;
 
         UIPanel panel = NGUITools.AddChild<UIPanel>(anchor.gameObject);
-        
+
         // 登入的全畫面圖按鈕
-        _loginBtn = CommonFunction.CreateUIButton(panel.gameObject, "Login BG", Vector3.zero, 0, (Resources.Load("TestUI/TestAtlas", typeof(UIAtlas)) as UIAtlas), "pachuri", 
-            null, 1920, 1080);
+        _loginBtn = CommonFunction.CreateUIButton(panel.gameObject, "Login BG", Vector3.zero, 0, 
+            ResourceStation.GetUIAtlas("TestAtlas"),
+            "pachuri", 
+            1920, 1080, null, Color.white, string.Empty);
         _loginBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         // 登入文字
-        _loginHint = CommonFunction.CreateLabel(panel.gameObject, "LoginHint", new Vector3(0, -106, 0), 7,
-            (Resources.Load("TestUI/MSJH_25", typeof(UIFont)) as UIFont), new Color(1.0f, 0.2f, 0.3f), "點選畫面進入遊戲");
+        _loginHint = CommonFunction.CreateUILabel(panel.gameObject, "LoginHint", UIWidget.Pivot.Center, new Vector3(0, -106, 0), 7,
+            ResourceStation.GetUIFont("MSJH_25"),
+            new Color(1.0f, 0.2f, 0.3f), "點選畫面進入遊戲");
         // 加上event
         _loginBtn.onClick.Add(new EventDelegate(this, "LoginClick"));
         // 繼承按鈕
-        _inheritBtn = CommonFunction.CreateUIButton(panel.gameObject, "Inhert Button", new Vector3(294, -159, 0), 1, (Resources.Load("TestUI/TestAtlas", typeof(UIAtlas)) as UIAtlas),
-            "fb_300_main", null, 40, 40);
+        _inheritBtn = CommonFunction.CreateUIButton(panel.gameObject, "Inhert Button", new Vector3(294, -159, 0), 1, 
+            ResourceStation.GetUIAtlas("TestAtlas"),
+            "fb_300_main", 40, 40, null, Color.white, string.Empty);
         _inheritBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         // 加上event
         _inheritBtn.onClick.Add(new EventDelegate(this, "InheritClick"));
 
         // 進度條
-        _progress = CommonFunction.CreateProgressBar(panel.gameObject, "Progress Bar_Build", new Vector3(-346, -167, 0), 2,
-            (Resources.Load("TestUI/SciFi Atlas", typeof(UIAtlas)) as UIAtlas),
+        _progress = CommonFunction.CreateUIProgressBar(panel.gameObject, "Progress Bar_Build", new Vector3(-346, -167, 0), 2,
+            ResourceStation.GetUIAtlas("SciFi Atlas"),
             "Dark", "Light", 690, 30);
         NGUITools.SetActive(_progress.gameObject, false);
         // 進度數值
-        _progressShow = CommonFunction.CreateLabel(_progress.gameObject, "Progress", new Vector3(652.67f, -4.0f, 0), 6,
-            (Resources.Load("TestUI/MSJH", typeof(UIFont)) as UIFont), new Color(1.0f, 0.2f, 0.3f), "0.00");
+        _progressShow = CommonFunction.CreateUILabel(_progress.gameObject, "Progress", UIWidget.Pivot.Right, new Vector3(652.67f, -4.0f, 0), 6,
+            ResourceStation.GetUIFont("MSJH"),
+            new Color(1.0f, 0.2f, 0.3f), "0.00");
     }
     #endregion
 
@@ -105,6 +110,9 @@ public class UI_Start : GUIFormBase
         _progress = null;
         NGUITools.Destroy(_inheritBtn.gameObject);
         _inheritBtn = null;
+
+        InheritBtnClick = null;
+        LoginBtnClick = null;
         base.OnDestroy();
     }
     #endregion

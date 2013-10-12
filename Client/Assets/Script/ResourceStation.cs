@@ -141,5 +141,49 @@ public class ResourceStation {
 			sprite.SetTextureName(boneName);
 			sprite.SetPivotOffset(Vector2.zero, true);
 		}
-	}
+    }
+
+    #region NGUI
+    static Dictionary<string, UIAtlas> _uiAtlases = new Dictionary<string, UIAtlas>();
+    public static UIAtlas GetUIAtlas(string uiAtlasName)
+    {
+        if (string.IsNullOrEmpty(uiAtlasName)) { return null; }
+        UIAtlas retUIAtlas;
+        if (!_uiAtlases.TryGetValue(uiAtlasName, out retUIAtlas))
+        {
+            UIAtlas_LoadFromResource(uiAtlasName);
+            _uiAtlases.TryGetValue(uiAtlasName, out retUIAtlas);
+        }
+        return retUIAtlas;
+    }
+    static void UIAtlas_LoadFromResource(string uiAtlasName)
+    {
+        UIAtlas uiAtlas = Resources.Load(GLOBALCONST.DIR_RESOURCES_NGUI + uiAtlasName, typeof(UIAtlas)) as UIAtlas;
+        if (uiAtlas == null) { return; }
+        _uiAtlases.Add(uiAtlasName, uiAtlas);
+    }
+
+    // 目前尚不知道動態生出不同大小的字體的UIFont，故先事先產出存放在Resources
+    // TODO: 找尋程式中動態生成不同大小字體的UIFont
+    static Dictionary<string, UIFont> _uiFonts = new Dictionary<string, UIFont>();
+    public static UIFont GetUIFont(string uiFontName)
+    {
+        if (string.IsNullOrEmpty(uiFontName)) { return null; }
+        UIFont retFont;
+        if (!_uiFonts.TryGetValue(uiFontName, out retFont))
+        {
+            UIFont_LoadFromResource(uiFontName);
+            _uiFonts.TryGetValue(uiFontName, out retFont);
+        }
+        return retFont;
+    }
+
+    static void UIFont_LoadFromResource(string uiFontName)
+    {
+        UIFont uiFont = Resources.Load(GLOBALCONST.DIR_RESOURCES_NGUI + uiFontName, typeof(UIFont)) as UIFont;
+        if (uiFont == null) { return; }
+        _uiFonts.Add(uiFontName, uiFont);
+    }
+
+    #endregion
 }

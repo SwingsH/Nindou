@@ -8,4 +8,11 @@ public static class GLOBAL_STRING
 {	
 	public const string GAME_TITLE = "忍豆豆豆風雲";
     public const string UI_BUTTON_1 = "快速登入";
+
+    #region UI_Main （主介面共通）
+    public const string CHARACTER_BTN_TEXT = "人物";
+    public const string BAG_BTN_TEXT = "背包";
+    public const string SHOP_BTN_TEXT = "商店";
+    public const string FRIEND_BTN_TEXT = "好友";
+    #endregion
 }
