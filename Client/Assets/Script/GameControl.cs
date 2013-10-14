@@ -142,8 +142,10 @@ public class GameControl{
     {
         get
         {
-            CommonFunction.DebugMsg("沒有檔案需要更新");
-            return _resource.IsNeedToUpdate; //todo: 當然是 todo, 接 ResourceUpdater
+            //CommonFunction.DebugMsg("沒有檔案需要更新");
+            //return _resource.IsNeedToUpdate; //todo: 當然是 todo, 接 ResourceUpdater
+            CommonFunction.DebugMsg("測試：有檔案要更新");
+            return true;
         }
     }
 

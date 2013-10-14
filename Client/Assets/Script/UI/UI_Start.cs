@@ -58,45 +58,12 @@ public class UI_Start : GUIFormBase
     #region 固定函式
     //void Start()
     //{
-    //    // 登入的全畫面圖按鈕
-    //    login = CommonFunction.CreateUIButton(gameObject, "Login BG", Vector3.zero, 0, 
-    //        (Resources.Load("TestUI/TestAtlas", typeof(UIAtlas)) as UIAtlas), 
-    //        "pachuri", 1920, 1080);
-    //    login.SetColor(Color.white, Color.white, Color.white, Color.white);
-    //    // 登入文字
-    //    loginHint = CommonFunction.CreateLabel(gameObject, "LoginHint", new Vector3(0, -106, 0), 7,
-    //        (Resources.Load("TestUI/MSJH_25", typeof(UIFont)) as UIFont), new Color(1.0f, 0.2f, 0.3f), "點選畫面進入遊戲");
-    //    // 加上event
-    //    login.onClick.Add(new EventDelegate(this, "MyClick"));
-    //    // 繼承按鈕
-    //    inheritBtn = CommonFunction.CreateUIButton(gameObject, "Inhert Button", new Vector3(294, -159, 0), 1, (Resources.Load("TestUI/TestAtlas", typeof(UIAtlas)) as UIAtlas),
-    //        "fb_300_main", 40, 40);
-    //    inheritBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
-    //    // 加上event
-    //    inheritBtn.onClick.Add(new EventDelegate(this, "TestClickInheritBtn"));
-    //    // 進度條
-    //    progress = CommonFunction.CreateProgressBar(gameObject, "Progress Bar", new Vector3(-346, -167, 0), 2,
-    //        (Resources.Load("TestUI/SciFi Atlas", typeof(UIAtlas)) as UIAtlas),
-    //        "Dark", "Light", 690, 30);
-    //    NGUITools.SetActive(progress.gameObject, false);
-    //    // 進度數值
-    //    progressShow = CommonFunction.CreateLabel(progress.gameObject, "Progress", new Vector3(652.67f, -4.0f, 0), 6,
-    //        (Resources.Load("TestUI/MSJH", typeof(UIFont)) as UIFont), new Color(1.0f, 0.2f, 0.3f), "0.00");        
     //}
 
 	// Update is called once per frame
-	void Update () 
-    {
-        // 此處動作應該交由外部讀取動作的人決定
-        if (IsShowLoading)
-        {
-            progressPercent += 1;
-            if (progressPercent >= 100)
-            {
-                SetProgressVisible(false);
-            }
-        }
-	}
+    //void Update () 
+    //{
+    //}
 
     protected override void OnDestroy()
     {
@@ -157,7 +124,7 @@ public class UI_Start : GUIFormBase
     private void LoginClick()
     {
         CommonFunction.DebugMsg("test");
-        if (!IsShowLoading)
+        if (!IsShowLoading && progressPercent <= 0)
         {
             CommonFunction.DebugMsg("test----");
             progressPercent = 0.0f;
