@@ -101,6 +101,7 @@ class MySqlDB
 		{
 			unset($this->row[$this->query_result]);
 			unset($this->rowset[$this->query_result]);
+
 			return $this->query_result;
 		}
 //		else

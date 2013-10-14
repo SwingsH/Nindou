@@ -63,6 +63,32 @@ function db_update_account( $device_id, $session )
  	return  $query ;
 }
 
+class AccountData
+{
+	var $player_name;           // 玩家名稱
+    var $max_action_point;       // max行動點數
+    var $current_action_point;   // 目前行動點數
+    var $max_card_slot;          //目前卡片背包最大格數
+    var $cards;                //目前持有卡片
+    var $max_friend_slot;        //目前朋友最大格數
+    var $friends;              //目前持有卡片	
+   
+    function __construct(array $row)
+	{
+		if(isset($row['player_name']))
+			$this->player_name = $row['player_name'];
+		if(isset($row['max_action_point']))
+			$this->max_action_point = $row['max_action_point'];
+		if(isset($row['current_action_point']))
+			$this->current_action_point = $row['current_action_point'];
+	}
+}
+
+function dbdata_account_get_player_data(array $db_link)
+{
+	
+}
+
 /*************************************************
  * 相關 Table : prs_user_favor
  ************************************************/

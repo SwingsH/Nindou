@@ -14,6 +14,7 @@ public class GameControl{
     private GUIStation _guiStation = null;
     private string _deviceID = string.Empty;
     private string _loginSession = string.Empty;
+    private AccountData _accountData = default(AccountData);
 
     private GameControl(GameMain main)
     {
@@ -95,13 +96,22 @@ public class GameControl{
 
     /// <summary>
     /// 留存 login session
-    /// todo: 改 json 版本
     /// </summary>
     public void SetLoginSession(string session)
     {
         CommonFunction.DebugMsg("留存 login session : " + session);
         _loginSession = session;
     }
+
+    /// <summary>
+    /// 留存 account data
+    /// </summary>
+    public void SetAccountData(AccountData accountData)
+    {
+        _accountData = accountData;
+        CommonFunction.DebugMsg("玩家名稱 : " + _accountData.PlayerName);
+    }
+
 
     /// <summary>
     /// 從 file server 下載更新資料

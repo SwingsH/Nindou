@@ -166,7 +166,7 @@ public class EnumClassValue : System.Attribute
 /// </summary>
 public struct AccountData
 {
-    public ushort PlayerName;           // 玩家名稱
+    public string PlayerName;           // 玩家名稱
     public ushort MaxActionPoint;       // max行動點數
     public ushort CurrentActionPoint;   // 目前行動點數
     public ushort MaxCardSlot;          //目前卡片背包最大格數

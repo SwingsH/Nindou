@@ -307,6 +307,11 @@ public class NetworkInterface
             CommonFunction.DebugMsg(" OnHTTPReceive HTTPResponseMixDatas null.");
             return;
         }
+        if (mixDatas.Packages == null)
+        {
+            CommonFunction.DebugMsg(" OnHTTPReceive HTTPResponseMixDatas null.");
+            return;
+        }
 
         int mainKind = 0;
         int subKind = 0;
@@ -402,23 +407,14 @@ public class NetworkInterface
         strNums++;
         intNums++;
 
-        CommonFunction.DebugMsg(string.Format("登入成功 : {0} , {1}", session, kind));
-        _control.SetLoginSession(session);
-    }
-
-    //S: 1-2 登入, s1:session , i1:登入類型(0=登入失敗,1=新帳號登入,2=快速登入,3=更新session)
-    private void HTTPResponse_Login_1(HTTPResponse responsePack)
-    {
-        //string deviceID = responsePack.Strs[]
-        int strNums = 0;
-        int intNums = 0;
-        string session = responsePack.Strs[strNums];
-        int kind = responsePack.Ints[intNums];
+        AccountData accountData = new AccountData();
+        accountData.PlayerName = responsePack.Strs[strNums];
         strNums++;
-        intNums++;
 
         CommonFunction.DebugMsg(string.Format("登入成功 : {0} , {1}", session, kind));
         _control.SetLoginSession(session);
+        _control.SetAccountData(accountData);
     }
+
     #endregion
 }

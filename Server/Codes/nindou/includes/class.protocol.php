@@ -61,15 +61,14 @@ class Protocol
 		
 		$deviceid = $this->pop_string();
 		$query = db_get_account($deviceid);
+		
 		if(IS_DEBUG)
 		{
-			//die(db_insert_log($query));
 			$result = $db->sql_query( db_insert_log($query) );
 			$db->sql_freeresult($result);
 		}
-		$result = $db->sql_query( $query );
-
-		$num_fields = $db->sql_numrows($result);
+		$data_res = $db->sql_query( $query );
+		$num_fields = $db->sql_numrows($data_res);
 		$login_result = 0;
 		
 		if($num_fields > 1) // 不正常   device id  重複
@@ -104,9 +103,13 @@ class Protocol
 
 		if(!isset($new_session))
 			$this->handle_command_error(get_calling_method_name());
-			
+		
+		$row = $db->sql_fetchrow($data_res);
+		$account_data = &new AccountData($row);
+
 		$pack = &new JsonPackage($this->current_mainkind, $this->current_subkind);
-		$pack->PushStr($new_session);
+		$pack->PushStr($new_session); // 新的 session
+		$pack->PushStr($account_data->player_name);
 		$pack->PushInt($login_result);
 		$package_group = &new JsonPackageGroup($this->current_serial, $this->current_mainkind, $this->current_subkind);
 		$package_group->AddPackage($pack);
