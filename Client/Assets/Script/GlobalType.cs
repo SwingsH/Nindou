@@ -161,6 +161,49 @@ public class EnumClassValue : System.Attribute
     }
 }
 
+/// <summary>
+/// 
+/// </summary>
+public struct AccountData
+{
+    public ushort PlayerName;           // 玩家名稱
+    public ushort MaxActionPoint;       // max行動點數
+    public ushort CurrentActionPoint;   // 目前行動點數
+    public ushort MaxCardSlot;          //目前卡片背包最大格數
+    public uint[] Cards;                //目前持有卡片
+    public ushort MaxFriendSlot;        //目前朋友最大格數
+    public uint[] Friends;              //目前持有卡片
+}
+
+/// <summary>
+/// 禮物資訊
+/// </summary>
+public struct GiftsData
+{
+    // LastUpdateTime : 目前C端資料最後一次更新時間 ( 指 server 時間), 無法由C端得知曾變動過的資料都要有此欄位
+    public DateTime LastUpdateTime;     
+    public uint[] GiftsID;            // 禮物 ID
+}
+
+[Serializable]
+[StructLayout(LayoutKind.Sequential)]
+public class HTTPResponseMixDatas
+{
+    public int Serial;
+    public int RequestMain;
+    public int RequestSub;
+    public HTTPResponse[] Packages;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+public class HTTPResponse
+{
+    public int MainKind;
+    public int SubKind;
+    public int[] Ints;
+    public string[] Strs;
+}
+
 // TODO: 測試用
 /// <summary>
 /// 從表格來的場景資料

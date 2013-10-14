@@ -10,14 +10,15 @@ public class NetworkHTTPBuffer
     private static int _currentMainKind = 0;  //目前即將用 POST method 傳送給 server 的資料
     private static int _currentSubKind = 0;   //目前即將用 POST method 傳送給 server 的資料
 
-    public static void Packaging(int kind, int subKind)
+    public static void Packaging(int serial, int kind, int subKind)
     {
          if (_currentPostForm == null)
             _currentPostForm = new WWWForm();
         _currentMainKind = kind;
         _currentSubKind = subKind;
-        _currentPostForm.AddField("MainKind", _currentMainKind);
-        _currentPostForm.AddField("SubKind", _currentSubKind);
+        _currentPostForm.AddField("mainkind", _currentMainKind); //post var is case sensitive !!
+        _currentPostForm.AddField("subkind", _currentSubKind);
+        _currentPostForm.AddField("serial", serial);
     }
 
     public static void ClearSendBuffer()
@@ -31,7 +32,7 @@ public class NetworkHTTPBuffer
             _currentPostForm = new WWWForm();
         _currentPostForm.AddField(fieldName, fieldvalue);
 
-        CommonFunction.DebugMsg(string.Format("Add String {0} {1} ", fieldName, fieldvalue));
+        CommonFunction.DebugMsg(string.Format("Add String {0}= {1} ", fieldName, fieldvalue));
     }
 
     public static void AddInteger(string fieldName, int fieldvalue)
@@ -39,6 +40,8 @@ public class NetworkHTTPBuffer
          if (_currentPostForm == null)
             _currentPostForm = new WWWForm();
         _currentPostForm.AddField(fieldName, fieldvalue);
+
+        CommonFunction.DebugMsg(string.Format("Add Integer {0}= {1} ", fieldName, fieldvalue));
     }
 
     public static WWWForm Form

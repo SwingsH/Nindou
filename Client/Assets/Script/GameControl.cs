@@ -51,9 +51,11 @@ public class GameControl{
     // 一般登入
     public void DoLogin()
     {
-        CommonFunction.DebugMsg(_deviceID);
-        _networkInterface.PushString(1, 1, "DeviceID", _deviceID);
+        _networkInterface.PushString(1, 1, _deviceID); // todo: 改用 s1, s2, s3, i1,i2
+        _networkInterface.PushInteger(1, 1, 0);
         _networkInterface.Send(1, 1);
+
+        //nindou/protocol.php?mainkind=1&subkind=2&serial=5
     }
 
     public void ChangeGameState(IGameState newState)
