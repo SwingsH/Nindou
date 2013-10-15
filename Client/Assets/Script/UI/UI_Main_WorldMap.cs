@@ -37,7 +37,7 @@ public class UI_Main_WorldMap : GUIFormBase
 
         #region 每個主介面都有的部分
         // 背景圖
-        UISprite backgroundPic = CommonFunction.CreateUISprite(gameObject, "Background", UISprite.Type.Simple, 0,
+        UISprite backgroundPic = CommonFunction.CreateUISprite(panel.gameObject, "Background", UISprite.Type.Simple, 0,
             ResourceStation.GetUIAtlas("TestAtlas"),
            "pachuri", UIWidget.Pivot.Center, 1920, 1080);
         // 「人物」按鈕

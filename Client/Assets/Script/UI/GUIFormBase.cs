@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-
-
 /// <summary>
 /// GUI Form的基礎類別，每個UI都繼承自此
 /// By Feles

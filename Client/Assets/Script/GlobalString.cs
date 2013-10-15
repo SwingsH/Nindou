@@ -22,5 +22,7 @@ public static class GLOBAL_STRING
     #region UI_Main_StageSelect (顯示關卡選擇的主介面）
     public const string STAGE_OPEN_HINT_TEXT = "點擊觀看開啟條件";
     public const string STAGE_NOT_OPEN_TEXT = "未開啟";
+    public const string STAGE_NAME_TEXT = "{0}\n消耗體力：{1} PT";
+    public const string STAGE_EXPLORE_PROGRESS_TEXT = "探索度：{0}/{1}";
     #endregion
 }

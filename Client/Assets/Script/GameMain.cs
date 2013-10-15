@@ -26,11 +26,14 @@ public class GameMain : MonoBehaviour {
     {
         
         // todo: 此區是 NGUI 未完成前暫代
-        if( _control.CurrentGameState == GameLoginNone.Instance)
+        if (_control.CurrentGameState != null)
         {
-            if (GUI.Button(new Rect((Screen.width - 100) / 2, (Screen.height - 40)/2, 100, 40), GLOBAL_STRING.UI_BUTTON_1))
+            if (_control.CurrentGameState == GameLoginNone.Instance)
             {
-                _control.DoLogin();
+                if (GUI.Button(new Rect((Screen.width - 100) / 2, (Screen.height - 40) / 2, 100, 40), GLOBAL_STRING.UI_BUTTON_1))
+                {
+                    _control.DoLogin();
+                }
             }
         }
 		#if UNITY_EDITOR
