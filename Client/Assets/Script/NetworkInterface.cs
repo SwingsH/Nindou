@@ -52,7 +52,8 @@ public class NetworkInterface
 
     private const int SOCKET_PORT = 17480;
     private const string HTTP_HEAD = "http";
-    private const string HTTP_IP = "127.0.0.1";
+    private const string HTTP_IP = "122.116.24.125";
+    private const string HTTP_PROTOCOL_PAGE = "{0}://{1}/nindou/protocol.php";
     private const int HTTP_PORT = 80;
     private const string HTTP_FIELD_STR = "s{0}"; // http post form field, string 名稱
     private const string HTTP_FIELD_INT = "i{0}"; // http post form field, int 名稱
@@ -78,7 +79,7 @@ public class NetworkInterface
         _control = control;
         _gameSocket = new NetworkSocket(NetworkSocketBuffer.Identify);
         _gameHTTP = new NetworkHTTP( OnHTTPReceive);
-        _gameHTTP.SetConfig( string.Format("{0}://{1}/nindou/protocol.php", HTTP_HEAD, HTTP_IP) );
+        _gameHTTP.SetConfig(string.Format(HTTP_PROTOCOL_PAGE, HTTP_HEAD, HTTP_IP)); //設置協定網址
         SetAllProtocolEvent();
     }
 
@@ -206,7 +207,6 @@ public class NetworkInterface
             object refObj = Activator.CreateInstance(typeof(HTTPResponseMixDatas));
             bool isSuccess = DataUtility.DeserializeObject(responseText, ref refObj);
             _currentResponse = refObj as HTTPResponseMixDatas;
-            //_httpProtocolEvents[_currentHTTPKind, _currentHTTPSubKind].OnResponse(_currentResponse);
             CommonFunction.DebugMsg(string.Format("OnHTTPReceive {0},{1},{2}", _currentHTTPKind, _currentHTTPSubKind, responseText));
         }
         else
@@ -382,6 +382,8 @@ public class NetworkInterface
         _currentHTTPKind = mainKind;
         _currentHTTPSubKind = subKind;
         NetworkHTTPBuffer.Packaging(_sendSerial, mainKind, subKind);
+
+        CommonFunction.DebugMsg( " URL for debugging : " + string.Format(HTTP_PROTOCOL_PAGE, HTTP_HEAD, HTTP_IP) + "?" + NetworkHTTPBuffer.DumpDebugURL());
         _gameHTTP.Send(NetworkHTTPBuffer.Form);
         _sendSerial++;
         //NetworkHTTPBuffer.ClearSendBuffer();
@@ -399,17 +401,11 @@ public class NetworkInterface
     //S: 1-1 登入, s1:session , i1:登入類型(0=登入失敗,1=新帳號登入,2=快速登入,3=更新session)
     private void HTTPResponse_Login_1(HTTPResponse responsePack)
     {
-        //string deviceID = responsePack.Strs[]
-        int strNums = 0;
-        int intNums = 0;
-        string session = responsePack.Strs[strNums];
-        int kind = responsePack.Ints[intNums];
-        strNums++;
-        intNums++;
+        string session = responsePack.PopString();
+        int kind = responsePack.PopInteger();
 
         AccountData accountData = new AccountData();
-        accountData.PlayerName = responsePack.Strs[strNums];
-        strNums++;
+        accountData.PlayerName = responsePack.PopString();
 
         CommonFunction.DebugMsg(string.Format("登入成功 : {0} , {1}", session, kind));
         _control.SetLoginSession(session);
