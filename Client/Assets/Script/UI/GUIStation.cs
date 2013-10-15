@@ -61,7 +61,8 @@ public class GUIStation
             GameObject rootObj = new GameObject("UI Root (2D)");
             GameObject.DontDestroyOnLoad(rootObj);
             _uiRoot = rootObj.AddComponent<UIRoot>();
-            _uiRoot.scalingStyle = UIRoot.Scaling.FixedSizeOnMobiles;            
+            _uiRoot.scalingStyle = UIRoot.Scaling.FixedSizeOnMobiles;
+            _uiRoot.manualHeight = 1080; // 先設死，之後測試用 Screen.height;
         }
 
         _uiRoot.gameObject.layer = GLOBALCONST.LAYER_UI_BASE;

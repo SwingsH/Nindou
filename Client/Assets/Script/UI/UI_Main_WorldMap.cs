@@ -393,5 +393,8 @@ public class UI_Main_WorldMap : GUIFormBase
         void StageBtnClick()
     {
         CommonFunction.DebugMsg("按下「關卡」按鈕");
+        Hide();
+        _guistation.Form<UI_Main_StageSelect>().Show();
+
     }
 }

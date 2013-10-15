@@ -19,4 +19,8 @@ public static class GLOBAL_STRING
     public const string MENU_BTN_TEXT = "選單";
     public const string WARNING_LABEL_TEXT = "強敵發現！！";
     #endregion
+    #region UI_Main_StageSelect (顯示關卡選擇的主介面）
+    public const string STAGE_OPEN_HINT_TEXT = "點擊觀看開啟條件";
+    public const string STAGE_NOT_OPEN_TEXT = "未開啟";
+    #endregion
 }

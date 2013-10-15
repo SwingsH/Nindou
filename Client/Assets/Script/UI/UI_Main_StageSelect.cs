@@ -8,6 +8,84 @@ using System.Collections.Generic;
 public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour 
 {
 
+    private class UI_Stage : GUIFormBase
+    {
+        private UIButton _stageBtn; // 關卡按鈕
+        private UILabel _stageNameText; // 關卡名稱(&消耗體力說明)
+        private UILabel _hintText; // 「點擊觀看開啟條件」的提示文字
+        private UILabel _nonOpenText; // 「未開啟」的提示文字
+        private UISprite _exploreProgressBackground; // 探索度的背景圖
+        private UILabel _exploreProgressText; // 探索度的文字
+
+        #region 繼承自GUIFormBase的method
+        // GameObject parentObj, string stageBtnName, Vector3 relativePos, int backgroundDepth,  EventDelegate eventDelegate, string stageName)
+        protected override void CreateAllComponent()
+        {
+            //_stageBtn = CommonFunction.CreateUIButton(gameObject, "Stage", relativePos, backgroundDepth,
+            //    ResourceStation.GetUIAtlas("TestAtlas"),
+            //    "button_back", 1478, 104, null, Color.white, string.Empty);
+
+            //_stageBtn.SetColor(Color.white, Color.white, Color.white, Color.gray);
+            //_stageBtn.onClick.Add(eventDelegate);
+
+            //_stageNameText = CommonFunction.CreateUILabel(_stageBtn.gameObject, "StageName", UIWidget.Pivot.Left, new Vector3(-653, 0, 0),
+            //    backgroundDepth + 1,
+            //    ResourceStation.GetUIFont("MSJH_30"),
+            //    Color.red, stageName);
+            //_hintText = CommonFunction.CreateUILabel(_stageBtn.gameObject, "HintText", UIWidget.Pivot.Left, new Vector3(-120, 0, 0),
+            //    backgroundDepth + 2,
+            //    ResourceStation.GetUIFont("MSJH_30"),
+            //    Color.red, GLOBAL_STRING.STAGE_OPEN_HINT_TEXT);
+            //_nonOpenText = CommonFunction.CreateUILabel(_stageBtn.gameObject, "NonOpenText", UIWidget.Pivot.Center, new Vector3(430, 0, 0),
+            //    backgroundDepth + 1,
+            //    ResourceStation.GetUIFont("MSJH_30"),
+            //    Color.red, GLOBAL_STRING.STAGE_NOT_OPEN_TEXT);
+            //_exploreProgressBackground = CommonFunction.CreateUISprite(_stageBtn.gameObject, "ExploreProgressBack", UISprite.Type.Simple,
+            //    backgroundDepth + 3,
+            //    ResourceStation.GetUIAtlas("TestAtlas"),
+            //    "button_back", UIWidget.Pivot.Center, 399, 67);
+            //_exploreProgressBackground.transform.localPosition = new Vector3(430, 0, 0);
+            //_exploreProgressText = CommonFunction.CreateUILabel(_exploreProgressBackground.gameObject, "ExploreProgressText", UIWidget.Pivot.Left,
+            //    new Vector3(-164, 0, 0), backgroundDepth + 4,
+            //    ResourceStation.GetUIFont("MSJH_30"),
+            //    Color.red, "探索度：0/1");
+        }
+        #endregion
+        #region 固定函式
+        // Use this for initialization
+        void Start()
+        {
+
+        }
+
+        // Update is called once per frame
+        void Update()
+        {
+
+        }
+
+        protected override void OnDestroy()
+        {
+            NGUITools.Destroy(_exploreProgressText.gameObject);
+            _exploreProgressText = null;
+            NGUITools.Destroy(_exploreProgressBackground.gameObject);
+            _exploreProgressBackground = null;
+            NGUITools.Destroy(_nonOpenText.gameObject);
+            _nonOpenText = null;
+            NGUITools.Destroy(_hintText.gameObject);
+            _hintText = null;
+            NGUITools.Destroy(_stageNameText.gameObject);
+            _stageNameText = null;
+            NGUITools.Destroy(_stageBtn.gameObject);
+            _stageBtn = null;
+            base.OnDestroy();
+        }
+        #endregion
+
+    }
+
+    
+
     #region 每個主介面都會有的部分
     private UIButton _characterBtn; // 「人物」按鈕
     private UIButton _bagBtn; // 「背包」按鈕
@@ -17,8 +95,9 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
     #region 關卡選擇部分
     private UILabel _stageNameText;
     private UIButton _returnPreviousUIBtn; // 回到上一層的按鈕
-    private List<UIButton> _allSubStageSelectUIBtn; // 所有子關卡選擇按鈕
-    private List<UILabel> _allSubStageName; // 所有子關卡名稱
+    //private List<UIButton> _allSubStageSelectUIBtn; // 所有子關卡選擇按鈕
+    //private List<UILabel> _allSubStageName; // 所有子關卡名稱
+    private List<UI_Stage> _allSubStage = new List<UI_Stage>();
     #endregion
     #region 繼承自GUIFormBase的method
     protected override void CreateAllComponent()
@@ -30,7 +109,7 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
 
         #region 每個主介面都有的部分
         // 背景圖
-        UISprite backgroundPic = CommonFunction.CreateUISprite(gameObject, "Background", UISprite.Type.Simple, 0,
+        UISprite backgroundPic = CommonFunction.CreateUISprite(panel.gameObject, "Background", UISprite.Type.Simple, 0,
             ResourceStation.GetUIAtlas("TestAtlas"),
            "pachuri", UIWidget.Pivot.Center, 1920, 1080);
         // 「人物」按鈕
@@ -84,12 +163,18 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
             "X", 100, 100, null, Color.white, string.Empty);
         _returnPreviousUIBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _returnPreviousUIBtn.onClick.Add(new EventDelegate(this, "ReturnPreviousUI"));
-
+        /// 先建三個
+        for (int i = 0; i < 3; ++i)
+        {
+            //_allSubStage.Add(new UI_Stage(stageSelectBackground.gameObject, string.Format("Stage_{0}", i + 1), new Vector3(-76, 184 - i * 200, 0),
+            //    5, new EventDelegate(this, "SelectStage"), string.Format("靈山 - 山腳下 - {0}\n消耗體力：1 PT", i + 1)));
+        }
     }
     #endregion
     #region 固定函式
     // Use this for initialization
-	void Start () {
+    void Start()
+    {
 	
 	}
 	
@@ -110,6 +195,9 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         _friendBtn = null;
         NGUITools.Destroy(_stageNameText.gameObject);
         _stageNameText = null;
+        NGUITools.Destroy(_returnPreviousUIBtn.gameObject);
+        _returnPreviousUIBtn = null;
+        _allSubStage = null;
         base.OnDestroy();
     }
     #endregion
