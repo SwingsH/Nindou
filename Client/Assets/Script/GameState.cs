@@ -197,6 +197,40 @@ public class GameLoginNone : IGameState
 	}
 }
 
+// game server 沒有帳號資料, 建立帳號
+public class GameCreatePlayer : IGameState
+{
+    private static GameCreatePlayer _instance = null;
+
+    ~GameCreatePlayer()
+    {
+        _instance = null;
+    }
+
+    public void OnChangeIn(GameControl control)
+    {
+        //進入遊戲
+        //control.GUIStation.Form<UI_Start>().Hide();
+    }
+    public void Update(GameControl control)
+    {
+    }
+    public static GameCreatePlayer Instance
+    {
+        get
+        {
+            if (_instance == null)
+                _instance = new GameCreatePlayer();
+            return _instance;
+        }
+    }
+
+    public void OnChangeOut(GameControl control)
+    {
+        //throw new System.NotImplementedException();
+    }
+}
+
 // game server 已經登入, 遊戲中
 public class GameEntered : IGameState
 {

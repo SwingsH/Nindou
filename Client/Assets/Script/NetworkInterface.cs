@@ -386,7 +386,7 @@ public class NetworkInterface
         CommonFunction.DebugMsg( " URL for debugging : " + string.Format(HTTP_PROTOCOL_PAGE, HTTP_HEAD, HTTP_IP) + "?" + NetworkHTTPBuffer.DumpDebugURL());
         _gameHTTP.Send(NetworkHTTPBuffer.Form);
         _sendSerial++;
-        //NetworkHTTPBuffer.ClearSendBuffer();
+        NetworkHTTPBuffer.ClearSendBuffer();
     }
 
     // 協定集中處理區

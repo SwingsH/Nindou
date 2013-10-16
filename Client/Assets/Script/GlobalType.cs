@@ -163,7 +163,7 @@ public class EnumClassValue : System.Attribute
 }
 
 /// <summary>
-/// 
+/// 遊戲帳號資訊
 /// </summary>
 public struct AccountData
 {

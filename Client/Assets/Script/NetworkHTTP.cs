@@ -24,6 +24,9 @@ public class NetworkHTTP
     {
     }
 
+    /// <summary>
+    /// 設置協定網址
+    /// </summary>
     public void SetConfig(string url)
     {
         _currentURL = url;
