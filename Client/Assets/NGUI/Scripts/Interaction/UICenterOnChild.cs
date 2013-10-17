@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 /// <summary>
 /// Ever wanted to be able to auto-center on an object within a draggable panel?

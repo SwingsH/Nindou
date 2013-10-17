@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 /// <summary>
 /// Attach to a game object to make its position always lag behind its parent as the parent moves.

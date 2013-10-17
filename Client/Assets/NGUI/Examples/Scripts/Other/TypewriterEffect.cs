@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 /// <summary>
 /// Trivial script that fills the label's contents gradually, as if someone was typing.

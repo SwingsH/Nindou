@@ -22,11 +22,18 @@ public class GUIStation
 {
     private GameControl _gameControl = null;
     private UIRoot _uiRoot = null;
+
+    #region UI攝影機相關
     private Camera _camera = null;  // 顯示UI用的Camera
     private UICamera _uiCamera = null; // 為了事件處理使用
 
-
-    private Dictionary<Type, GUIFormBase> _guiReference; // GUIForm參照儲存
+    /// <summary>
+    /// 顯示UI用的攝影機
+    /// </summary>
+    public Camera GUICamera
+    {
+        get { return _camera; }
+    }
 
     /// <summary>
     /// UICamera的深度
@@ -35,7 +42,9 @@ public class GUIStation
     {
         set { if (_camera != null) { _camera.depth = value; } }
     }
+    #endregion
 
+    private Dictionary<Type, GUIFormBase> _guiReference; // GUIForm參照儲存
     /// <summary>
     /// 建構式
     /// </summary>
@@ -139,7 +148,7 @@ public class GUIStation
         if (!_guiReference.TryGetValue(typeof(T), out retUI))
         {
             retUI = InstantiateContainer(typeof(T));
-            retUI.CreateUI(_camera);
+            retUI.CreateUI(this);
         }
         return (retUI as T);
     }
