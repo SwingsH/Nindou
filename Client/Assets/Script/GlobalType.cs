@@ -342,3 +342,77 @@ enum AreaType : byte
     Normal = 1, // 一般關卡
     Activity = 2 //活動關卡
 }
+
+
+#region 技能相關
+[StructLayout(LayoutKind.Sequential)]
+public class SkillData
+{
+	public uint ID;
+	public string Name = "";
+	public byte SkillType;
+	public byte DamageType;
+	public ushort Power;
+	public ushort Critical;
+	public ushort Accuracy;
+	public ushort Range;
+	public ushort RangeMode;
+	public ushort Cooldown;
+	public uint[] SPEffect = new uint[3];
+
+	public string AnimName = "";
+	public ushort AnimPlayTimes;
+	public ushort CastTime;
+	public string ParticleAttackStart = "";
+	public string ParticleAttackEnd = "";
+	public string ParticleHit = "";
+}
+
+[StructLayout(LayoutKind.Sequential)]
+public class SpecialEffect
+{
+	public uint ID;
+	public byte EffectType;
+	public uint EffectPower; //用uint是為了可以填技能id，平時還是以ushort為主
+	public ushort EffectChance;
+	public ushort EffectDuration;
+}
+
+public enum SkillDamageType : byte
+{
+	Damage = 0,
+	Heal = 100,
+}
+public enum SkillType : byte
+{
+	None = 0,
+	Weapon = 1,
+	Active,
+	Passive,
+	Extrim = 255,
+}
+//特殊效果類型
+public enum SPEffectType : byte
+{
+	None = 0,
+	//以下為實際效果
+	PowerBuffer,
+	CriticalBuffer,
+	AccuracyBuffer,
+	Posion = 10,
+	Fire,
+	Water,
+	Earth,
+	//以下為觸發類效果，目前只有攻擊時觸發
+	AdditionalEffect = 100,
+	AddPowerBuffer,
+	AddCriticalBuffer,
+	AddAccuracyBuffer,
+	AddPosion = 110,
+	AddFire,
+	AddWater,
+	AddEarth,
+	//武器技能上附加的特殊技能
+	ExtrimSkill = 255,
+}
+#endregion

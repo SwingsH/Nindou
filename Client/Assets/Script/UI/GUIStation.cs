@@ -181,16 +181,4 @@ public class GUIStation
         return retUI;
     }
     #endregion
-    public void TestDestroy<T>()
-    {
-         GUIFormBase deUI;
-
-         if (_guiReference.TryGetValue(typeof(T), out deUI))
-         {
-             _guiReference.Remove(typeof(T));
-             NGUITools.Destroy(deUI.gameObject);
-         }
-         deUI = null;
-    }
-
 }

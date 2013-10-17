@@ -19,7 +19,7 @@ public class UnitGenerater{
 		{
 			activeSkill.Add(new MainSkill(TestDataBase.Instance.GetSkillData(skillID)));
 		}
-		au.triggerSkills = activeSkill;
+		au.ActiveSkills = activeSkill;
 		au.MaxLife = info.MaxLife;
 		au.Life = info.MaxLife;
 		au.MoveSpeed = info.MoveSpeed;
@@ -45,14 +45,56 @@ public class UnitGenerater{
 		}
 		else
 			ba = ResourceStation.GetBone(BoneAnimName);
-		ResourceStation.GenerateModelSprite(ba, spriteInfo);
+		GenerateModelSprite(ba, spriteInfo);
 		GameObject go = new GameObject(BoneAnimName);
 		ba.transform.parent = go.transform;
 		ba.transform.localRotation = Quaternion.identity;
 		ba.transform.localPosition = new Vector3(0, 125, 0);
 		return go;
 	}
+	//public static Sprite[] GetSprites(BoneAnimation boneData)
+	//{
+	//    Sprite[] result = new Sprite[GLOBALCONST.BONE_NAME.Length];
+	//    for (int i = 0; i < GLOBALCONST.BONE_NAME.Length; i++)
+	//    {
+	//        string boneName = GLOBALCONST.BONE_NAME[i];
 
+	//        Transform spriteTrans = boneData.GetSpriteTransform(boneName);
+	//        if (spriteTrans == null)
+	//            continue;
+	//        Sprite sprite = spriteTrans.GetComponent<SmoothMoves.Sprite>();
+
+	//        if (sprite == null)
+	//            sprite = spriteTrans.gameObject.AddComponent<Sprite>();
+	//        sprite.SetPivotOffset(Vector2.zero, true);
+	//        //sprite.useDefaultPivot = true;
+	//        result[i] = sprite;
+	//    }
+	//    return result;
+	//}
+	public static void GenerateModelSprite(SmoothMoves.BoneAnimation boneData, string[] atlasInfo)
+	{
+		if (boneData == null || atlasInfo == null)
+			return;
+		for (int i = 0; i < atlasInfo.Length && i < GLOBALCONST.BONE_NAME.Length; i++)
+		{
+			string boneName = GLOBALCONST.BONE_NAME[i];
+			string atlasName = atlasInfo[i];
+
+			Transform spriteTrans = boneData.GetSpriteTransform(boneName);
+			if (spriteTrans == null)
+				continue;
+			TextureAtlas atlas = ResourceStation.GetAtlas(atlasName);
+			Sprite sprite = spriteTrans.GetComponent<SmoothMoves.Sprite>();
+			
+			if (sprite == null)
+				sprite = spriteTrans.gameObject.AddComponent<Sprite>();
+			sprite.SetAtlas(atlas);
+			sprite.SetTextureName(boneName);
+			//sprite.useDefaultPivot = true;←這個沒有用，要用下面這個才行
+			sprite.SetPivotOffset(Vector2.zero, true);
+		}
+	}
 	public void Recycle(Unit unit)
 	{
 		AnimUnit au = unit as AnimUnit;

@@ -40,12 +40,12 @@ public class TestSkillPreview : MonoBehaviour {
 			if (au.ExtrimSkill != null)
 				if (GUI.Button(new Rect(70, 50, 60, 40), au.ExtrimSkill.Name))
 					au.PlaySkill(au.ExtrimSkill);
-			if(au.triggerSkills != null)
-				for (int i = 0; i < au.triggerSkills.Count; i++)
+			if(au.ActiveSkills != null)
+				for (int i = 0; i < au.ActiveSkills.Count; i++)
 				{
-					if(au.triggerSkills[i] != null)
-						if (GUI.Button(new Rect(70, 90 + i * 40, 60, 40), au.triggerSkills[i].Name))
-							au.PlaySkill(au.triggerSkills[i]);
+					if(au.ActiveSkills[i] != null)
+						if (GUI.Button(new Rect(70, 90 + i * 40, 60, 40), au.ActiveSkills[i].Name))
+							au.PlaySkill(au.ActiveSkills[i]);
 				}
 		}
 

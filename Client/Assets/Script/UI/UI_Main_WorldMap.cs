@@ -277,27 +277,27 @@ public class UI_Main_WorldMap : GUIFormBase
 
     protected override void OnDestroy()
     {
-        if (_characterBtn != null) { NGUITools.Destroy(_characterBtn.gameObject); }
+        NGUITools.Destroy(_characterBtn.gameObject);
         _characterBtn = null;
-        if (_bagBtn != null) { NGUITools.Destroy(_bagBtn.gameObject); }
+        NGUITools.Destroy(_bagBtn.gameObject);
         _bagBtn = null;
-        if (_shopBtn != null) { NGUITools.Destroy(_shopBtn.gameObject); }
+        NGUITools.Destroy(_shopBtn.gameObject);
         _shopBtn = null;
-        if (_friendBtn != null) { NGUITools.Destroy(_friendBtn.gameObject); }
+        NGUITools.Destroy(_friendBtn.gameObject);
         _friendBtn = null;
-        if (_stamina != null) { NGUITools.Destroy(_stamina.gameObject); }
+        NGUITools.Destroy(_stamina.gameObject);
         _stamina = null;
-        if (_staminaText != null) { NGUITools.Destroy(_staminaText.gameObject); }
+        NGUITools.Destroy(_staminaText.gameObject);
         _staminaText = null;
-        if (_headPictureBtn != null) { NGUITools.Destroy(_headPictureBtn.gameObject); }
+        NGUITools.Destroy(_headPictureBtn.gameObject);
         _headPictureBtn = null;
-        if (_pointText != null) { NGUITools.Destroy(_pointText.gameObject); }
+        NGUITools.Destroy(_pointText.gameObject);
         _pointText = null;
-        if (_menuBtn != null) { NGUITools.Destroy(_menuBtn.gameObject); }
+        NGUITools.Destroy(_menuBtn.gameObject);
         _menuBtn = null;
-        if (_warningText != null) { NGUITools.Destroy(_warningText.gameObject); }
+        NGUITools.Destroy(_warningText.gameObject);
         _warningText = null;
-        if (_stageBtn != null) { NGUITools.Destroy(_stageBtn.gameObject); }
+        NGUITools.Destroy(_stageBtn.gameObject);
         _stageBtn = null;
         base.OnDestroy();
     }
@@ -307,7 +307,8 @@ public class UI_Main_WorldMap : GUIFormBase
     /// 按下「人物」按鈕的反應函式
     /// TODO : public 只是暫時為了確認用，之後要改成private
     /// </summary>
-    void CharacterBtnClick()
+    //public 
+        void CharacterBtnClick()
     {
         CommonFunction.DebugMsg("按下 「人物」按鈕");
         // test : 隱藏警告提示
@@ -318,7 +319,8 @@ public class UI_Main_WorldMap : GUIFormBase
     /// 按下「背包」按鈕的反應函式
     /// TODO : public 只是暫時為了確認用，之後要改成private
     /// </summary>
-    void BagBtnClick()
+    //public 
+        void BagBtnClick()
     {
         CommonFunction.DebugMsg("按下「背包」按鈕");
         // test : 顯示警告提示
@@ -329,7 +331,8 @@ public class UI_Main_WorldMap : GUIFormBase
     /// 按下「商店」按鈕的反應函式
     /// TODO : public 只是暫時為了確認用，之後要改成private
     /// </summary>
-    void ShopBtnClick()
+    //public 
+        void ShopBtnClick()
     {
         CommonFunction.DebugMsg("按下「商店」按鈕");
         // test : 增加體力（超過最大值改成0）
@@ -342,7 +345,8 @@ public class UI_Main_WorldMap : GUIFormBase
     /// 按下「好友」按鈕的反應函式
     /// TODO : public 只是暫時為了確認用，之後要改成private
     /// </summary>
-    void FriendBtnClick()
+    //public 
+        void FriendBtnClick()
     {
         CommonFunction.DebugMsg("按下「好友」按鈕");
         // test : 減少體力（低於0改成最大值）

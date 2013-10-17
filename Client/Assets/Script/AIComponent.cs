@@ -36,7 +36,11 @@ public abstract class ActionComponent
 /// </summary>
 public class NinDoAttackComponent : ActionComponent
 {
-	public Unit Target; 
+	public NinDoAttackComponent(ActionUnit aunit)
+	{
+		this.unit = aunit;
+	}
+
 	public MainSkill normalAttack; //普通攻擊的技能
 	public List<MainSkill> triggerSkills = new List<MainSkill>(); //普通攻擊時機率性觸發的技能
 	
@@ -44,65 +48,36 @@ public class NinDoAttackComponent : ActionComponent
 	{
 		if (State == ActionState.Busy)
 			return;
+		Unit Target = unit.TargetUnit;
 		if (Target == null)
 			return;
 		//攻擊前先面對目標
-		unit.Direction = (Target.Pos.x - unit.Pos.x) > 0 ? eDirection.Right : eDirection.Left;
+		if(Target.Pos.x == unit.Pos.x)
+			//x相等面對哪邊都沒差了，用畫面上的位置看起來比較不會那麼奇怪
+			unit.Direction = Target.ScreenPos.x - unit.ScreenPos.x > 0 ? eDirection.Right : eDirection.Left;
+		else
+			unit.Direction = Target.Pos.x - unit.Pos.x > 0 ? eDirection.Right : eDirection.Left;
 
 		//無法進行普通攻擊則跳出
-		if (normalAttack == null || !normalAttack.Castable)
+		if (unit.CurrentCast == null || !unit.CurrentCast.Castable)
 			return;
 		
 		//判斷攻擊範圍
 		if (BattleManager.CheckInRange(unit.AttackRangeMode, unit.Pos, unit.Direction, unit.AttackRange, Target.Pos))
 		{
-			float rateFix = 1;
-			UnavailableTime = Time.time + normalAttack.CoolDown;
-			MainSkill castSkill = normalAttack;
-			
-			for (int i = 0; i < triggerSkills.Count; i++)
-			{
-				if (triggerSkills[i].Castable)
-				{
-					List<Unit> units;
-					if (triggerSkills[i].DamageType == SkillDamageType.Damage)
-						units = BattleManager.Get_EnemyUnitsInRange(unit.Group, triggerSkills[i].range, unit.Pos, unit.Direction, triggerSkills[i].range);
-					else
-						units = BattleManager.Get_FriendUnitsInRange(unit.Group, triggerSkills[i].range, unit.Pos, unit.Direction, triggerSkills[i].range);
-
-					if (units.Count == 0)
-						continue;
-
-					float r = Random.value;
-					if (r < triggerSkills[i].ActivePropability * rateFix)
-					{
-						castSkill = triggerSkills[i];
-						break;
-					}
-					else
-					{
-						if (1 - triggerSkills[i].ActivePropability != 0)
-							rateFix /= 1 - triggerSkills[i].ActivePropability;
-					}
-				}
-			}
-			BusyTime = Time.time + castSkill.CastTime;
-			unit.CastSkill(castSkill);
+			unit.CastCurrentSkill();
 		}
 	}
 	public override ActionState State
 	{
 		get
 		{
-			if (Target == null)
+			Unit Target = unit.TargetUnit;
+			if (unit == null)
 				return ActionState.Unavailable;
-			if (BusyTime > Time.time)
+			if (unit.IsCasting)
 				return ActionState.Busy;
-			//if (unit.IsCasting)
-			//    return ActionState.Busy;
-			//if (UnavailableTime > Time.time)
-			//    return ActionState.Unavailable;
-			if (normalAttack == null || !normalAttack.Castable || !BattleManager.CheckInRange(normalAttack.rangeMode, unit.Pos, (Target.Pos.x - unit.Pos.x) > 0 ? eDirection.Right : eDirection.Left, normalAttack.range, Target.Pos))
+			if (unit.CurrentCast == null || !unit.CurrentCast.Castable || !BattleManager.CheckInRange(unit.AttackRangeMode, unit.Pos, (Target.Pos.x - unit.Pos.x) > 0 ? eDirection.Right : eDirection.Left, unit.AttackRange, Target.Pos))
 				return ActionState.Unavailable;
 			return ActionState.Idle; 
 		}

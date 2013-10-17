@@ -19,13 +19,15 @@ public class TestDataBase{
 		if (_Instance == null)
 			_Instance = new TestDataBase();
 	}
-	Dictionary<ushort, SkillData> SkillDataBase;
+	Dictionary<uint, SkillData> SkillDataBase;
 	Dictionary<uint, NPCData> NpcDataBase;
 	Dictionary<uint, List<Battle>> BattleDatas;
+	Dictionary<uint, SpecialEffect> SPEffectDatas;
 	public TestDataBase()
 	{
-		SkillDataBase = LoadData<ushort, SkillData>(GLOBALCONST.FILENAME_SKILL, "ID");
-		NpcDataBase = LoadData<uint, NPCData>("npcdata", "NPCID");
+		SkillDataBase = LoadData<uint, SkillData>(GLOBALCONST.FILENAME_SKILL, "ID");
+		NpcDataBase = LoadData<uint, NPCData>(GLOBALCONST.FILENAME_NPC, "NPCID");
+		SPEffectDatas = LoadData<uint, SpecialEffect>(GLOBALCONST.FILENAME_SKILLEFFECT, "ID");
 		BattleDatas = new Dictionary<uint,List<Battle>>();
 		TextAsset ta = Resources.Load("Data/" + GLOBALCONST.FILENAME_BATTLE, typeof(TextAsset)) as TextAsset;
 		object obj = new List<Battle>();
@@ -51,26 +53,26 @@ public class TestDataBase{
 		playerInfo[tempIndex].MaxLife = 300;
 		playerInfo[tempIndex].MoveMode = 1;
 		playerInfo[tempIndex].MoveSpeed = 3;
-		playerInfo[tempIndex].spriteNames = new string[] { TestDataBase.TestAtlasName[tempIndex], TestDataBase.TestAtlasName[tempIndex], TestDataBase.TestAtlasName[tempIndex],
-				TestDataBase.TestAtlasName[tempIndex], TestDataBase.TestAtlasName[tempIndex], TestDataBase.TestAtlasName[tempIndex] };
+		playerInfo[tempIndex].spriteNames = new string[] { TestDataBase.TestAtlasName[0], TestDataBase.TestAtlasName[0], TestDataBase.TestAtlasName[0],
+				TestDataBase.TestAtlasName[0], TestDataBase.TestAtlasName[0], TestDataBase.TestAtlasName[0] };
 		tempIndex = 1;
 		playerInfo[tempIndex] = new UnitInfo();
 		playerInfo[tempIndex].AttackID = 6;
-		playerInfo[tempIndex].SkillID = new ushort[] { 1,2};
+		playerInfo[tempIndex].SkillID = new ushort[] { 1, 2 };
 		playerInfo[tempIndex].MaxLife = 250;
 		playerInfo[tempIndex].MoveMode = 1;
 		playerInfo[tempIndex].MoveSpeed = 3;
-		playerInfo[tempIndex].spriteNames = new string[] { TestDataBase.TestAtlasName[tempIndex], TestDataBase.TestAtlasName[tempIndex], TestDataBase.TestAtlasName[tempIndex],
-				TestDataBase.TestAtlasName[tempIndex], TestDataBase.TestAtlasName[tempIndex], TestDataBase.TestAtlasName[tempIndex] };
+		playerInfo[tempIndex].spriteNames = new string[] { TestDataBase.TestAtlasName[0], TestDataBase.TestAtlasName[0], TestDataBase.TestAtlasName[0],
+		        TestDataBase.TestAtlasName[0], TestDataBase.TestAtlasName[0], TestDataBase.TestAtlasName[0] };
 		tempIndex = 2;
 		playerInfo[tempIndex] = new UnitInfo();
 		playerInfo[tempIndex].AttackID = 6;
-		playerInfo[tempIndex].SkillID = new ushort[] { 7,100 };
+		playerInfo[tempIndex].SkillID = new ushort[] { 7, 100 };
 		playerInfo[tempIndex].MaxLife = 200;
 		playerInfo[tempIndex].MoveMode = 1;
 		playerInfo[tempIndex].MoveSpeed = 3;
-		playerInfo[tempIndex].spriteNames = new string[] { TestDataBase.TestAtlasName[tempIndex], TestDataBase.TestAtlasName[tempIndex], TestDataBase.TestAtlasName[tempIndex],
-				TestDataBase.TestAtlasName[tempIndex], TestDataBase.TestAtlasName[tempIndex], TestDataBase.TestAtlasName[tempIndex] };
+		playerInfo[tempIndex].spriteNames = new string[] { TestDataBase.TestAtlasName[0], TestDataBase.TestAtlasName[0], TestDataBase.TestAtlasName[0],
+		        TestDataBase.TestAtlasName[0], TestDataBase.TestAtlasName[0], TestDataBase.TestAtlasName[0] };
 		tempIndex = 3;
 		playerInfo[tempIndex] = new UnitInfo();
 		playerInfo[tempIndex].AttackID = 6;
@@ -78,12 +80,12 @@ public class TestDataBase{
 		playerInfo[tempIndex].MaxLife = 200;
 		playerInfo[tempIndex].MoveMode = 1;
 		playerInfo[tempIndex].MoveSpeed = 3;
-		playerInfo[tempIndex].spriteNames = new string[] { TestDataBase.TestAtlasName[tempIndex], TestDataBase.TestAtlasName[tempIndex], TestDataBase.TestAtlasName[tempIndex],
-				TestDataBase.TestAtlasName[tempIndex], TestDataBase.TestAtlasName[tempIndex], TestDataBase.TestAtlasName[tempIndex] };
+		playerInfo[tempIndex].spriteNames = new string[] { TestDataBase.TestAtlasName[0], TestDataBase.TestAtlasName[0], TestDataBase.TestAtlasName[0],
+		        TestDataBase.TestAtlasName[0], TestDataBase.TestAtlasName[0], TestDataBase.TestAtlasName[0] };
 		#endregion
 
 	}
-	public SkillData GetSkillData(ushort SkillID)
+	public SkillData GetSkillData(uint SkillID)
 	{
 		SkillData result;
 		if (SkillDataBase == null)
@@ -104,6 +106,14 @@ public class TestDataBase{
 		NPCData result;
 		NpcDataBase.TryGetValue(NPCID, out result);
 		return result;
+	}
+	public SpecialEffect GetSPEffect(uint EffectID)
+	{
+		SpecialEffect result;
+		if (SPEffectDatas.TryGetValue(EffectID, out result))
+			return result;
+		else
+			return new SpecialEffect();
 	}
 	public UnitInfo[] playerInfo = new UnitInfo[4];
 	public static Dictionary<KeyType, DataType> LoadData<KeyType, DataType>(string dataName,string KeyFieldName)

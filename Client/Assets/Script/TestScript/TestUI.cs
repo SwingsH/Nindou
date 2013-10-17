@@ -58,7 +58,7 @@ public class TestUI : MonoBehaviour {
 				uint battleID = 0;
 				for (uint i = 1; i <= 3; i++)
 				{
-					if (GUI.Button(new Rect(Screen.width / 2 - 90, Screen.height / 2 - 40 - 3 * 20 + i * 40, 60, 40), "Battle" + i.ToString()))
+					if (GUI.Button(new Rect(Screen.width / 2 - 160, Screen.height / 2 - 3 * 40 + (i -1) * 80, 80, 80), "Battle" + i.ToString()))
 					{
 						battleID = i;
 					}
@@ -70,11 +70,12 @@ public class TestUI : MonoBehaviour {
 				}
 			}
 		}
-		
+#if UNITY_EDITOR
 		if (UnityEditor.Selection.activeGameObject)
 		{
 			GUI.Label(new Rect(610, 10, 100, 40), UnityEditor.Selection.activeGameObject.GetInstanceID().ToString());
 		}
+
 		if (UnityEditor.Selection.activeGameObject && UnityEditor.Selection.activeGameObject.GetComponent<SmoothMoves.BoneAnimation>() != null)
 		{
 			SmoothMoves.BoneAnimation anim = UnityEditor.Selection.activeGameObject.GetComponent<SmoothMoves.BoneAnimation>();
@@ -106,7 +107,7 @@ public class TestUI : MonoBehaviour {
 				line += 30;
 			}
 		}
-
+#endif
 	}
 
 }

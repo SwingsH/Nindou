@@ -360,11 +360,6 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         if (_allSubStage[stageIndex].StageOpen)
         {
             CommonFunction.DebugMsgFormat("{0}   關卡已經開啟，進入探索", _allSubStage[stageIndex].StageName);
-            BattleState.BattleID = (uint)(stageIndex + 1);
-            GameControl.Instance.ChangeGameState(BattleState.instance);
-            // for test : 進入戰鬥
-            Hide();
-            _guistation.Form<UI_Battle>().Show();
         }
         else // 關卡尚未開啟，顯示開啟條件
         {
