@@ -49,12 +49,13 @@ public class GLOBALCONST
     #region 檔名相關常數（無副檔名）
     // TODO: 下面目前都是為了測試用
     public const string FILENAME_SCENE = "SceneData";   // 場景資料
-	public const string FILENAME_SKILL = "SkillData"; // 
+	public const string FILENAME_SKILL = "SkillData"; //技能資料 
 	public const string FILENAME_NPC = "NpcData";       // NpcData
     public const string FILENAME_AREA = "Area";             // 區域資料
     public const string FILENAME_AREA_EVENT = "AreaEvent"; // 區域事件資料
     public const string FILENAME_STORY = "Story";           // 劇情資料
     public const string FILENAME_BATTLE = "Battle";           // 戰鬥配置資料
+	public const string FILENAME_SKILLEFFECT = "SkillExtraEffect"; //技能附加效果
 
     #endregion
     #region 副檔名相關常數
@@ -81,13 +82,14 @@ public class GLOBALCONST
     public enum DataLoadTag
     {
         // for test
-        [EnumClassValue(typeof(SceneData), FILENAME_SCENE)]        Scene = 0, // 場景
-		[EnumClassValue(typeof(SkillData), FILENAME_SKILL)]	       Skill,       // 技能（暫
-		[EnumClassValue(typeof(NPCData), FILENAME_NPC)]     	   NPC,         // NpcData
-        [EnumClassValue(typeof(Area), FILENAME_AREA)]              Area,        // 區域
-        [EnumClassValue(typeof(AreaEvent), FILENAME_AREA_EVENT)]   AreaEvent,   // 區域事件
-        [EnumClassValue(typeof(Story), FILENAME_STORY)]            Story,       // 劇情
-        [EnumClassValue(typeof(Battle), FILENAME_BATTLE)]            Battle       // 戰鬥配置表       
+        [EnumClassValue(typeof(SceneData), FILENAME_SCENE)]				Scene = 0, // 場景
+		[EnumClassValue(typeof(SkillData), FILENAME_SKILL)]				Skill,       // 技能
+		[EnumClassValue(typeof(NPCData), FILENAME_NPC)]					NPC,         // NpcData
+        [EnumClassValue(typeof(Area), FILENAME_AREA)]					Area,        // 區域
+        [EnumClassValue(typeof(AreaEvent), FILENAME_AREA_EVENT)]		AreaEvent,   // 區域事件
+        [EnumClassValue(typeof(Story), FILENAME_STORY)]					Story,       // 劇情
+        [EnumClassValue(typeof(Battle), FILENAME_BATTLE)]				Battle,       // 戰鬥配置表      
+ 		[EnumClassValue(typeof(SpecialEffect), FILENAME_SKILLEFFECT)]	SPEffect,       // 殊特狀態表
         
     };
 }

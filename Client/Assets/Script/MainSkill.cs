@@ -22,24 +22,35 @@ public class MainSkill
 	public MainSkill()
 	{
 		SkillData = new SkillData();
+		_speffect = new SpecialEffect[0];
 	}
 
 	public MainSkill(ushort SkillID)
 	{
 		SkillData = TestDataBase.Instance.GetSkillData(SkillID);
+		_speffect = new SpecialEffect[SkillData.SPEffect.Length];
+		for (int i = 0; i < SkillData.SPEffect.Length; i++)
+			_speffect[i] = TestDataBase.Instance.GetSPEffect(SkillData.SPEffect[i]);
 		Passive.Reset();
 		State.Reset();
 	}
 	public MainSkill(SkillData skillData)
 	{
 		SkillData = skillData;
+		_speffect = new SpecialEffect[SkillData.SPEffect.Length];
+		for (int i = 0; i < SkillData.SPEffect.Length; i++)
+			_speffect[i] = TestDataBase.Instance.GetSPEffect(SkillData.SPEffect[i]);
 		Passive.Reset();
 		State.Reset();
 	}
-	public global::SkillData SkillData
+	protected global::SkillData SkillData
 	{
-		protected get;
+		get;
 		set;
+	}
+	public uint SkillID
+	{
+		get { return SkillData.ID; }
 	}
 	public string Name
 	{
@@ -120,14 +131,10 @@ public class MainSkill
 		get { return Time.time > CastableTime; }
 	}
 
-	public float ActivePropability
-	{
-		get { return SkillData.ActiveRate / 100f; }
-	}
-
+	SpecialEffect[] _speffect = new SpecialEffect[0];
 	public SpecialEffect[] SPEffect
 	{
-		get { return SkillData.SPEffect; }
+		get { return _speffect; }
 	}
 
 	public string ParticleAttackStart
@@ -218,7 +225,7 @@ public class PassiveEffectInfo
 					case SPEffectType.PowerBuffer:
 					case SPEffectType.AccuracyBuffer:
 					case SPEffectType.CriticalBuffer:
-						BonusValue.AddValue((SPEffectType)se.EffectType, se.EffectPower);
+						BonusValue.AddValue((SPEffectType)se.EffectType,System.Convert.ToUInt16(se.EffectPower));
 						break;
 					default:
 						attackEffect.Add(se);
@@ -260,29 +267,36 @@ public class StateInfo
 	{
 		get { return BonusValue.Critical; }
 	}
-	public void Reflash()
+	public void UpdateDuration()
 	{
-		BonusValue = new AttrbuteBonus();
-		BonusValue.ASpeedRate = 1;
-		BonusValue.MSpeedRate = 1;
-
 		int index = 0;
+		bool needReflash = false;
 		while (index < states.Count)
 		{
+			states[index].Duration -= Time.deltaTime;
 			if (states[index].Duration <= 0)
 			{
+				needReflash = true;
 				states.RemoveAt(index);
 				continue;
 			}
 
 			index++;
 		}
+		if (needReflash)
+			Reflash();
+	}
+	public void Reflash()
+	{
+		BonusValue = new AttrbuteBonus();
+		BonusValue.ASpeedRate = 1;
+		BonusValue.MSpeedRate = 1;
+
+
 		DoT = 0;
 
 		foreach(StateData sd in states)
-		{
-			sd.Duration -= Time.deltaTime;
-			
+		{			
 			switch (sd.EffectType)
 			{
 				case SPEffectType.PowerBuffer:
@@ -308,6 +322,7 @@ public class StateInfo
 	public void AddState(StateData sd)
 	{
 		states.Add(sd);
+		Reflash();
 	}
 }
 public struct AttrbuteBonus
@@ -375,7 +390,7 @@ public class StateData
 			EffectType = (SPEffectType)se.EffectType;
 		else
 			EffectType = SPEffectType.None;
-		EffectPower = se.EffectPower;
+		EffectPower = System.Convert.ToUInt16(se.EffectPower);
 		Duration = se.EffectDuration;
 	}
 }

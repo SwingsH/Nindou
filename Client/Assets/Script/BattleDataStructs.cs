@@ -26,7 +26,21 @@ public enum eDirection
 	Left,
 	Right,
 }
-
+public static class eDirectionExtensions
+{
+	public static eDirection GetOppsiteDirection(this eDirection dir)
+	{
+		switch (dir)
+		{
+			case eDirection.Left:
+				return eDirection.Right;
+			case eDirection.Right:
+				return eDirection.Left;
+			default:
+				return eDirection.Right;
+		}
+	}
+}
 public enum eTargetMode
 {
 	Closest,

@@ -19,6 +19,10 @@ public abstract class Unit
 		get { return Direction == eDirection.Left ? Vector3.left : Vector3.right; }
 	}
 	public Vector3 WorldPos;
+	public Vector3 ScreenPos
+	{
+		get { return BattleManager.GetRealWorldPos(WorldPos); }
+	}
 	public Color c = Color.white;
 	public eGroup Group;
 
@@ -91,7 +95,7 @@ public class AnimUnit : Unit
 		get;
 		protected set;
 	}
-
+	public Sprite[] Sprites = new Sprite[0];
 	public override uint MaxLife
 	{
 		get
@@ -173,9 +177,12 @@ public class AnimUnit : Unit
 	}
 	protected void Damaged(float value)
 	{
-		Life -= value;
-		if (Life <= 0)
-			BattleManager.Unit_Dead(this);
+		if (Life > 0)
+		{
+			Life -= value;
+			if (Life <= 0)
+				BattleManager.Unit_Dead(this);
+		}
 	}
 }
 
@@ -197,6 +204,8 @@ public class ActionUnit : AnimUnit
 				_moveAction.unit = this;
 		}
 	}
+	public ActionComponent AttackAction;
+	public GridPos TestOrderMove = GridPos.Null;
 
 	public eMoveState MoveState
 	{
@@ -215,8 +224,6 @@ public class ActionUnit : AnimUnit
 		}
 	}
 
-	protected NinDoAttackComponent AttackAction;
-	public GridPos TestOrderMove = GridPos.Null;
 	public Unit TargetUnit = null;
 	public override BoneAnimation Anim
 	{
@@ -244,22 +251,25 @@ public class ActionUnit : AnimUnit
 		}
 		set
 		{
-			if (value.Type == SkillType.Weapon)
+			if (value != null)
 			{
-				foreach(SpecialEffect spe in value.SPEffect)
-					if (spe.EffectType == (byte)SPEffectType.ExtrimSkill)
-					{
-						ExtrimSkill = new MainSkill(TestDataBase.Instance.GetSkillData(spe.EffectPower));
-					}
-				_normalAttack = value;
+				if (value.Type == SkillType.Weapon)
+				{
+					foreach (SpecialEffect spe in value.SPEffect)
+						if (spe.EffectType == (byte)SPEffectType.ExtrimSkill)
+						{
+							ExtrimSkill = new MainSkill(TestDataBase.Instance.GetSkillData(spe.EffectPower));
+						}
+					_normalAttack = value;
+				}
+				else
+				{
+					Debug.LogError("NormalAttack Type Error: ID " + value.SkillID.ToString());
+					_normalAttack = new MainSkill(GLOBALCONST.BattleSettingValue.DEFAULT_NORMAL_ATTACK);
+				}
 			}
 			else
-			{
-				Debug.LogError("NormalAttack Type Error");
-				_normalAttack = new MainSkill(GLOBALCONST.BattleSettingValue.DEFAULT_NORMAL_ATTACK);
-			}
-			if (AttackAction != null)
-				AttackAction.normalAttack = _normalAttack;	
+				_normalAttack = null;
 			if (_normalAttack != null)
 			{
 				if (_normalAttack.range > 2)
@@ -284,21 +294,19 @@ public class ActionUnit : AnimUnit
 				_extrimSkill = null;
 		}
 	}
-	List<MainSkill> _triggerSkills = new List<MainSkill>();
-	public List<MainSkill> triggerSkills
+	List<MainSkill> _activeSkills = new List<MainSkill>();
+	public List<MainSkill> ActiveSkills
 	{
 		get
 		{
-			return new List<MainSkill>(_triggerSkills);
+			//回傳一個新複製的list
+			//防止被加入不合法的技能，這樣只能用set來設技能，set會做檢查
+			return new List<MainSkill>(_activeSkills);
 		}
 		set
 		{
-			_triggerSkills = value;
-			CheckSkillList(ref _triggerSkills, SkillType.Active);
-			if (AttackAction != null)
-			{
-				AttackAction.triggerSkills = _triggerSkills;
-			}
+			_activeSkills = value;
+			CheckSkillList(ref _activeSkills, SkillType.Active);
 		}
 	}
 
@@ -308,6 +316,8 @@ public class ActionUnit : AnimUnit
 	{
 		get
 		{
+			//回傳一個新複製的list
+			//防止被加入不合法的技能，這樣只能用set來設技能，set會做檢查
 			return new List<MainSkill>(_passiveSkill);
 		}
 		set
@@ -315,35 +325,40 @@ public class ActionUnit : AnimUnit
 			_passiveSkill = value;
 			CheckSkillList(ref _passiveSkill, SkillType.Passive);
 			if (Passive != null)
-			{
 				Passive.Reset();
-				Passive.AddPassiveSkills(_passiveSkill);
-			}
+			else
+				Passive = new PassiveEffectInfo();
+			Passive.AddPassiveSkills(_passiveSkill);
+
 		}
 	}
 	public PassiveEffectInfo Passive = new PassiveEffectInfo();
 	public StateInfo State = new StateInfo();
 
-	Queue<CastInfo> CurrentCast = new Queue<CastInfo>();
+	//施展中技能
+	Queue<MainSkill> CastQueue = new Queue<MainSkill>();
+	public MainSkill CurrentCast
+	{
+		get
+		{
+			if (CastQueue.Count == 0)
+				return null;
+			return CastQueue.Peek();
+		}
+	}
+	CastInfo CurrentCasting;
 	
 	public bool IsCasting
 	{
 		get
 		{
-			if (CurrentCast.Count == 0)
-				return false;
-			else
-				return true;
+			return CurrentCasting != null && CurrentCasting.Casting;
 		}
 	}
 
 	public ActionUnit()
 	{
-		AttackAction = new NinDoAttackComponent();
-		AttackAction.normalAttack = NormalAttack;
-		AttackAction.triggerSkills = triggerSkills;
-		AttackAction.unit = this;
-
+		AttackAction = new NinDoAttackComponent(this);
 		totalCount++;
 	}
 	public ActionUnit(bool isPreview):this()
@@ -351,20 +366,19 @@ public class ActionUnit : AnimUnit
 		totalCount++;
 		PreviewUnit = isPreview;
 	}
-	public int ActionRangeMode
-	{
-		get
-		{
-			if (_normalAttack != null)
-				return _normalAttack.rangeMode;
-			else
-				return 0;
-		}
-	}
+
 	public int AttackRangeMode
 	{
 		get
 		{
+			if (CastQueue.Count > 0)
+			{
+				MainSkill temp = CastQueue.Peek();
+				if (temp != null)
+				{
+					return temp.rangeMode;
+				}
+			}
 			if (_normalAttack != null)
 				return _normalAttack.rangeMode;
 			else
@@ -375,6 +389,14 @@ public class ActionUnit : AnimUnit
 	{
 		get
 		{
+			if (CastQueue.Count > 0)
+			{
+				MainSkill temp = CastQueue.Peek();
+				if (temp != null)
+				{
+					return temp.range;
+				}
+			}
 			if (_normalAttack != null)
 				return _normalAttack.range;
 			else
@@ -398,15 +420,12 @@ public class ActionUnit : AnimUnit
 	{
 		//if (mc.State == ActionState.Idle)
 		//    RandomMove();
-		this.State.Reflash();
+		
 		Damaged(this.State.DoT);
 
 		TargetUnit = FindTarget(eTargetMode.Closest);
-		AttackAction.Target = TargetUnit;
 		if (TargetUnit != null)
-		{
 			MoveAction.Target = TargetUnit.Pos;
-		}
 		else
 			MoveAction.Target = GridPos.Null;
 		
@@ -428,11 +447,16 @@ public class ActionUnit : AnimUnit
 		if (currentAction != null && currentAction.State == ActionState.Busy)
 		{
 			currentAction.Active();
-			return;
 		}
-		currentAction = DecideAction(eMoveState.Closer);
-		if (currentAction != null)
-			currentAction.Active();
+		else
+		{
+			DecideSkill();
+			currentAction = DecideAction();
+			if (currentAction != null)
+				currentAction.Active();
+		}
+		//更新狀態時間
+		this.State.Reflash();
 	}
 
 	protected virtual Unit FindTarget(eTargetMode mode)
@@ -472,28 +496,43 @@ public class ActionUnit : AnimUnit
 				return null;
 		}
 	}
-	protected ActionComponent DecideAction(eMoveState state)
+	protected ActionComponent DecideAction()
 	{
 		if (IsCasting)
 			return null;
-		switch (state)
-		{
-			case eMoveState.Closer:
-				if (AttackAction.State == ActionState.Idle)
-					return AttackAction;
-				if (MoveAction.State == ActionState.Idle)
-					return MoveAction;
-				break;
-			case eMoveState.KeepRange:
-				if (MoveAction.State == ActionState.Idle)
-					return MoveAction;
-				if (AttackAction.State == ActionState.Idle)
-					return AttackAction;
-				break;
-			default:
-				return null;
-		}
+		if (AttackAction.State == ActionState.Idle)
+			return AttackAction;
+		if (MoveAction.State == ActionState.Idle)
+			return MoveAction;
+
 		return null;
+	}
+
+	//選擇要施法的技能
+	protected void DecideSkill()
+	{
+		if (IsCasting)
+			return;
+		while (CastQueue.Count > 0 && !CastQueue.Peek().Castable)
+		{
+			CastQueue.Dequeue();
+		}
+		if (CastQueue.Count == 0)
+		{
+			List<MainSkill> randomList = new List<MainSkill>();
+			foreach (MainSkill ms in _activeSkills)
+			{
+				if (ms.Castable)
+					randomList.Add(ms);
+			}
+			MainSkill randomSkill = null;
+			if (randomList.Count > 0)
+				randomSkill = randomList[Random.Range(0, randomList.Count)];
+			if (randomSkill != null)
+				CastQueue.Enqueue(randomSkill);
+			else if (NormalAttack.Castable)
+				CastQueue.Enqueue(NormalAttack);
+		}
 	}
 
 	public void PlayWalk()
@@ -506,55 +545,77 @@ public class ActionUnit : AnimUnit
 		if (Anim != null)
 			Anim.Blend(AnimationSetting.WALK_ANIM, 0, 0.1f);
 	}
-	//播放技能，差別只在於沒有施放目標，為了要放particle所以也要建CastInfo
+	//播放技能，差別只在於沒有施放目標，為了要播放particle所以也要建CastInfo
 	public void PlaySkill(MainSkill skill)
 	{
 		if (PreviewUnit)
 		{
 			PlayAnim(skill.GenerateAnimInfo());
-			CurrentCast.Clear();
-			CurrentCast.Enqueue(new CastInfo(skill));
+			CastInfo info = new CastInfo(skill);
+
+			CurrentCasting = info;
+			skill.CastableTime = Time.time + skill.CoolDown;
+			PlayAnim(info.skill.GenerateAnimInfo());
 		}
 	}
-	public void CastSkill(MainSkill skill)
+	protected void CastSkill(MainSkill skill)
 	{
-		if (skill == null)
+		if (IsCasting)
 			return;
-		CastInfo info = new CastInfo(skill);
+
+		if (skill == null || !skill.Castable)
+			return;
 		
-		CurrentCast.Enqueue(info);
-		if (CurrentCast.Count == 1)
-			StartCast();
+		CastInfo info = new CastInfo(skill);
+
+		CurrentCasting = info;
+		CurrentCasting.Target = GetTarget(skill);
+		skill.CastableTime = Time.time + skill.CoolDown;
+		PlayAnim(info.skill.GenerateAnimInfo());
 	}
-	void StartCast()
+	public void CastCurrentSkill()
 	{
-		while (CurrentCast.Count > 0)
-		{
-			CastInfo info = CurrentCast.Peek();
-			if (info.skill == null || !info.skill.Castable)
-			{
-				CurrentCast.Dequeue();
-				continue;
-			}
-			info.Target = GetTarget(info.skill);
-			if (info.Target.Count > 0)
-			{
-				info.skill.CastableTime = Time.time + info.skill.CoolDown;
-				PlayAnim(info.skill.GenerateAnimInfo());
-				break;
-			}
-			else
-			{
-				CurrentCast.Dequeue();
-			}
-		}
+		CastSkill(CastQueue.Dequeue());
 	}
+	//void StartCast()
+	//{
+	//    while (CurrentCasting.Count > 0)
+	//    {
+	//        CastInfo info = CurrentCasting.Peek();
+	//        if (info.skill == null || !info.skill.Castable)
+	//        {
+	//            CurrentCasting.Dequeue();
+	//            continue;
+	//        }
+	//        info.Target = GetTarget(info.skill);
+	//        if (info.Target.Count > 0)
+	//        {
+	//            info.skill.CastableTime = Time.time + info.skill.CoolDown;
+	//            PlayAnim(info.skill.GenerateAnimInfo());
+	//            break;
+	//        }
+	//        else
+	//        {
+	//            CurrentCasting.Dequeue();
+	//        }
+	//    }
+	//}
 	public void CastExtrimSkill()
 	{
-		if (ExtrimSkill != null && ExtrimSkill.Castable)
-			CastSkill(ExtrimSkill);
+		if(ExtrimSkill == null || !ExtrimSkill.Castable)
+			return;
+		if (!CastQueue.Contains(ExtrimSkill))
+			CastQueue.Enqueue(ExtrimSkill);
 	}
-
+	void StopAllCast()
+	{
+		CurrentCasting = null;
+		if (Anim != null)
+		{
+			Anim.Stop();
+			StopWalk();
+		}
+	}
 	public List<Unit> GetTarget(MainSkill skill)
 	{
 		if (skill == null)
@@ -564,22 +625,27 @@ public class ActionUnit : AnimUnit
 			units = BattleManager.Get_EnemyUnitsInRange(Group, skill.range, Pos, Direction, skill.range);
 		else
 			units = BattleManager.Get_FriendUnitsInRange(Group, skill.range, Pos, Direction, skill.range);
+		if (units.Count == 0)
+			return units;
+		//單體目標技能，如現目標在範圍內用現在目標，不然用list裡第一個當目標
 		if (skill.rangeMode <= GLOBALCONST.BattleSettingValue.AllInRangeModeGroup)
 		{
-			if (!units.Contains(TargetUnit))
-			{
-				units.Clear();
-				units.Add(TargetUnit);
-			}
+			Unit singleUnit = null;
+			if (units.Contains(TargetUnit))
+				singleUnit = TargetUnit;
+			else
+				singleUnit = units[0];
+			units.Clear();
+			units.Add(singleUnit);
 		}
 		return units;
 	}
 
 	void AnimUserTriggerDelegate(UserTriggerEvent triggerEvent)
 	{
-		if (CurrentCast.Count > 0)
+		if (CurrentCasting != null)
 		{
-			CastInfo info = CurrentCast.Peek();
+			CastInfo info = CurrentCasting;
 			if (triggerEvent.animationName != info.skill.AnimClipName)
 				return;
 
@@ -601,12 +667,8 @@ public class ActionUnit : AnimUnit
 					break;
 				case AnimationSetting.END_TAG:
 					info.EndCount--;
-					if (!CurrentCast.Peek().Casting)
-					{
-						CurrentCast.Dequeue();
-						if (CurrentCast.Count > 0)
-							StartCast();
-					}
+					if(!IsCasting)
+						CurrentCasting = null;
 					break;
 				case AnimationSetting.START_TAG:
 					if (info.StartCount == 0)

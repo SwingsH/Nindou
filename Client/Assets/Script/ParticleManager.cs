@@ -2,17 +2,26 @@
 using System.Collections;
 using System.Collections.Generic;
 /*
- * 新版的ParticleSystem沒有自我刪除的功能，加上手持不適合直實體化物件，所以在這裡做觀察回收的動作
+ * 新版的ParticleSystem沒有自我刪除的功能，加上手持不適合一直實體化物件，所以在這裡做觀察回收的動作
  * 為了要重複使用同一個ParticleSystem,故不要修改參數
  */
 public class ParticleManager : MonoBehaviour {
 
 	public const int RESERVE_AMOUNT = 5;
-	public static ParticleManager Instance;
+	private static ParticleManager Instance;
 
 	static Dictionary<string, List<ParticleSystem>> AvailableParticles = new Dictionary<string, List<ParticleSystem>>();
+	/*
+	 * 存放掛載型particle的資料，方便刪除用
+	 * 用Transform當key，這樣比較容易發現Transform被刪掉
+	 */
+	static Dictionary<Transform, List<ParticleSystem>> mountedParticle = new Dictionary<Transform, List<ParticleSystem>>();
+
+	float mountedCheckTime = 0;
 	List<ParticleSystem> actingParticleSystem = new List<ParticleSystem>();
+#if UNITY_EDITOR
 	public ParticleSystem[] displayingArray; //目前顯示中的
+#endif
 	void Awake()
 	{
 		if (Instance)
@@ -48,7 +57,36 @@ public class ParticleManager : MonoBehaviour {
 				actingParticleSystem.RemoveAt(i);
 			}
 		}
+		//檢查有掛載Particle的Transform有沒有被刪除的，有的話就回收並清除紀錄
+		//雖然應該是會一起被砍了
+		if (Time.time > mountedCheckTime)
+		{
+			mountedCheckTime +=3;
+			if (mountedParticle.Count > 0)
+			{
+				List<Transform> removeKey = new List<Transform>();
+				foreach (KeyValuePair<Transform,List<ParticleSystem>> kvp in mountedParticle)
+				{
+					if (kvp.Key == null)
+					{
+						removeKey.Add(kvp.Key);
+						foreach (ParticleSystem ps in kvp.Value)
+						{
+							if(ps!=null)
+								Recycle(ps);
+						}
+						kvp.Value.Clear();
+					}
+				}
+				foreach (Transform trans in removeKey)
+				{
+					mountedParticle.Remove(trans);
+				}
+			}
+		}
+#if UNITY_EDITOR
 		displayingArray = actingParticleSystem.ToArray();
+#endif
 	}
 	public static void Emit(string particleName, Vector3 worldPos, Vector3 direction)
 	{
@@ -62,6 +100,83 @@ public class ParticleManager : MonoBehaviour {
 			ps.Play();
 		}
 	}
+
+	
+	/*
+	 * 掛載持續播放的particle
+	 * 需要手動呼叫才會停止
+	 * 同一個Transform可以掛載多種，不過一種（同名稱）只能掛一個
+	 */
+	/// <summary>
+	/// 掛載持續播放的particle
+	/// </summary>
+	/// <param name="trans">欲掛載的Transform</param>
+	public static void MountParticle(Transform trans, string particleName)
+	{
+		List<ParticleSystem> tempList;
+		if (mountedParticle.TryGetValue(trans, out tempList))
+		{
+			foreach (ParticleSystem ps in tempList)
+			{
+				if (ps.name == particleName)
+					return;
+			}
+		}
+		else
+		{
+			tempList = new List<ParticleSystem>();
+			mountedParticle.Add(trans, tempList);
+		}
+		ParticleSystem particle = GetParticle(particleName);
+		particle.Play();
+		particle.transform.parent = trans;
+		if (particle != null)
+		{
+			tempList.Add(particle);
+		}
+	}
+	/// <summary>
+	/// 卸載指定particle
+	/// </summary>
+	/// <param name="trans">欲卸載的Transform</param>	
+	public static void UnmountParticle(Transform trans, string particleName)
+	{
+		List<ParticleSystem> tempList;
+		if (mountedParticle.TryGetValue(trans, out tempList))
+		{
+			ParticleSystem target = null;
+			for (int i = 0; i < tempList.Count;i++ )
+			{
+
+				if (tempList[i].name == particleName)
+				{
+					target = tempList[i];
+					tempList.RemoveAt(i);
+					break;
+				}
+			}
+			if (target != null)
+			{
+				target.transform.parent = null;
+				Recycle(target);
+			}
+		}
+	}
+	/// <summary>
+	/// 卸載particle
+	/// </summary>
+	public static void UnmountAllParticle(Transform trans)
+	{
+		List<ParticleSystem> tempList;
+		if (mountedParticle.TryGetValue(trans, out tempList))
+		{
+			for (int i = 0; i < tempList.Count; i++)
+				Recycle(tempList[i]);
+		}
+		mountedParticle.Remove(trans);
+		tempList.Clear();
+	}
+
 	static ParticleSystem GetParticle(string name)
 	{
 		List<ParticleSystem> tempList;
@@ -72,8 +187,14 @@ public class ParticleManager : MonoBehaviour {
 		}
 		else
 		{
-			tempps = tempList[0];
-			tempList.RemoveAt(0);
+			tempps = null;
+			while (tempList.Count >0 && tempList[0] == null)
+				tempList.RemoveAt(0);
+			if (tempList.Count > 0)
+			{
+				tempps = tempList[0];
+				tempList.RemoveAt(0);
+			}
 		}
 		if(tempps != null)
 		{
