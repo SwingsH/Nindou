@@ -122,4 +122,25 @@ public class ResourceStation {
 	}
 	#endregion
 
+	public static void GenerateModelSprite(SmoothMoves.BoneAnimation boneData,string[] atlasInfo)
+	{
+		if (boneData == null || atlasInfo == null)
+			return;
+		for (int i = 0; i < atlasInfo.Length && i < GLOBALCONST.BONE_NAME.Length; i++)
+		{
+			string boneName = GLOBALCONST.BONE_NAME[i];
+			string atlasName = atlasInfo[i];
+
+			Transform spriteTrans = boneData.GetSpriteTransform(boneName);
+			if (spriteTrans == null)
+				continue;
+			TextureAtlas atlas = GetAtlas(atlasName);
+			Sprite sprite = spriteTrans.GetComponent<SmoothMoves.Sprite>();
+			if (sprite == null)
+				sprite = spriteTrans.gameObject.AddComponent<Sprite>();
+			sprite.SetAtlas(atlas);
+			sprite.SetTextureName(boneName);
+			sprite.SetPivotOffset(Vector2.zero, true);
+		}
+	}
 }

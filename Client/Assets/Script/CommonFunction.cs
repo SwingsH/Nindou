@@ -150,23 +150,6 @@ public static class CommonFunction
     #endregion
 
     #region UI相關
-    public static UISprite CreateUISprite(GameObject parentObj, string spriteObjName, UISprite.Type spriteType, int depth, UIAtlas atlas, string spriteName, 
-        UISprite.Pivot pivot, int width, int height)
-    {
-        UISprite retSprite = NGUITools.AddWidget<UISprite>(parentObj);
-        retSprite.name = spriteObjName;
-        retSprite.type = spriteType;
-        retSprite.depth = depth;
-        retSprite.atlas = atlas;
-        retSprite.spriteName = spriteName;
-        retSprite.pivot = pivot;
-        retSprite.transform.localPosition = Vector3.zero;
-        retSprite.MakePixelPerfect(); // 如果type = simple or filled 會改回近原大小，故在呼叫此函式和才修改寬高      
-        retSprite.width = width;
-        retSprite.height = height;
-        return retSprite;
-    }
-
     /// <summary>
     /// 依據設定 建立一個UIButton
     /// </summary>
@@ -178,24 +161,29 @@ public static class CommonFunction
     /// <param name="spriteName">使用的Sprite名稱</param>
     /// <param name="width">按鈕寬度</param>
     /// <param name="height">按鈕高度</param>
-    /// <param name="btnLabelText">按鈕標籤文字(沒有傳入字體時無作用)</param>
-    /// <param name="btnLabelColor">按鈕標籤顏色(沒有傳入字體時無作用)</param>
     /// <returns>建出的UIButton</returns>
-    public static UIButton CreateUIButton(GameObject parentObj, string btnName, Vector3 relativePos, int depth, UIAtlas atlas, string spriteName,
-        int width, int height, UIFont font, Color btnLabelColor, string btnLabelText)
+    public static UIButton CreateUIButton(GameObject parentObj, string btnName, Vector3 relativePos, int depth, UIAtlas atlas, string spriteName, UIFont font, 
+        int width, int height)
     {
         GameObject retButtonObj = NGUITools.AddChild(parentObj);
         retButtonObj.name = btnName;
         retButtonObj.transform.localPosition = relativePos;
         // 設定按鈕背景圖
-        UISprite bg = CreateUISprite(retButtonObj, "Background", UISprite.Type.Sliced, depth, atlas, spriteName, UIWidget.Pivot.Center, width, height);
+        UISprite bg = NGUITools.AddWidget<UISprite>(retButtonObj);
+        bg.type = UISprite.Type.Sliced;
+        bg.name = "Background";
+        bg.depth = depth;
+        bg.atlas = atlas;
+        bg.spriteName = spriteName;
+        bg.width = width;
+        bg.height = height;
+        bg.MakePixelPerfect();
         // font
         if (font != null)
         {
             UILabel lbl = NGUITools.AddWidget<UILabel>(retButtonObj);
             lbl.font = font;
-            lbl.text = btnLabelText;
-            lbl.color = btnLabelColor;
+            lbl.text = retButtonObj.name;
             lbl.MakePixelPerfect();
         }
         // Add a Collider
@@ -236,22 +224,41 @@ public static class CommonFunction
     /// <param name="width">Progress Bar寬度</param>
     /// <param name="height">Progress Bar高度</param>
     /// <returns>建出的 ProgressBar</returns>
-    public static UISlider CreateUIProgressBar(GameObject parentObj, string progressBarName, Vector3 relativePos, int depth,
+    public static UISlider CreateProgressBar(GameObject parentObj, string progressBarName, Vector3 relativePos, int depth,
         UIAtlas atlas, string backgroundName, string foregroundName, int width, int height)
     {
         GameObject progressBarObject = NGUITools.AddChild(parentObj);
         progressBarObject.name = progressBarName;
         progressBarObject.transform.localPosition = relativePos;
         // Background sprite
+        //UIAtlas.Sprite bgs = atlas.GetSprite(backgroundName);
         UISpriteData bgs = atlas.GetSprite(backgroundName);
+        UISprite back = (UISprite)NGUITools.AddWidget<UISprite>(progressBarObject);
 
-        UISprite back = CreateUISprite(progressBarObject, "Background", (bgs.hasBorder ? UISprite.Type.Sliced : UISprite.Type.Simple), depth, atlas, backgroundName,
-            UIWidget.Pivot.Left, width, height);
+        back.type = bgs.hasBorder ? UISprite.Type.Sliced : UISprite.Type.Simple;
+        back.name = "Background";
+        back.depth = depth;
+        back.pivot = UIWidget.Pivot.Left;
+        back.atlas = atlas;
+        back.spriteName = backgroundName;
+        back.width = width;
+        back.height = height;
+        back.transform.localPosition = Vector3.zero;
+        back.MakePixelPerfect();
+
         // Foreground sprite
         UISpriteData fgs = atlas.GetSprite(foregroundName);
+        UISprite front = NGUITools.AddWidget<UISprite>(progressBarObject);
+        front.type = fgs.hasBorder ? UISprite.Type.Sliced : UISprite.Type.Simple;
+        front.name = "Foreground";
+        front.pivot = UIWidget.Pivot.Left;
+        front.atlas = atlas;
+        front.spriteName = foregroundName;
+        front.width = width;
+        front.height = height;
+        front.transform.localPosition = Vector3.zero;
+        front.MakePixelPerfect();
 
-        UISprite front = CreateUISprite(progressBarObject, "Foreground", (fgs.hasBorder ? UISprite.Type.Sliced : UISprite.Type.Simple), depth + 1, atlas, foregroundName,
-            UIWidget.Pivot.Left, width, height);
         // Add the slider script
         UISlider retSilder = progressBarObject.AddComponent<UISlider>();
         retSilder.foreground = front.transform;
@@ -271,11 +278,9 @@ public static class CommonFunction
     /// <param name="labelColor">文字顏色</param>
     /// <param name="labelText">文字內容</param>
     /// <returns>建出的Label</returns>
-    public static UILabel CreateUILabel(GameObject parentObj, string labelName, UIWidget.Pivot pivot, Vector3 relativePos, int depth, 
-        UIFont font, Color labelColor, string labelText)
+    public static UILabel CreateLabel(GameObject parentObj, string labelName, Vector3 relativePos, int depth, UIFont font, Color labelColor, string labelText)
     {
         UILabel retLabel = NGUITools.AddWidget<UILabel>(parentObj);
-        retLabel.pivot = pivot;
         retLabel.transform.localPosition = relativePos;
         retLabel.name = labelName;
         retLabel.depth = depth;

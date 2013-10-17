@@ -11,8 +11,6 @@ public abstract class GUIFormBase : MonoBehaviour
     // 使得按鈕被點擊時可以呼叫非MonoBehaviour的methods
     public delegate void BtnClick();
 
-    protected GUIStation _guistation; // 介面管理者
-
     #region 固定method
     // Use this for initialization
 	void Start () 
@@ -41,18 +39,16 @@ public abstract class GUIFormBase : MonoBehaviour
     /// <summary>
     /// 建立UI所有元件
     /// </summary>
-    protected abstract void CreateAllComponent();
+    protected abstract void CreateAllComponent(Camera uiCamera);
 
     /// <summary>
     /// 建立此UI
     /// </summary>
-    /// <param name="guistation">UI管理者</param>
-    public void CreateUI(GUIStation guistation)
+    /// <param name="uiCamera">看此UI的攝影機</param>
+    public void CreateUI(Camera uiCamera)
     {
-        _guistation = guistation;
-        CreateAllComponent();
+        CreateAllComponent(uiCamera);
     }
-
     #endregion
     #region 顯示/隱藏UI相關
     public delegate void FormNotifyDelegate(GUIFormBase sender);
