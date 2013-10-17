@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using System.Text;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
@@ -158,6 +159,79 @@ public class EnumClassValue : System.Attribute
             return true;
         }
         return false;
+    }
+}
+
+/// <summary>
+/// 遊戲帳號資訊
+/// </summary>
+public struct AccountData
+{
+    public string PlayerName;           // 玩家名稱
+    public ushort MaxActionPoint;       // max行動點數
+    public ushort CurrentActionPoint;   // 目前行動點數
+    public ushort MaxCardSlot;          //目前卡片背包最大格數
+    public uint[] Cards;                //目前持有卡片
+    public ushort MaxFriendSlot;        //目前朋友最大格數
+    public uint[] Friends;              //目前持有卡片
+}
+
+/// <summary>
+/// 禮物資訊
+/// </summary>
+public struct GiftsData
+{
+    // LastUpdateTime : 目前C端資料最後一次更新時間 ( 指 server 時間), 無法由C端得知曾變動過的資料都要有此欄位
+    public DateTime LastUpdateTime;     
+    public uint[] GiftsID;            // 禮物 ID
+}
+
+[Serializable]
+[StructLayout(LayoutKind.Sequential)]
+public class HTTPResponseMixDatas
+{
+    public int Serial;
+    public int RequestMain;
+    public int RequestSub;
+    public HTTPResponse[] Packages;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+public class HTTPResponse
+{
+    public int MainKind;
+    public int SubKind;
+    public List<int> Ints;
+    public List<string> Strs;
+
+    /// <summary>
+    /// 協定資料 - 解出一個 integer
+    /// </summary>
+    public int PopInteger()
+    {
+        if(Ints.Count == 0)
+        {
+            CommonFunction.DebugMsg( string.Format(" PopInteger null. {0},{1}", MainKind, SubKind) );
+            return 0;
+        }
+        int result = Ints[0];
+        Ints.RemoveAt(0);
+        return result;
+    }
+
+    /// <summary>
+    /// 協定資料 - 解出一個 string
+    /// </summary>
+    public string PopString()
+    {
+        if (Strs.Count == 0)
+        {
+            CommonFunction.DebugMsg(string.Format(" PopString null. {0},{1}", MainKind, SubKind));
+            return string.Empty;
+        }
+        string result = Strs[0];
+        Strs.RemoveAt(0);
+        return result;
     }
 }
 

@@ -11,8 +11,10 @@ public class GameControl{
     private NetworkInterface _networkInterface = null;
     private IGameState _gameState = null; // 遊戲進行狀態
     private ResourceStation _resource = null;
+    private GUIStation _guiStation = null;
     private string _deviceID = string.Empty;
     private string _loginSession = string.Empty;
+    private AccountData _accountData = default(AccountData);
 
     private GameControl(GameMain main)
     {
@@ -20,6 +22,7 @@ public class GameControl{
         _gameState = GameEmpty.Instance;
         _networkInterface = new NetworkInterface(this);
         _resource = new ResourceStation();
+        _guiStation = new GUIStation(this);
 
         //a36ec54e961ee79e8d92247f8a081b47a4c52e55
         _deviceID = SystemInfo.deviceUniqueIdentifier;
@@ -49,8 +52,8 @@ public class GameControl{
     // 一般登入
     public void DoLogin()
     {
-        CommonFunction.DebugMsg(_deviceID);
-        _networkInterface.PushString(1, 1, "DeviceID", _deviceID);
+        _networkInterface.PushString(1, 1, _deviceID); // todo: 改用 s1, s2, s3, i1,i2
+        _networkInterface.PushInteger(1, 1, 0);
         _networkInterface.Send(1, 1);
     }
 
@@ -73,6 +76,14 @@ public class GameControl{
     }
 
     /// <summary>
+    /// 取得UI管理者
+    /// </summary>
+    public GUIStation GUIStation
+    {
+        get { return _guiStation; }
+    }
+    
+    /// <summary>
     /// 為了掌握整個遊戲 Coroutine 使用量, 請集中使用此 method 進行 Coroutine
     /// todo: 可以考慮使用 CoroutineManager
     /// </summary>
@@ -83,13 +94,22 @@ public class GameControl{
 
     /// <summary>
     /// 留存 login session
-    /// todo: 改 json 版本
     /// </summary>
     public void SetLoginSession(string session)
     {
         CommonFunction.DebugMsg("留存 login session : " + session);
         _loginSession = session;
     }
+
+    /// <summary>
+    /// 留存 account data
+    /// </summary>
+    public void SetAccountData(AccountData accountData)
+    {
+        _accountData = accountData;
+        CommonFunction.DebugMsg("玩家名稱 : " + _accountData.PlayerName);
+    }
+
 
     /// <summary>
     /// 從 file server 下載更新資料
@@ -120,8 +140,10 @@ public class GameControl{
     {
         get
         {
-            CommonFunction.DebugMsg("沒有檔案需要更新");
-            return _resource.IsNeedToUpdate; //todo: 當然是 todo, 接 ResourceUpdater
+            //CommonFunction.DebugMsg("沒有檔案需要更新");
+            //return _resource.IsNeedToUpdate; //todo: 當然是 todo, 接 ResourceUpdater
+            CommonFunction.DebugMsg("測試：有檔案要更新");
+            return true;
         }
     }
 

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 public delegate void OnHTTPWaiting(); // 等待 http server 回應中要處理的 method
-public delegate void OnHTTPResponse(string responseText); // http server 回應後要處理的 method
+public delegate void OnHTTPResponse(HTTPResponse responsePack); // http server 回應後要處理的 method
 
 public delegate void OnSocketWaiting(); // 等待 socket server 回應中要處理的 method
 public delegate void OnSocketResponse(MemoryStream Message); // socket server 回應後要處理的 method
@@ -52,8 +52,11 @@ public class NetworkInterface
 
     private const int SOCKET_PORT = 17480;
     private const string HTTP_HEAD = "http";
-    private const string HTTP_IP = "127.0.0.1";
+    private const string HTTP_IP = "122.116.24.125";
+    private const string HTTP_PROTOCOL_PAGE = "{0}://{1}/nindou/protocol.php";
     private const int HTTP_PORT = 80;
+    private const string HTTP_FIELD_STR = "s{0}"; // http post form field, string 名稱
+    private const string HTTP_FIELD_INT = "i{0}"; // http post form field, int 名稱
 
     private HTTPProtocolEvent[,] _httpProtocolEvents     = new HTTPProtocolEvent[PROTOCAL_KIND_MAX, PROTOCAL_SUBKIND_MAX];
     private SocketProtocolEvent[,] _socketProtocolEvents   = new SocketProtocolEvent[PROTOCAL_KIND_MAX, PROTOCAL_SUBKIND_MAX];
@@ -65,6 +68,10 @@ public class NetworkInterface
 
     private byte _currentHTTPKind = 0;
     private byte _currentHTTPSubKind = 0;
+    private byte _currentStringNums = 0; // 目前準備送出的 string 數量
+    private byte _currentIntegerNums = 0; // 目前準備送出的 int 數量
+    private int _sendSerial = 1; //送出資料序列號
+    private HTTPResponseMixDatas _currentResponse = null;
 
     //constructor
     public NetworkInterface(GameControl control)
@@ -72,7 +79,7 @@ public class NetworkInterface
         _control = control;
         _gameSocket = new NetworkSocket(NetworkSocketBuffer.Identify);
         _gameHTTP = new NetworkHTTP( OnHTTPReceive);
-        _gameHTTP.SetConfig( string.Format("{0}://{1}/protocol/", HTTP_HEAD, HTTP_IP) );
+        _gameHTTP.SetConfig(string.Format(HTTP_PROTOCOL_PAGE, HTTP_HEAD, HTTP_IP)); //設置協定網址
         SetAllProtocolEvent();
     }
 
@@ -84,6 +91,7 @@ public class NetworkInterface
     // 批次加入所有協定設定
     private void SetAllProtocolEvent()
     {
+        //S: 1-1 登入
         AddHTTPProtocol(PROTOCOL_KIND_LOGIN, 1, HTTPHandling_Login_1, HTTPResponse_Login_1);
     }
 
@@ -123,9 +131,10 @@ public class NetworkInterface
         }
     }
 
-    //加入一筆準備傳送 string 的資料
-    // todo: fieldName 應該拿掉, 協定常常變動, 總不能一直取不一樣的 field name, 累死
-    public void PushString(int kind, int subKind, string fieldName, string fieldvalue)
+    /// <summary>
+    /// 加入一筆準備傳送 string 的資料
+    /// </summary>
+    public void PushString(int kind, int subKind, string fieldvalue)
     {
         if (!HTTPExist(kind, subKind) && !SocketExist(kind, subKind))
         {
@@ -135,6 +144,8 @@ public class NetworkInterface
 
         if (HTTPExist(kind, subKind))
         {
+            _currentStringNums++;
+            string fieldName = string.Format(HTTP_FIELD_STR, _currentStringNums);
             NetworkHTTPBuffer.AddString(fieldName, fieldvalue);
         }
         else if (SocketExist(kind, subKind))
@@ -143,9 +154,10 @@ public class NetworkInterface
         }
     }
 
-    //加入一筆準備傳送 int 的資料
-    // todo: fieldName 應該拿掉, 協定常常變動, 總不能一直取不一樣的 field name, 累死
-    public void PushInteger(int kind, int subKind, string fieldName, int fieldvalue)
+    /// <summary>
+    /// 加入一筆準備傳送 int 的資料
+    /// </summary>
+    public void PushInteger(int kind, int subKind, int fieldvalue)
     {
         if (!HTTPExist(kind, subKind) && !SocketExist(kind, subKind))
         {
@@ -155,11 +167,13 @@ public class NetworkInterface
 
         if (HTTPExist(kind, subKind))
         {
+            _currentIntegerNums++;
+            string fieldName = string.Format(HTTP_FIELD_INT, _currentIntegerNums);
             NetworkHTTPBuffer.AddInteger(fieldName, fieldvalue);
         }
         else if (SocketExist(kind, subKind))
         {
-            NetworkSocketBuffer.Encode_FromUInt( Convert.ToUInt32( fieldvalue ) );
+            NetworkSocketBuffer.Encode_FromUInt(Convert.ToUInt32(fieldvalue));
         }
     }
 
@@ -188,16 +202,29 @@ public class NetworkInterface
     /// </summary>
     public void OnHTTPReceive(string responseText)
     {
-        CommonFunction.DebugMsg(string.Format("OnHTTPReceive {0},{1}", _currentHTTPKind, _currentHTTPSubKind));
         if (_httpProtocolEvents[_currentHTTPKind, _currentHTTPSubKind].OnResponse != null)
-            _httpProtocolEvents[_currentHTTPKind, _currentHTTPSubKind].OnResponse(responseText);
+        {
+            object refObj = Activator.CreateInstance(typeof(HTTPResponseMixDatas));
+            bool isSuccess = DataUtility.DeserializeObject(responseText, ref refObj);
+            _currentResponse = refObj as HTTPResponseMixDatas;
+            CommonFunction.DebugMsg(string.Format("OnHTTPReceive {0},{1},{2}", _currentHTTPKind, _currentHTTPSubKind, responseText));
+        }
         else
+        {
             CommonFunction.DebugMsg(" OnHTTPReceive ProtocolEvents null.");
+        }
 
+        // no Interface "Command Pattern"
+        DispatchResponseHTTPCommands(_currentResponse);
+
+        // clear previous
+        _currentIntegerNums = 0;
+        _currentStringNums = 0;
         NetworkHTTPBuffer.ClearSendBuffer();
     }
 
     /// <summary>
+
     /// http 處理中
     /// </summary>
     public void OnHTTPWait()
@@ -256,18 +283,50 @@ public class NetworkInterface
     }
 
     /// <summary>
-    /// 處理收到的 HTTP 
+    /// 處理收到的 HTTP  todo: remove shortly
     /// </summary>
-    private void HandleHTTPProtocal(int kind, int subKind, string responseText)
+    //private void HandleHTTPProtocal(int kind, int subKind, string responseText)
+    //{
+    //    if (!SocketExist(kind, subKind))
+    //    {
+    //        CommonFunction.DebugError(string.Format("Socket {0}  {1} 不存在", kind, subKind));
+    //        return;
+    //    }
+
+    //    HTTPProtocolEvent eve = _httpProtocolEvents[kind, subKind];
+    //    eve.OnResponse(responseText);
+    //}
+
+    /// <summary>
+    /// 依據回應的綜合 http 資料, 帶有多個 command 指示, 來分派處理 method
+    /// </summary>
+    public void DispatchResponseHTTPCommands(HTTPResponseMixDatas mixDatas)
     {
-        if (!SocketExist(kind, subKind))
+        if (mixDatas == null)
         {
-            CommonFunction.DebugError(string.Format("Socket {0}  {1} 不存在", kind, subKind));
+            CommonFunction.DebugMsg(" OnHTTPReceive HTTPResponseMixDatas null.");
+            return;
+        }
+        if (mixDatas.Packages == null)
+        {
+            CommonFunction.DebugMsg(" OnHTTPReceive HTTPResponseMixDatas null.");
             return;
         }
 
-        HTTPProtocolEvent eve = _httpProtocolEvents[kind, subKind];
-        eve.OnResponse(responseText);
+        int mainKind = 0;
+        int subKind = 0;
+        for (int i = 0; i < mixDatas.Packages.Length; i++)
+        {
+            mainKind    = mixDatas.Packages[i].MainKind;
+            subKind     = mixDatas.Packages[i].SubKind;
+            if (_httpProtocolEvents[mainKind, subKind].OnResponse == null)
+            {
+                CommonFunction.DebugMsg( string.Format(" OnHTTPReceive ProtocolEvents {0},{1} null.", mainKind, subKind) );
+                continue;
+            }
+
+            _httpProtocolEvents[mainKind, subKind].OnResponse(mixDatas.Packages[i]);
+        }
     }
 
     /// <summary>
@@ -322,25 +381,35 @@ public class NetworkInterface
 
         _currentHTTPKind = mainKind;
         _currentHTTPSubKind = subKind;
-        NetworkHTTPBuffer.Packaging(mainKind, subKind);
+        NetworkHTTPBuffer.Packaging(_sendSerial, mainKind, subKind);
+
+        CommonFunction.DebugMsg( " URL for debugging : " + string.Format(HTTP_PROTOCOL_PAGE, HTTP_HEAD, HTTP_IP) + "?" + NetworkHTTPBuffer.DumpDebugURL());
         _gameHTTP.Send(NetworkHTTPBuffer.Form);
-        //NetworkHTTPBuffer.ClearSendBuffer();
+        _sendSerial++;
+        NetworkHTTPBuffer.ClearSendBuffer();
     }
 
     // 協定集中處理區
     #region Protocol Event
 
-    //C: 1-1 登入
+    //C: 1-1 登入 s1:deviceid
     private void HTTPHandling_Login_1()
     {
         //show 個 loading bar
     }
 
-    //S: 1-1 登入
-    private void HTTPResponse_Login_1(string responseText)
+    //S: 1-1 登入, s1:session , i1:登入類型(0=登入失敗,1=新帳號登入,2=快速登入,3=更新session)
+    private void HTTPResponse_Login_1(HTTPResponse responsePack)
     {
-        CommonFunction.DebugMsg("登入成功 : " + responseText);
-        _control.SetLoginSession(responseText);
+        string session = responsePack.PopString();
+        int kind = responsePack.PopInteger();
+
+        AccountData accountData = new AccountData();
+        accountData.PlayerName = responsePack.PopString();
+
+        CommonFunction.DebugMsg(string.Format("登入成功 : {0} , {1}", session, kind));
+        _control.SetLoginSession(session);
+        _control.SetAccountData(accountData);
     }
 
     #endregion

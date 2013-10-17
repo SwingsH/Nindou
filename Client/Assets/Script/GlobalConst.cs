@@ -46,6 +46,10 @@ public class GLOBALCONST
 		WEAPON_RIGHT,
 	};
 
+    #region UI相關設定
+    public const int LAYER_UI_BASE = 31; // 基本ui layer
+    #endregion
+
     #region 檔名相關常數（無副檔名）
     // TODO: 下面目前都是為了測試用
     public const string FILENAME_SCENE = "SceneData";   // 場景資料
@@ -69,6 +73,9 @@ public class GLOBALCONST
     // AssetBundle路徑
     public static readonly string DIR_ASSETBUNDLE = "assetbundles" + Path.AltDirectorySeparatorChar;
     public static readonly string DIR_ASSETBUNDLE_JSON = DIR_ASSETBUNDLE + "JSON" + Path.AltDirectorySeparatorChar;
+    // NGUI資源相關路徑
+    public static readonly string DIR_RESOURCES_NGUI = "NGUI" + Path.AltDirectorySeparatorChar;
+
     // 資料路徑
     public static readonly string DIR_DATA_ROOT = Application.dataPath +  Path.AltDirectorySeparatorChar;
     public static readonly string DIR_DATA_TEMP = DIR_DATA_ROOT + "TEMP" + Path.AltDirectorySeparatorChar;
