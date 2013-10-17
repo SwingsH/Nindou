@@ -1,4 +1,4 @@
-//----------------------------------------------
+﻿//----------------------------------------------
 //            NGUI: Next-Gen UI kit
 // Copyright © 2011-2013 Tasharen Entertainment
 //----------------------------------------------
@@ -65,16 +65,6 @@ public class UICamera : MonoBehaviour
 		public bool dragStarted = false;
 	}
 
-	/// <summary>
-	/// Camera type controls how raycasts are handled by the UICamera.
-	/// </summary>
-
-	public enum EventType
-	{
-		World,	// Perform a Physics.Raycast and sort by distance to the point that was hit.
-		UI,		// Perform a Physics.Raycast and sort by widget depth.
-	}
-
 	class Highlighted
 	{
 		public GameObject go;
@@ -86,13 +76,6 @@ public class UICamera : MonoBehaviour
 	/// </summary>
  
 	static public List<UICamera> list = new List<UICamera>();
-
-	/// <summary>
-	/// Event type -- use "UI" for your user interfaces, and "World" for your game camera.
-	/// This setting changes how raycasts are handled. Raycasts have to be more complicated for UI cameras.
-	/// </summary>
-
-	public EventType eventType = EventType.UI;
 
 	/// <summary>
 	/// Which layers will receive events.
@@ -144,6 +127,13 @@ public class UICamera : MonoBehaviour
 	/// </summary>
 
 	public bool stickyPress = true;
+
+	/// <summary>
+	/// Whether raycast events will be clipped just like widgets. This essentially means that clicking on a collider that
+	/// happens to have been clipped will not produce a hit. Note that having this enabled will slightly reduce performance.
+	/// </summary>
+
+	public bool clipRaycasts = true;
 
 	/// <summary>
 	/// Whether the tooltip will disappear as soon as the mouse moves (false) or only if the mouse moves outside of the widget's area (true).
@@ -484,14 +474,6 @@ public class UICamera : MonoBehaviour
 		return 0;
 	}
 
-	struct DepthEntry
-	{
-		public int depth;
-		public RaycastHit hit;
-	}
-
-	static DepthEntry mHit = new DepthEntry();
-	static BetterList<DepthEntry> mHits = new BetterList<DepthEntry>();
 	static RaycastHit mEmpty = new RaycastHit();
 
 	/// <summary>
@@ -522,51 +504,32 @@ public class UICamera : MonoBehaviour
 			int mask = currentCamera.cullingMask & (int)cam.eventReceiverMask;
 			float dist = (cam.rangeDistance > 0f) ? cam.rangeDistance : currentCamera.farClipPlane - currentCamera.nearClipPlane;
 
-			if (cam.eventType == EventType.World)
-			{
-				if (Physics.Raycast(ray, out hit, dist, mask))
-				{
-					hoveredObject = hit.collider.gameObject;
-					return true;
-				}
-				continue;
-			}
-			else if (cam.eventType == EventType.UI)
+			// If raycasts should be clipped by panels, we need to find a panel for each hit
+			if (cam.clipRaycasts)
 			{
 				RaycastHit[] hits = Physics.RaycastAll(ray, dist, mask);
 
 				if (hits.Length > 1)
 				{
-					for (int b = 0; b < hits.Length; ++b)
-					{
-						GameObject go = hits[b].collider.gameObject;
-						mHit.depth = NGUITools.CalculateRaycastDepth(go);
-						mHit.hit = hits[b];
-						mHits.Add(mHit);
-					}
+					System.Array.Sort(hits, delegate(RaycastHit r1, RaycastHit r2) { return r1.distance.CompareTo(r2.distance); });
 
-					mHits.Sort(delegate(DepthEntry r1, DepthEntry r2) { return r2.depth.CompareTo(r1.depth); });
-
-					for (int b = 0; b < mHits.size; ++b)
+					for (int b = 0, bmax = hits.Length; b < bmax; ++b)
 					{
-						if (IsVisible(ref mHits.buffer[b]))
+						if (IsVisible(ref hits[b]))
 						{
-							hit = mHits[b].hit;
-							hoveredObject = hit.collider.gameObject;
-							mHits.Clear();
+							hit = hits[b];
 							return true;
 						}
 					}
-					mHits.Clear();
 				}
 				else if (hits.Length == 1 && IsVisible(ref hits[0]))
 				{
 					hit = hits[0];
-					hoveredObject = hit.collider.gameObject;
 					return true;
 				}
 				continue;
 			}
+			if (Physics.Raycast(ray, out hit, dist, mask)) return true;
 		}
 		hit = mEmpty;
 		return false;
@@ -585,16 +548,6 @@ public class UICamera : MonoBehaviour
 			return true;
 		}
 		return false;
-	}
-
-	/// <summary>
-	/// Helper function to check if the specified hit is visible by the panel.
-	/// </summary>
-
-	static bool IsVisible (ref DepthEntry de)
-	{
-		UIPanel panel = NGUITools.FindInParents<UIPanel>(de.hit.collider.gameObject);
-		return (panel == null || panel.IsVisible(de.hit.point));
 	}
 
 	/// <summary>
@@ -830,7 +783,7 @@ public class UICamera : MonoBehaviour
 	{
 		if (useMouse && Application.isPlaying && handlesEvents)
 		{
-			if (!Raycast(Input.mousePosition, out lastHit)) hoveredObject = fallThrough;
+			hoveredObject = Raycast(Input.mousePosition, out lastHit) ? lastHit.collider.gameObject : fallThrough;
 			if (hoveredObject == null) hoveredObject = genericEventHandler;
 			for (int i = 0; i < 3; ++i) mMouse[i].current = hoveredObject;
 		}
@@ -925,7 +878,7 @@ public class UICamera : MonoBehaviour
 		// Update the object under the mouse
 		if (updateRaycast)
 		{
-			if (!Raycast(Input.mousePosition, out lastHit)) hoveredObject = fallThrough;
+			hoveredObject = Raycast(Input.mousePosition, out lastHit) ? lastHit.collider.gameObject : fallThrough;
 			if (hoveredObject == null) hoveredObject = genericEventHandler;
 			mMouse[0].current = hoveredObject;
 		}
@@ -1035,7 +988,7 @@ public class UICamera : MonoBehaviour
 			}
 
 			currentTouch.pos = input.position;
-			if (!Raycast(currentTouch.pos, out lastHit)) hoveredObject = fallThrough;
+			hoveredObject = Raycast(currentTouch.pos, out lastHit) ? lastHit.collider.gameObject : fallThrough;
 			if (hoveredObject == null) hoveredObject = genericEventHandler;
 			currentTouch.current = hoveredObject;
 			lastTouchPosition = currentTouch.pos;
@@ -1274,9 +1227,9 @@ public class UICamera : MonoBehaviour
 #if UNITY_EDITOR
 	void OnGUI ()
 	{
-		if (debug && hoveredObject != null)
+		if (debug && lastHit.collider != null)
 		{
-			GUILayout.Label("Last Hit: " + NGUITools.GetHierarchy(hoveredObject).Replace("\"", ""));
+			GUILayout.Label("Last Hit: " + NGUITools.GetHierarchy(lastHit.collider.gameObject).Replace("\"", ""));
 		}
 	}
 #endif

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 
@@ -267,7 +267,7 @@ public class InvDatabaseInspector : Editor
 
 					// Draw the sprite selection popup
 					index = EditorGUILayout.Popup("Icon", index, sprites.ToArray());
-					UISpriteData sprite = (index > 0) ? item.iconAtlas.GetSprite(sprites[index]) : null;
+					UIAtlas.Sprite sprite = (index > 0) ? item.iconAtlas.GetSprite(sprites[index]) : null;
 
 					if (sprite != null)
 					{
@@ -282,8 +282,12 @@ public class InvDatabaseInspector : Editor
 							if (tex != null)
 							{
 								drawIcon = true;
-								Rect rect = new Rect(sprite.x, sprite.y, sprite.width, sprite.height);
-								rect = NGUIMath.ConvertToTexCoords(rect, tex.width, tex.height);
+								Rect rect = sprite.outer;
+
+								if (item.iconAtlas.coordinates == UIAtlas.Coordinates.Pixels)
+								{
+									rect = NGUIMath.ConvertToTexCoords(rect, tex.width, tex.height);
+								}
 
 								GUILayout.Space(4f);
 								GUILayout.BeginHorizontal();
@@ -293,7 +297,7 @@ public class InvDatabaseInspector : Editor
 								}
 								GUILayout.EndHorizontal();
 
-								extraSpace = iconSize * (float)sprite.height / sprite.width;
+								extraSpace = iconSize * (float)sprite.outer.height / sprite.outer.width;
 							}
 						}
 					}

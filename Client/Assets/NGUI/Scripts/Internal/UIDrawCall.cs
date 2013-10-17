@@ -1,4 +1,4 @@
-//----------------------------------------------
+﻿//----------------------------------------------
 //            NGUI: Next-Gen UI kit
 // Copyright © 2011-2013 Tasharen Entertainment
 //----------------------------------------------
@@ -86,8 +86,6 @@ public class UIDrawCall : MonoBehaviour
 #if UNITY_EDITOR
 	public string keyName { get { return "Draw Call " + (1 + mRenderQueue); } }
 
-	public bool showDetails { get { return UnityEditor.EditorPrefs.GetBool(keyName, true); } }
-
 	/// <summary>
 	/// Whether the draw call is currently active.
 	/// </summary>
@@ -96,31 +94,19 @@ public class UIDrawCall : MonoBehaviour
 	{
 		get
 		{
-			return mActive;
-			//return UnityEditor.EditorPrefs.GetBool(keyName, true);
+			return UnityEditor.EditorPrefs.GetBool(keyName, true);
 		}
 		set
 		{
-			if (mActive != value)
-			{
-				mActive = value;
-
-				if (mRen != null)
-				{
-					mRen.enabled = value;
-					UnityEditor.EditorUtility.SetDirty(gameObject);
-				}
-			}
-			//UnityEditor.EditorPrefs.SetBool(keyName, value);
+			UnityEditor.EditorPrefs.SetBool(keyName, value);
 			
-			//if (mRen != null)
-			//{
-			//    mRen.enabled = value;
-			//    UnityEditor.EditorUtility.SetDirty(gameObject);
-			//}
+			if (mRen != null)
+			{
+				mRen.enabled = value;
+				UnityEditor.EditorUtility.SetDirty(gameObject);
+			}
 		}
 	}
-	bool mActive = true;
 #endif
 
 	/// <summary>

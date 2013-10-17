@@ -1,4 +1,4 @@
-//----------------------------------------------
+﻿//----------------------------------------------
 //            NGUI: Next-Gen UI kit
 // Copyright © 2011-2013 Tasharen Entertainment
 //----------------------------------------------
@@ -63,19 +63,11 @@ public class UIStretch : MonoBehaviour
 
 	public Vector2 initialSize = Vector2.one;
 
-	/// <summary>
-	/// Padding applied after the size of the stretched object gets calculated. This value is in pixels.
-	/// </summary>
-
-	public Vector2 borderPadding = Vector2.zero;
-
 	// Deprecated legacy functionality
 	[HideInInspector][SerializeField] UIWidget widgetContainer;
 
 	Transform mTrans;
 	UIWidget mWidget;
-	UISprite mSprite;
-	UIPanel mPanel;
 	UIRoot mRoot;
 	Animation mAnim;
 	Rect mRect;
@@ -86,8 +78,6 @@ public class UIStretch : MonoBehaviour
 		mRect = new Rect();
 		mTrans = transform;
 		mWidget = GetComponent<UIWidget>();
-		mSprite = GetComponent<UISprite>();
-		mPanel = GetComponent<UIPanel>();
 	}
 
 	void Start ()
@@ -162,7 +152,6 @@ public class UIStretch : MonoBehaviour
 			else if (uiCamera != null)
 			{
 				mRect = uiCamera.pixelRect;
-				if (mRoot != null) adjustment = mRoot.pixelSizeAdjustment;
 			}
 			else return;
 
@@ -176,7 +165,7 @@ public class UIStretch : MonoBehaviour
 				rectHeight *= scale;
 			}
 
-			Vector3 size = (mWidget != null) ? new Vector3(mWidget.width, mWidget.height) : mTrans.localScale;
+			Vector3 size = mWidget != null ? new Vector3(mWidget.width, mWidget.height) : mTrans.localScale;
 
 			if (style == Style.BasedOnHeight)
 			{
@@ -227,57 +216,17 @@ public class UIStretch : MonoBehaviour
 			}
 			else
 			{
-				if (style != Style.Vertical)
-					size.x = relativeSize.x * rectWidth;
-
-				if (style != Style.Horizontal)
-					size.y = relativeSize.y * rectHeight;
+				if (style == Style.Both || style == Style.Horizontal) size.x = relativeSize.x * rectWidth;
+				if (style == Style.Both || style == Style.Vertical) size.y = relativeSize.y * rectHeight;
 			}
 
-			if (mSprite != null)
+			UIWidget w = mTrans.GetComponent<UIWidget>();
+
+			if (w != null)
 			{
-				float multiplier = (mSprite.atlas != null) ? mSprite.atlas.pixelSize : 1f;
-				size.x -= borderPadding.x * multiplier;
-				size.y -= borderPadding.y * multiplier;
-
-				if (style != Style.Vertical)
-					mSprite.width = Mathf.RoundToInt(size.x);
-
-				if (style != Style.Horizontal)
-					mSprite.height = Mathf.RoundToInt(size.y);
-
+				w.width = Mathf.RoundToInt(size.x);
+				w.height = Mathf.RoundToInt(size.y);
 				size = Vector3.one;
-			}
-			else if (mWidget != null)
-			{
-				if (style != Style.Vertical)
-					mWidget.width = Mathf.RoundToInt(size.x - borderPadding.x);
-
-				if (style != Style.Horizontal)
-					mWidget.height = Mathf.RoundToInt(size.y - borderPadding.y);
-
-				size = Vector3.one;
-			}
-			else if (mPanel != null)
-			{
-				Vector4 cr = mPanel.clipRange;
-
-				if (style != Style.Vertical)
-					cr.z = size.x - borderPadding.x;
-				
-				if (style != Style.Horizontal)
-					cr.w = size.y - borderPadding.y;
-				
-				mPanel.clipRange = cr;
-				size = Vector3.one;
-			}
-			else
-			{
-				if (style != Style.Vertical)
-					size.x -= borderPadding.x;
-				
-				if (style != Style.Horizontal)
-					size.y -= borderPadding.y;
 			}
 			
 			if (mTrans.localScale != size)

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Text;
 using System.Collections.Generic;
@@ -56,20 +56,21 @@ public class NGUIJson
 			return;
 		}
 
-		List<UISpriteData> oldSprites = atlas.spriteList;
-		atlas.spriteList = new List<UISpriteData>();
+		atlas.coordinates = UIAtlas.Coordinates.Pixels;
+		List<UIAtlas.Sprite> oldSprites = atlas.spriteList;
+		atlas.spriteList = new List<UIAtlas.Sprite>();
 
 		Hashtable frames = (Hashtable)decodedHash["frames"];
 
 		foreach (System.Collections.DictionaryEntry item in frames)
 		{
-			UISpriteData newSprite = new UISpriteData();
+			UIAtlas.Sprite newSprite = new UIAtlas.Sprite();
 			newSprite.name = item.Key.ToString();
 
 			bool exists = false;
 
 			// Check to see if this sprite exists
-			foreach (UISpriteData oldSprite in oldSprites)
+			foreach (UIAtlas.Sprite oldSprite in oldSprites)
 			{
 				if (oldSprite.name.Equals(newSprite.name, StringComparison.OrdinalIgnoreCase))
 				{
@@ -96,12 +97,19 @@ public class NGUIJson
 			int frameH = int.Parse(frame["h"].ToString());
 
 			// Read the rotation value
-			//newSprite.rotated = (bool)table["rotated"];
+			newSprite.rotated = (bool)table["rotated"];
 
-			newSprite.x = frameX;
-			newSprite.y = frameY;
-			newSprite.width = frameW;
-			newSprite.height = frameH;
+			// Fill in the proper values
+			if (newSprite.rotated)
+			{
+				newSprite.outer = new Rect(frameX, frameY, frameH, frameW);
+				newSprite.inner = new Rect(frameX, frameY, frameH, frameW);
+			}
+			else
+			{
+				newSprite.outer = new Rect(frameX, frameY, frameW, frameH);
+				newSprite.inner = new Rect(frameX, frameY, frameW, frameH);
+			}
 
 			// Support for trimmed sprites
 			Hashtable sourceSize = (Hashtable)table["sourceSize"];
@@ -112,34 +120,31 @@ public class NGUIJson
 				// TODO: Account for rotated sprites
 				if (frameW > 0)
 				{
-					int spriteX = int.Parse(spriteSize["x"].ToString());
-					int spriteW = int.Parse(spriteSize["w"].ToString());
-					int sourceW = int.Parse(sourceSize["w"].ToString());
+					float spriteX = int.Parse(spriteSize["x"].ToString());
+					float spriteW = int.Parse(spriteSize["w"].ToString());
+					float sourceW = int.Parse(sourceSize["w"].ToString());
 
-					newSprite.paddingLeft = spriteX;
-					newSprite.paddingRight = sourceW - (spriteX + spriteW);
+					newSprite.paddingLeft = spriteX / frameW;
+					newSprite.paddingRight = (sourceW - (spriteX + spriteW)) / frameW;
 				}
 
 				if (frameH > 0)
 				{
-					int spriteY = int.Parse(spriteSize["y"].ToString());
-					int spriteH = int.Parse(spriteSize["h"].ToString());
-					int sourceH = int.Parse(sourceSize["h"].ToString());
+					float spriteY = int.Parse(spriteSize["y"].ToString());
+					float spriteH = int.Parse(spriteSize["h"].ToString());
+					float sourceH = int.Parse(sourceSize["h"].ToString());
 
-					newSprite.paddingTop = spriteY;
-					newSprite.paddingBottom = sourceH - (spriteY + spriteH);
+					newSprite.paddingTop = spriteY / frameH;
+					newSprite.paddingBottom = (sourceH - (spriteY + spriteH)) / frameH;
 				}
 			}
 
 			// If the sprite was present before, see if we can copy its inner rect
-			foreach (UISpriteData oldSprite in oldSprites)
+			foreach (UIAtlas.Sprite oldSprite in oldSprites)
 			{
 				if (oldSprite.name.Equals(newSprite.name, StringComparison.OrdinalIgnoreCase))
 				{
-					newSprite.borderLeft = oldSprite.borderLeft;
-					newSprite.borderRight = oldSprite.borderRight;
-					newSprite.borderBottom = oldSprite.borderBottom;
-					newSprite.borderTop = oldSprite.borderTop;
+					CopyInnerRect(oldSprite, newSprite);
 				}
 			}
 
@@ -160,7 +165,30 @@ public class NGUIJson
 	/// Sprite comparison function for sorting.
 	/// </summary>
 
-	static int CompareSprites (UISpriteData a, UISpriteData b) { return a.name.CompareTo(b.name); }
+	static int CompareSprites (UIAtlas.Sprite a, UIAtlas.Sprite b) { return a.name.CompareTo(b.name); }
+
+	/// <summary>
+	/// Copy the inner rectangle from one sprite to another.
+	/// </summary>
+
+	static void CopyInnerRect (UIAtlas.Sprite oldSprite, UIAtlas.Sprite newSprite)
+	{
+		float offsetX = oldSprite.inner.xMin - oldSprite.outer.xMin;
+		float offsetY = oldSprite.inner.yMin - oldSprite.outer.yMin;
+		float sizeX = oldSprite.inner.width;
+		float sizeY = oldSprite.inner.height;
+
+		if (Mathf.Approximately(newSprite.outer.width, oldSprite.outer.width))
+		{
+			// The sprite has not been rotated or it's a square
+			newSprite.inner = new Rect(newSprite.outer.xMin + offsetX, newSprite.outer.yMin + offsetY, sizeX, sizeY);
+		}
+		else if (Mathf.Approximately(newSprite.outer.width, oldSprite.outer.height))
+		{
+			// The sprite was rotated since the last time it was imported
+			newSprite.inner = new Rect(newSprite.outer.xMin + offsetY, newSprite.outer.yMin + offsetX, sizeY, sizeX);
+		}
+	}
 
 	/// <summary>
 	/// Parses the string json into a value

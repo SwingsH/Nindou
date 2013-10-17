@@ -1,4 +1,4 @@
-//----------------------------------------------
+﻿//----------------------------------------------
 //            NGUI: Next-Gen UI kit
 // Copyright © 2011-2013 Tasharen Entertainment
 //----------------------------------------------
@@ -450,13 +450,25 @@ public class UIFontInspector : Editor
 		{
 			Material m = (mUseShader ? mFont.material : null);
 
-			if (mView == View.Font && mFont.sprite != null)
+			if (mView == View.Font)
 			{
-				NGUIEditorTools.DrawSprite(tex, rect, mFont.sprite, Color.white, m);
+				Rect outer = new Rect(mFont.uvRect);
+				Rect uv = outer;
+
+				outer = NGUIMath.ConvertToPixels(outer, tex.width, tex.height, true);
+
+				NGUIEditorTools.DrawSprite(tex, rect, outer, outer, uv, Color.white, m);
 			}
 			else
 			{
-				NGUIEditorTools.DrawTexture(tex, rect, mFont.uvRect, Color.white, m);
+				Rect outer = new Rect(0f, 0f, 1f, 1f);
+				Rect inner = new Rect(mFont.uvRect);
+				Rect uv = outer;
+
+				outer = NGUIMath.ConvertToPixels(outer, tex.width, tex.height, true);
+				inner = NGUIMath.ConvertToPixels(inner, tex.width, tex.height, true);
+
+				NGUIEditorTools.DrawSprite(tex, rect, outer, inner, uv, Color.white, m);
 			}
 		}
 	}

@@ -1,4 +1,4 @@
-//----------------------------------------------
+﻿//----------------------------------------------
 //            NGUI: Next-Gen UI kit
 // Copyright © 2011-2013 Tasharen Entertainment
 //----------------------------------------------
@@ -53,7 +53,7 @@ public class UIToggledObjects : MonoBehaviour
 				Set(activate[i], UIToggle.current.value);
 
 			for (int i = 0; i < deactivate.Count; ++i)
-				Set(deactivate[i], !UIToggle.current.value);
+				Set(activate[i], !UIToggle.current.value);
 		}
 	}
 

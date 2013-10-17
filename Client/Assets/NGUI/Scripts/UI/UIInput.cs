@@ -1,4 +1,4 @@
-//----------------------------------------------
+﻿//----------------------------------------------
 //            NGUI: Next-Gen UI kit
 // Copyright © 2011-2013 Tasharen Entertainment
 //----------------------------------------------
@@ -160,7 +160,7 @@ public class UIInput : UIWidgetContainer
 			}
 
 #if UNITY_IPHONE || UNITY_ANDROID || UNITY_WP8 || UNITY_BLACKBERRY
-			if (mKeyboard != null) mKeyboard.text = value;
+			if (mKeyboard != null) mKeyboard.text = text;
 #endif
 			if (label != null)
 			{
@@ -394,22 +394,22 @@ public class UIInput : UIWidgetContainer
 #endif
 		if (mKeyboard != null)
 		{
-			string val = mKeyboard.text;
+			string text = mKeyboard.text;
 
-			if (mText != val)
+			if (mText != text)
 			{
 				mText = "";
 
-				for (int i = 0; i < val.Length; ++i)
+				for (int i = 0; i < text.Length; ++i)
 				{
-					char ch = val[i];
+					char ch = text[i];
 					if (validator != null) ch = validator(mText, ch);
 					if (ch != 0) mText += ch;
 				}
 
 				if (maxChars > 0 && mText.Length > maxChars) mText = mText.Substring(0, maxChars);
 				UpdateLabel();
-				if (mText != val) mKeyboard.text = mText;
+				if (mText != text) mKeyboard.text = mText;
 				SendMessage("OnInputChanged", this, SendMessageOptions.DontRequireReceiver);
 			}
 

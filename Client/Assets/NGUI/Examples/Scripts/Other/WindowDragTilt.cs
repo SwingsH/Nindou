@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// Attach this script to a child of a draggable window to make it tilt as it's dragged.

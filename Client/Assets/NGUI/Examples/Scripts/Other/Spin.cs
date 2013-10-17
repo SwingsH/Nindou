@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// Want something to spin? Attach this script to it. Works equally well with rigidbodies as without.

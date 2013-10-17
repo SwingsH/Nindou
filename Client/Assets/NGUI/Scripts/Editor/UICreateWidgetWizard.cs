@@ -1,4 +1,4 @@
-//----------------------------------------------
+﻿//----------------------------------------------
 //            NGUI: Next-Gen UI kit
 // Copyright © 2011-2013 Tasharen Entertainment
 //----------------------------------------------
@@ -206,7 +206,7 @@ public class UICreateWidgetWizard : EditorWindow
 			lbl.font = NGUISettings.font;
 			lbl.text = "New Label";
 			lbl.color = mColor;
-			lbl.AssumeNaturalSize();
+			lbl.MakePixelPerfect();
 			Selection.activeGameObject = lbl.gameObject;
 		}
 	}
@@ -290,8 +290,7 @@ public class UICreateWidgetWizard : EditorWindow
 				UILabel lbl = NGUITools.AddWidget<UILabel>(go);
 				lbl.font = NGUISettings.font;
 				lbl.text = go.name;
-				lbl.AssumeNaturalSize();
-				Debug.Log(lbl.height);
+				lbl.MakePixelPerfect();
 			}
 
 			// Add a collider
@@ -327,9 +326,9 @@ public class UICreateWidgetWizard : EditorWindow
 			go = NGUITools.AddChild(go);
 			go.name = "Image Button";
 
-			UISpriteData sp = NGUISettings.atlas.GetSprite(mImage0);
+			UIAtlas.Sprite sp = NGUISettings.atlas.GetSprite(mImage0);
 			UISprite sprite = NGUITools.AddWidget<UISprite>(go);
-			sprite.type = sp.hasBorder ? UISprite.Type.Sliced : UISprite.Type.Simple;
+			sprite.type = (sp.inner == sp.outer) ? UISprite.Type.Simple : UISprite.Type.Sliced;
 			sprite.name = "Background";
 			sprite.depth = depth;
 			sprite.atlas = NGUISettings.atlas;
@@ -343,7 +342,7 @@ public class UICreateWidgetWizard : EditorWindow
 				UILabel lbl = NGUITools.AddWidget<UILabel>(go);
 				lbl.font = NGUISettings.font;
 				lbl.text = go.name;
-				lbl.AssumeNaturalSize();
+				lbl.MakePixelPerfect();
 			}
 
 			// Add a collider
@@ -408,7 +407,7 @@ public class UICreateWidgetWizard : EditorWindow
 				lbl.text = go.name;
 				lbl.pivot = UIWidget.Pivot.Left;
 				lbl.transform.localPosition = new Vector3(16f, 0f, 0f);
-				lbl.AssumeNaturalSize();
+				lbl.MakePixelPerfect();
 			}
 
 			// Add a collider
@@ -521,10 +520,10 @@ public class UICreateWidgetWizard : EditorWindow
 			go.name = slider ? "Slider" : "Progress Bar";
 
 			// Background sprite
-			UISpriteData bgs = NGUISettings.atlas.GetSprite(mSliderBG);
+			UIAtlas.Sprite bgs = NGUISettings.atlas.GetSprite(mSliderBG);
 			UISprite back = (UISprite)NGUITools.AddWidget<UISprite>(go);
 
-			back.type = bgs.hasBorder ? UISprite.Type.Sliced : UISprite.Type.Simple;
+			back.type = (bgs.inner == bgs.outer) ? UISprite.Type.Simple : UISprite.Type.Sliced;
 			back.name = "Background";
 			back.depth = depth;
 			back.pivot = UIWidget.Pivot.Left;
@@ -536,9 +535,9 @@ public class UICreateWidgetWizard : EditorWindow
 			back.MakePixelPerfect();
 
 			// Foreground sprite
-			UISpriteData fgs = NGUISettings.atlas.GetSprite(mSliderFG);
+			UIAtlas.Sprite fgs = NGUISettings.atlas.GetSprite(mSliderFG);
 			UISprite front = NGUITools.AddWidget<UISprite>(go);
-			front.type = fgs.hasBorder ? UISprite.Type.Sliced : UISprite.Type.Simple;
+			front.type = (fgs.inner == fgs.outer) ? UISprite.Type.Filled : UISprite.Type.Sliced;
 			front.name = "Foreground";
 			front.pivot = UIWidget.Pivot.Left;
 			front.atlas = NGUISettings.atlas;
@@ -558,10 +557,10 @@ public class UICreateWidgetWizard : EditorWindow
 			// Thumb sprite
 			if (slider)
 			{
-				UISpriteData tbs = NGUISettings.atlas.GetSprite(mSliderTB);
+				UIAtlas.Sprite tbs = NGUISettings.atlas.GetSprite(mSliderTB);
 				UISprite thb = NGUITools.AddWidget<UISprite>(go);
 
-				thb.type = tbs.hasBorder ? UISprite.Type.Sliced : UISprite.Type.Simple;
+				thb.type = (tbs.inner == tbs.outer) ? UISprite.Type.Simple : UISprite.Type.Sliced;
 				thb.name = "Thumb";
 				thb.atlas = NGUISettings.atlas;
 				thb.spriteName = mSliderTB;
@@ -625,7 +624,7 @@ public class UICreateWidgetWizard : EditorWindow
 			lbl.supportEncoding = false;
 			lbl.width = Mathf.RoundToInt(400f - padding * 2f);
 			lbl.text = "You can type here";
-			lbl.AssumeNaturalSize();
+			lbl.MakePixelPerfect();
 
 			// Add a collider to the background
 			NGUITools.AddWidgetCollider(go);
@@ -660,11 +659,16 @@ public class UICreateWidgetWizard : EditorWindow
 			go = NGUITools.AddChild(go);
 			go.name = isDropDown ? "Popup List" : "Popup Menu";
 
-			UISpriteData sphl = NGUISettings.atlas.GetSprite(mListHL);
-			UISpriteData spfg = NGUISettings.atlas.GetSprite(mListFG);
+			UIAtlas.Sprite sphl = NGUISettings.atlas.GetSprite(mListHL);
+			UIAtlas.Sprite spfg = NGUISettings.atlas.GetSprite(mListFG);
 
-			Vector2 hlPadding = new Vector2(Mathf.Max(4f, sphl.paddingLeft), Mathf.Max(4f, sphl.paddingTop));
-			Vector2 fgPadding = new Vector2(Mathf.Max(4f, spfg.paddingLeft), Mathf.Max(4f, spfg.paddingTop));
+			Vector2 hlPadding = new Vector2(
+				Mathf.Max(4f, sphl.inner.xMin - sphl.outer.xMin),
+				Mathf.Max(4f, sphl.inner.yMin - sphl.outer.yMin));
+
+			Vector2 fgPadding = new Vector2(
+				Mathf.Max(4f, spfg.inner.xMin - spfg.outer.xMin),
+				Mathf.Max(4f, spfg.inner.yMin - spfg.outer.yMin));
 
 			// Background sprite
 			UISprite sprite = NGUITools.AddSprite(go, NGUISettings.atlas, mListFG);
@@ -682,7 +686,7 @@ public class UICreateWidgetWizard : EditorWindow
 			lbl.text = go.name;
 			lbl.pivot = UIWidget.Pivot.Left;
 			lbl.cachedTransform.localPosition = new Vector3(fgPadding.x, 0f, 0f);
-			lbl.AssumeNaturalSize();
+			lbl.MakePixelPerfect();
 
 			// Add a collider
 			NGUITools.AddWidgetCollider(go);

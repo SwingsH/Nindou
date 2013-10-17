@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// Basic input validator with a few presets. I suggest making your own validator if you need new functionality.

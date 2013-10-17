@@ -1,4 +1,4 @@
-//----------------------------------------------
+﻿//----------------------------------------------
 //            NGUI: Next-Gen UI kit
 // Copyright © 2011-2013 Tasharen Entertainment
 //----------------------------------------------
@@ -57,7 +57,7 @@ public class UIFont : MonoBehaviour
 #endif
 
 	// Cached value
-	UISpriteData mSprite = null;
+	UIAtlas.Sprite mSprite = null;
 	int mPMA = -1;
 	bool mSpriteSet = false;
 
@@ -255,13 +255,22 @@ public class UIFont : MonoBehaviour
 
 				if (tex != null)
 				{
-					mUVRect = new Rect(
-						mSprite.x - mSprite.paddingLeft,
-						mSprite.y - mSprite.paddingTop,
-						mSprite.width + mSprite.paddingLeft + mSprite.paddingRight,
-						mSprite.height + mSprite.paddingTop + mSprite.paddingBottom);
+					mUVRect = mSprite.outer;
 
-					mUVRect = NGUIMath.ConvertToTexCoords(mUVRect, tex.width, tex.height);
+					if (mAtlas.coordinates == UIAtlas.Coordinates.Pixels)
+					{
+						mUVRect = NGUIMath.ConvertToTexCoords(mUVRect, tex.width, tex.height);
+					}
+
+					// Account for trimmed sprites
+					if (mSprite.hasPadding)
+					{
+						Rect rect = mUVRect;
+						mUVRect.xMin = rect.xMin - mSprite.paddingLeft * rect.width;
+						mUVRect.yMin = rect.yMin - mSprite.paddingBottom * rect.height;
+						mUVRect.xMax = rect.xMax + mSprite.paddingRight * rect.width;
+						mUVRect.yMax = rect.yMax + mSprite.paddingTop * rect.height;
+					}
 #if UNITY_EDITOR
 					// The font should always use the original texture size
 					if (mFont != null)
@@ -390,7 +399,7 @@ public class UIFont : MonoBehaviour
 	/// Retrieves the sprite used by the font, if any.
 	/// </summary>
 
-	public UISpriteData sprite
+	public UIAtlas.Sprite sprite
 	{
 		get
 		{
@@ -540,7 +549,8 @@ public class UIFont : MonoBehaviour
 		if (tex != null && mSprite != null)
 		{
 			Rect full = NGUIMath.ConvertToPixels(mUVRect, texture.width, texture.height, true);
-			Rect trimmed = new Rect(mSprite.x, mSprite.y, mSprite.width, mSprite.height);
+			Rect trimmed = (mAtlas.coordinates == UIAtlas.Coordinates.TexCoords) ?
+				NGUIMath.ConvertToPixels(mSprite.outer, tex.width, tex.height, true) : mSprite.outer;
 
 			int xMin = Mathf.RoundToInt(trimmed.xMin - full.xMin);
 			int yMin = Mathf.RoundToInt(trimmed.yMin - full.yMin);
@@ -1097,10 +1107,8 @@ public class UIFont : MonoBehaviour
 			int lineHeight = (fs + mSpacingY);
 			Vector3 v0 = Vector3.zero, v1 = Vector3.zero;
 			Vector2 u0 = Vector2.zero, u1 = Vector2.zero;
-
 			float invX = uvRect.width / mFont.texWidth;
 			float invY = mUVRect.height / mFont.texHeight;
-
 			int textLength = text.Length;
 			bool useSymbols = encoding && symbolStyle != SymbolStyle.None && hasSymbols && sprite != null;
 

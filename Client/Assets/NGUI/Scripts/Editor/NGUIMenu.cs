@@ -1,4 +1,4 @@
-//----------------------------------------------
+﻿//----------------------------------------------
 //            NGUI: Next-Gen UI kit
 // Copyright © 2011-2013 Tasharen Entertainment
 //----------------------------------------------
@@ -17,17 +17,9 @@ static public class NGUIMenu
 	[MenuItem("NGUI/Selection/Bring To Front &#=")]
 	static public void BringForward2 ()
 	{
-		int val = 0;
 		for (int i = 0; i < Selection.gameObjects.Length; ++i)
-			val |= NGUITools.AdjustDepth(Selection.gameObjects[i], 1000);
-
-		if ((val & 1) != 0)
-		{
-			NGUITools.NormalizePanelDepths();
-			if (UIPanelTool.instance != null)
-				UIPanelTool.instance.Repaint();
-		}
-		if ((val & 2) != 0) NGUITools.NormalizeWidgetDepths();
+			NGUITools.AdjustDepth(Selection.gameObjects[i], 1);
+		NGUIEditorTools.NormalizeDepths();
 	}
 
 	[MenuItem("NGUI/Selection/Bring To Front &#=", true)]
@@ -36,17 +28,9 @@ static public class NGUIMenu
 	[MenuItem("NGUI/Selection/Push To Back &#-")]
 	static public void PushBack2 ()
 	{
-		int val = 0;
 		for (int i = 0; i < Selection.gameObjects.Length; ++i)
-			val |= NGUITools.AdjustDepth(Selection.gameObjects[i], -1000);
-
-		if ((val & 1) != 0)
-		{
-			NGUITools.NormalizePanelDepths();
-			if (UIPanelTool.instance != null)
-				UIPanelTool.instance.Repaint();
-		}
-		if ((val & 2) != 0) NGUITools.NormalizeWidgetDepths();
+			NGUITools.AdjustDepth(Selection.gameObjects[i], -1000);
+		NGUIEditorTools.NormalizeDepths();
 	}
 
 	[MenuItem("NGUI/Selection/Push To Back &#-", true)]
@@ -55,11 +39,8 @@ static public class NGUIMenu
 	[MenuItem("NGUI/Selection/Adjust Depth By +1 %=")]
 	static public void BringForward ()
 	{
-		int val = 0;
 		for (int i = 0; i < Selection.gameObjects.Length; ++i)
-			val |= NGUITools.AdjustDepth(Selection.gameObjects[i], 1);
-		if (((val & 1) != 0) && UIPanelTool.instance != null)
-			UIPanelTool.instance.Repaint();
+			NGUITools.AdjustDepth(Selection.gameObjects[i], 1);
 	}
 
 	[MenuItem("NGUI/Selection/Adjust Depth By +1 %=", true)]
@@ -68,11 +49,8 @@ static public class NGUIMenu
 	[MenuItem("NGUI/Selection/Adjust Depth By -1 %-")]
 	static public void PushBack ()
 	{
-		int val = 0;
 		for (int i = 0; i < Selection.gameObjects.Length; ++i)
-			val |= NGUITools.AdjustDepth(Selection.gameObjects[i], -1);
-		if (((val & 1) != 0) && UIPanelTool.instance != null)
-			UIPanelTool.instance.Repaint();
+			NGUITools.AdjustDepth(Selection.gameObjects[i], -1);
 	}
 
 	[MenuItem("NGUI/Selection/Adjust Depth By -1 %-", true)]
@@ -111,12 +89,12 @@ static public class NGUIMenu
 			if (sprite.atlas != null)
 			{
 				string sn = EditorPrefs.GetString("NGUI Sprite", "");
-				UISpriteData sp = sprite.atlas.GetSprite(sn);
+				UIAtlas.Sprite sp = sprite.atlas.GetSprite(sn);
 
 				if (sp != null)
 				{
 					sprite.spriteName = sn;
-					if (sp.hasBorder) sprite.type = UISprite.Type.Sliced;
+					if (sp.inner != sp.outer) sprite.type = UISprite.Type.Sliced;
 				}
 			}
 			sprite.pivot = NGUISettings.pivot;
@@ -303,19 +281,22 @@ static public class NGUIMenu
 	[MenuItem("NGUI/Handles/Set to Green")]
 	static public void SetToGreen () { NGUISettings.colorMode = NGUISettings.ColorMode.Green; }
 
-	[MenuItem("NGUI/Selection/Make Pixel Perfect &#p")]
+	[MenuItem("NGUI/Make Pixel Perfect &#p")]
 	static void PixelPerfectSelection ()
 	{
+		if (Selection.activeTransform == null)
+		{
+			Debug.Log("You must select an object in the scene hierarchy first");
+			return;
+		}
+		
 		foreach (Transform t in Selection.transforms)
 			NGUITools.MakePixelPerfect(t);
 	}
 
-	[MenuItem("NGUI/Selection/Make Pixel Perfect &#p", true)]
-	static bool PixelPerfectSelectionValidation ()
-	{
-		return (Selection.activeTransform != null);
-	}
-
 	[MenuItem("NGUI/Normalize Depth Hierarchy &#0")]
-	static public void Normalize () { NGUITools.NormalizeDepths(); }
+	static public void Normalize ()
+	{
+		NGUIEditorTools.NormalizeDepths();
+	}
 }

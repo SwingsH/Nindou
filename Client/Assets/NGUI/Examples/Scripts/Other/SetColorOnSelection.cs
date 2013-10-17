@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// Simple script used by Tutorial 11 that sets the color of the sprite based on the string value.

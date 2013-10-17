@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// Attaching this script to an object will make it turn as it gets closer to left/right edges of the screen.

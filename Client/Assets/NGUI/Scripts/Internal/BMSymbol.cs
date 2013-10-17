@@ -1,4 +1,4 @@
-//----------------------------------------------
+﻿//----------------------------------------------
 //            NGUI: Next-Gen UI kit
 // Copyright © 2011-2013 Tasharen Entertainment
 //----------------------------------------------
@@ -16,7 +16,7 @@ public class BMSymbol
 	public string sequence;
 	public string spriteName;
 
-	UISpriteData mSprite = null;
+	UIAtlas.Sprite mSprite = null;
 	bool mIsValid = false;
 	int mLength = 0;
 	int mOffsetX = 0;		// (outer - inner) in pixels
@@ -68,13 +68,23 @@ public class BMSymbol
 				}
 				else
 				{
-					mUV = new Rect(mSprite.x, mSprite.y, mSprite.width, mSprite.height);
-					mUV = NGUIMath.ConvertToTexCoords(mUV, tex.width, tex.height);
-					mOffsetX = mSprite.paddingLeft;
-					mOffsetY = mSprite.paddingTop;
-					mWidth = mSprite.width;
-					mHeight = mSprite.height;
-					mAdvance = mSprite.width + (mSprite.paddingLeft + mSprite.paddingRight);
+					Rect outer = mSprite.outer;
+					mUV = outer;
+
+					if (atlas.coordinates == UIAtlas.Coordinates.Pixels)
+					{
+						mUV = NGUIMath.ConvertToTexCoords(mUV, tex.width, tex.height);
+					}
+					else
+					{
+						outer = NGUIMath.ConvertToPixels(outer, tex.width, tex.height, true);
+					}
+
+					mOffsetX = Mathf.RoundToInt(mSprite.paddingLeft * outer.width);
+					mOffsetY = Mathf.RoundToInt(mSprite.paddingTop * outer.width);
+					mWidth = Mathf.RoundToInt(outer.width);
+					mHeight = Mathf.RoundToInt(outer.height);
+					mAdvance = Mathf.RoundToInt(outer.width + (mSprite.paddingRight + mSprite.paddingLeft) * outer.width);
 					mIsValid = true;
 				}
 			}

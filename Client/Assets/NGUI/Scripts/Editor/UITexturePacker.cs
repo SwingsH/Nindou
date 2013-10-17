@@ -1,5 +1,5 @@
-/*
-	Based on the Public Domain MaxRectsBinPack.cpp source by Jukka Jylänki
+ï»¿/*
+	Based on the Public Domain MaxRectsBinPack.cpp source by Jukka Jylï¿½nki
 	https://github.com/juj/RectangleBinPack/
 
 	Ported to C# by Sven Magnus

@@ -1,4 +1,4 @@
-//----------------------------------------------
+﻿//----------------------------------------------
 //            NGUI: Next-Gen UI kit
 // Copyright © 2011-2013 Tasharen Entertainment
 //----------------------------------------------
@@ -52,12 +52,19 @@ public abstract class UIWidget : MonoBehaviour
 	Matrix4x4 mLocalToPanel;
 	bool mVisibleByPanel = true;
 	float mLastAlpha = 0f;
+	int mDrawnIndex = -1;
 
 	/// <summary>
 	/// Internal usage -- draw call that's drawing the widget.
 	/// </summary>
 
-	public UIDrawCall drawCall { get; set; }
+	//public UIDrawCall drawCall { get; set; }
+
+	/// <summary>
+	/// Internal usage -- used by the panel to get and set the order that the widgets are drawn in.
+	/// </summary>
+
+	public int renderQueue { get { return mDrawnIndex; } set { mDrawnIndex = value; } }
 
 	// Widget's generated geometry
 	UIGeometry mGeom = new UIGeometry();
@@ -185,24 +192,8 @@ public abstract class UIWidget : MonoBehaviour
 			if (mDepth != value)
 			{
 				mDepth = value;
-#if UNITY_EDITOR
-				UnityEditor.EditorUtility.SetDirty(this);
-#endif
 				UIPanel.SetDirty();
 			}
-		}
-	}
-
-	/// <summary>
-	/// Raycast depth order on widgets takes the depth of their panel into consideration.
-	/// This functionality is used to determine the "final" depth of the widget for drawing and raycasts.
-	/// </summary>
-
-	public int raycastDepth
-	{
-		get
-		{
-			return (mPanel != null) ? mDepth + mPanel.depth * 1000 : mDepth;
 		}
 	}
 
@@ -210,7 +201,7 @@ public abstract class UIWidget : MonoBehaviour
 	/// Local space corners of the widget. The order is bottom-left, top-left, top-right, bottom-right.
 	/// </summary>
 
-	public virtual Vector3[] localCorners
+	public Vector3[] localCorners
 	{
 		get
 		{
@@ -247,7 +238,7 @@ public abstract class UIWidget : MonoBehaviour
 	/// World-space corners of the widget. The order is bottom-left, top-left, top-right, bottom-right.
 	/// </summary>
 
-	public virtual Vector3[] worldCorners
+	public Vector3[] worldCorners
 	{
 		get
 		{
@@ -374,59 +365,51 @@ public abstract class UIWidget : MonoBehaviour
 	[System.Obsolete("There is no relative scale anymore. Widgets now have width and height instead")]
 	public Vector2 relativeSize { get { return Vector2.one; } }
 
-	// Temporary list of widgets, used in the Raycast function in order to avoid repeated allocations.
-	//static BetterList<UIWidget> mTemp = new BetterList<UIWidget>();
-
 	/// <summary>
 	/// Raycast into the screen and return a list of widgets in order from closest to farthest away.
-	/// This is a slow operation and will consider all active widgets.
+	/// This is a slow operation and will consider ALL widgets underneath the specified game object.
 	/// </summary>
 
-	//static public BetterList<UIWidget> Raycast (Vector2 mousePos, Camera cam, int mask)
-	//{
-	//    mTemp.Clear();
-		
-	//    for (int i = list.size; i > 0; )
-	//    {
-	//        UIWidget w = list[--i];
+	static public BetterList<UIWidget> Raycast (GameObject root, Vector2 mousePos)
+	{
+		BetterList<UIWidget> list = new BetterList<UIWidget>();
+		UICamera uiCam = UICamera.FindCameraForLayer(root.layer);
 
-	//        if ((mask & (1 << w.cachedGameObject.layer)) != 0 && w.mPanel != null)
-	//        {
-	//            Vector3[] corners = w.worldCorners;
-	//            if (NGUIMath.DistanceToRectangle(corners, mousePos, cam) == 0f)
-	//                mTemp.Add(w);
-	//        }
-	//    }
-	//    return mTemp;
-	//}
+		if (uiCam != null)
+		{
+			Camera cam = uiCam.cachedCamera;
+			UIWidget[] widgets = root.GetComponentsInChildren<UIWidget>();
+
+			for (int i = 0; i < widgets.Length; ++i)
+			{
+				UIWidget w = widgets[i];
+
+				Vector3[] corners = w.worldCorners;
+				if (NGUIMath.DistanceToRectangle(corners, mousePos, cam) == 0f)
+					list.Add(w);
+			}
+
+			list.Sort(delegate(UIWidget w1, UIWidget w2) { return w2.mDepth.CompareTo(w1.mDepth); });
+		}
+		return list;
+	}
 
 	/// <summary>
-	/// Static widget comparison function used for depth sorting.
+	/// Static widget comparison function used for Z-sorting.
 	/// </summary>
 
 	static public int CompareFunc (UIWidget left, UIWidget right)
 	{
-		int val = UIPanel.CompareFunc(left.mPanel, right.mPanel);
-
-		if (val == 0)
-		{
-			if (left.mDepth < right.mDepth) return -1;
-			if (left.mDepth > right.mDepth) return 1;
-		}
-		return val;
+		if (left.mDepth > right.mDepth) return 1;
+		if (left.mDepth < right.mDepth) return -1;
+		return 0;
 	}
 
 	/// <summary>
 	/// Calculate the widget's bounds, optionally making them relative to the specified transform.
 	/// </summary>
 
-	public Bounds CalculateBounds () { return CalculateBounds(null); }
-
-	/// <summary>
-	/// Calculate the widget's bounds, optionally making them relative to the specified transform.
-	/// </summary>
-
-	public Bounds CalculateBounds (Transform relativeParent)
+	public Bounds CalculateBounds (Transform relativeParent = null)
 	{
 		if (relativeParent == null)
 		{
@@ -439,7 +422,7 @@ public abstract class UIWidget : MonoBehaviour
 		{
 			Matrix4x4 toLocal = relativeParent.worldToLocalMatrix;
 			Vector3[] corners = worldCorners;
-			Bounds b = new Bounds(toLocal.MultiplyPoint3x4(corners[0]), Vector3.zero);
+			Bounds b = new Bounds(corners[0], Vector3.zero);
 			for (int j = 1; j < 4; ++j) b.Encapsulate(toLocal.MultiplyPoint3x4(corners[j]));
 			return b;
 		}
@@ -451,14 +434,14 @@ public abstract class UIWidget : MonoBehaviour
 
 	void SetDirty ()
 	{
-		if (drawCall != null)
+		int index = renderQueue;
+
+		if (index == -1)
 		{
-			drawCall.isDirty = true;
+			if (isVisible)
+				UIPanel.SetDirty();
 		}
-		else if (isVisible && hasVertices)
-		{
-			UIPanel.SetDirty();
-		}
+		else UIPanel.SetDirty(renderQueue);
 	}
 
 	/// <summary>
@@ -469,7 +452,7 @@ public abstract class UIWidget : MonoBehaviour
 	{
 		if (mPanel != null)
 		{
-			drawCall = null;
+			renderQueue = -1;
 			mPanel = null;
 			SetDirty();
 		}
@@ -489,9 +472,7 @@ public abstract class UIWidget : MonoBehaviour
 	public virtual void MarkAsChanged ()
 	{
 		mChanged = true;
-#if UNITY_EDITOR
-		UnityEditor.EditorUtility.SetDirty(this);
-#endif
+
 		// If we're in the editor, update the panel right away so its geometry gets updated.
 		if (mPanel != null && enabled && NGUITools.GetActive(gameObject) && !Application.isPlaying && material != null)
 		{
@@ -698,7 +679,7 @@ public abstract class UIWidget : MonoBehaviour
 
 	void OnDrawGizmos ()
 	{
-		if (isVisible && hasVertices && mPanel != null)
+		if (isVisible && mPanel != null)
 		{
 			if (UnityEditor.Selection.activeGameObject == gameObject && showHandles) return;
 
@@ -838,20 +819,18 @@ public abstract class UIWidget : MonoBehaviour
 
 				if (isVisible)
 				{
-					bool hadVertices = mGeom.hasVertices;
 					mGeom.Clear();
 					OnFill(mGeom.verts, mGeom.uvs, mGeom.cols);
 
+					// Want to see what's being filled? Uncomment this line.
+					//Debug.Log("Fill " + name + " (" + Time.time + ")");
+
 					if (mGeom.hasVertices)
 					{
-						// Want to see what's being filled? Uncomment this line.
-						//Debug.Log("Fill " + name + " (" + Time.time + ")");
-
 						if (!hasMatrix) mLocalToPanel = p.worldToLocal * cachedTransform.localToWorldMatrix;
 						mGeom.ApplyTransform(mLocalToPanel);
-						return true;
 					}
-					return hadVertices;
+					return true;
 				}
 				else if (mGeom.hasVertices)
 				{
