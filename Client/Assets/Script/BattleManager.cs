@@ -472,6 +472,7 @@ public class BattleManager : BattleState
 	{
 		Unit_Clear();
 		Generater.ClearGrave();
+		TimeMachine.SetTimeScale(1);
 	}
 }
 public struct GridPos
@@ -1033,7 +1034,7 @@ public class BattleEntering : BattleState
 	public override void OnChangeIn(GameControl control)
 	{
 		Application.LoadLevel("BattleField");
-		
+		TimeMachine.SetTimeScale(1);
 	}
 
 	public override void Update(GameControl control)
@@ -1073,5 +1074,6 @@ public class BattleLeaving :BattleState
 
 	public override void OnChangeOut(GameControl control)
 	{
+
 	}
 }
