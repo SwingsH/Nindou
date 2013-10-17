@@ -30,7 +30,8 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         /// <param name="depth">深度</param>
         /// <param name="eventDelegate">按下按鈕的反應函式</param>
         /// <param name="stageName">要顯示的關卡名稱</param>
-        public StageSubUI(GameObject parent, string stageUIName, Vector3 relativePos, int depth, EventDelegate eventDelegate)
+        public StageSubUI(GameObject parent, string stageUIName, Vector3 relativePos, int depth, EventDelegate clickEventDelegate)
+
         {
             // 最上層物件
             _stageSubUIObj = NGUITools.AddChild(parent);
@@ -39,9 +40,10 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
             // 底圖＆按鈕
             _stageBtn = CommonFunction.CreateUIButton(_stageSubUIObj, "StageBtn", Vector3.zero, depth,
                 ResourceStation.GetUIAtlas("TestAtlas"),
-                "button_back", 1478, 104, null, Color.red, string.Empty);
-            _stageBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
-            _stageBtn.onClick.Add(eventDelegate);
+                "button_back", 1478, 200, null, Color.red, string.Empty);
+            _stageBtn.SetColor(Color.white, Color.white, new Color(184.0f / 255.0f, 184.0f / 255.0f, 184.0f / 255.0f, 1.0f), new Color(184.0f / 255.0f, 184.0f / 255.0f, 184.0f / 255.0f, 1.0f));
+            _stageBtn.onClick.Add(clickEventDelegate);
+            
             // 關卡名稱＆消耗體力說明
             _stageNameText = CommonFunction.CreateUILabel(_stageSubUIObj, "StageName", UIWidget.Pivot.Left, new Vector3(-653, 0, 0), depth + 1,
                 ResourceStation.GetUIFont("MSJH_30"),
@@ -117,7 +119,7 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
             set
             {
                 _stageOpen = value;
-                if (_stageOpen) { _stageBtn.SetColor(Color.white, Color.white, Color.white, Color.white); }
+                if (_stageOpen) { _stageBtn.SetColor(Color.white, Color.white, new Color(184.0f / 255.0f, 184.0f / 255.0f, 184.0f / 255.0f, 1.0f), new Color(184.0f / 255.0f, 184.0f / 255.0f, 184.0f / 255.0f, 1.0f));}
                 else { _stageBtn.SetColor(Color.gray, Color.gray, Color.gray, Color.gray); }
 
                 NGUITools.SetActive(_hintText.gameObject, !_stageOpen);
@@ -360,6 +362,9 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         if (_allSubStage[stageIndex].StageOpen)
         {
             CommonFunction.DebugMsgFormat("{0}   關卡已經開啟，進入探索", _allSubStage[stageIndex].StageName);
+            // for test : 進入戰鬥
+            BattleState.BattleID = (uint)(stageIndex + 1);
+            GameControl.Instance.ChangeGameState(BattleState.instance);
         }
         else // 關卡尚未開啟，顯示開啟條件
         {
@@ -393,8 +398,9 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
     {
         int curStageCount = _allSubStage.Count;
         _allSubStage.Add(new StageSubUI(_stageSelectBackground.gameObject, string.Format("Stage_{0}", curStageCount), 
-              new Vector3(-76, 184 - curStageCount * 200, 0), 5,
+              new Vector3(-76, 150 - curStageCount * 205, 0), 5,
                 new EventDelegate(this, "SelectStage")));
+        
         SetStageInfo(curStageCount, isOpen, stageName, cost, currentExploreProgress, maxExploreProgress);
         return curStageCount;
     }

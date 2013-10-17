@@ -96,7 +96,7 @@ public class GLOBALCONST
         [EnumClassValue(typeof(AreaEvent), FILENAME_AREA_EVENT)]		AreaEvent,   // 區域事件
         [EnumClassValue(typeof(Story), FILENAME_STORY)]					Story,       // 劇情
         [EnumClassValue(typeof(Battle), FILENAME_BATTLE)]				Battle,       // 戰鬥配置表      
- 		[EnumClassValue(typeof(SpecialEffect), FILENAME_SKILLEFFECT)]	SPEffect,       // 殊特狀態表
+ 		[EnumClassValue(typeof(SpecialEffect), FILENAME_SKILLEFFECT)]	SPEffect,       // 特殊狀態表
         
     };
 }

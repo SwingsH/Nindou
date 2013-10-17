@@ -181,4 +181,49 @@ public class GUIStation
         return retUI;
     }
     #endregion
+
+    /// <summary>
+    /// 顯示uiType表示的ui，並且關閉其他UI
+    /// </summary>
+    /// <param name="uiType">要顯示的UI</param>
+    public void ShowAndHideOther(Type uiType)
+    {
+        if (!typeof(GUIFormBase).IsAssignableFrom(uiType)) {return;} // 並非繼承自GUIFormBase的uiType，不做事
+
+        if (_guiReference == null) { _guiReference = new Dictionary<Type, GUIFormBase>(); }
+        // 隱藏所有UI，若確定一次只開一個，就只需關前一個
+        foreach (GUIFormBase ui in _guiReference.Values)
+        {
+            if (ui.Visible) { ui.Hide(); }
+        }
+
+        GUIFormBase showUI;
+        if (!_guiReference.TryGetValue(uiType, out showUI))
+        {
+            showUI = InstantiateContainer(uiType);
+            showUI.CreateUI(this);
+        }
+        showUI.Show();
+    }
+
+    ///// <summary>
+    ///// 顯示前一個UI
+    ///// </summary>
+    //public void ShowPreviouUI()
+    //{
+    //    _previousShowUI.Show();
+    //}
+
+    public void TestDestroy<T>()
+    {
+         GUIFormBase deUI;
+
+         if (_guiReference.TryGetValue(typeof(T), out deUI))
+         {
+             _guiReference.Remove(typeof(T));
+             NGUITools.Destroy(deUI.gameObject);
+         }
+         deUI = null;
+    }
+
 }

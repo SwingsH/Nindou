@@ -461,7 +461,14 @@ public class BattleManager : BattleState
 		Generater = new UnitGenerater();
 
 		BattleStart();
-	}
+        // fs: 切換完畢後關閉選擇關卡UI，開啟戰鬥UI
+        control.GUIStation.ShowAndHideOther(typeof(UI_Battle));
+        control.GUIStation.Form<UI_Battle>().SetBossMessageVisible(false);
+        for (int i = 0; i < Players.Length; ++i)
+        {
+            control.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true);
+        }
+    }
 
 	public override void Update(GameControl control)
 	{
@@ -1065,11 +1072,18 @@ public class BattleLeaving :BattleState
 	{
 		BattleID = uint.MinValue;
 		Application.LoadLevel("Empty");
-		GameControl.Instance.ChangeGameState(GameLoginNone.Instance);
 	}
 
 	public override void Update(GameControl control)
 	{
+        // fs : 改變GameState到GameStageSelect時，會關閉除了UI_Main_StageSelect以外的介面，
+        //      此時會使用DestroyImmediate刪除UIDrawCall，如果在LoadLevel()尚未完成時呼叫，
+        //      會出現「Destroying GameObjects immediately is not permitted during physics trigger/contact or animation event callbacks...」的錯誤訊息，
+        //      故要在Update中持續等待LoadLevel()完成後才呼叫。
+        if (Application.loadedLevelName == "Empty")
+        {
+            GameControl.Instance.ChangeGameState(GameStageSelect.Instance);
+        }
 	}
 
 	public override void OnChangeOut(GameControl control)

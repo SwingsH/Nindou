@@ -8,6 +8,7 @@ public class UI_Battle : GUIFormBase
     UISlider _bossHPBar; // Boss HP 血條
     UIButton _fastForwardBtn; // 加速鈕
     UIButton _pauseBtn; // 暫停鈕
+    UISprite _iconBackground; // 角色icon所在的背景圖
     List<UIButton> _iconBtns = new List<UIButton>(); // 玩家角色圖像
     List<UISlider> _hpBars = new List<UISlider>(); // 玩家角色血條
     
@@ -46,15 +47,19 @@ public class UI_Battle : GUIFormBase
             "pause", 150, 150, null, Color.white, string.Empty);
         _pauseBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _pauseBtn.onClick.Add(new EventDelegate(this, "PauseBtnClick"));
-        UISprite iconBackground = CommonFunction.CreateUISprite(panel.gameObject, "IconBackground", UISprite.Type.Simple, 0,
+        _iconBackground = CommonFunction.CreateUISprite(panel.gameObject, "IconBackground", UISprite.Type.Simple, 0,
             ResourceStation.GetUIAtlas("TestAtlas"),
             "pachuri", UIWidget.Pivot.Center, 1920, 248);
-        iconBackground.transform.localPosition = new Vector3(0, -416, 0);
+        _iconBackground.transform.localPosition = new Vector3(0, -416, 0);
         // 玩家角色圖像 & 血條
-        for (int i = 0; i < 4; ++i)
-        {
-            AddPlayerIcon(iconBackground.gameObject);
-        }
+        //if (BattleManager.Instance.Players != null)
+        //{
+        //    for (int i = 0; i < BattleManager.Instance.Players.Length; ++i)
+        //    {
+        //        CommonFunction.DebugMsgFormat("player number = {0}", BattleManager.Instance.Players.Length);
+        //        AddPlayerIcon(_iconBackground.gameObject);
+        //    }
+        //}
     }
      #endregion
     #region 固定函式
@@ -88,14 +93,15 @@ public class UI_Battle : GUIFormBase
         //    "pause", 150, 150, null, Color.white, string.Empty);
         //_pauseBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         //_pauseBtn.onClick.Add(new EventDelegate(this, "PauseBtnClick"));
-        //UISprite iconBackground = CommonFunction.CreateUISprite(gameObject, "IconBackground", UISprite.Type.Simple, 0,
+        // 角色icon所在的背景圖
+        //_iconBackground = CommonFunction.CreateUISprite(gameObject, "IconBackground", UISprite.Type.Simple, 0,
         //    ResourceStation.GetUIAtlas("TestAtlas"),
         //    "pachuri", UIWidget.Pivot.Center, 1920, 248);
-        //iconBackground.transform.localPosition = new Vector3(0, -416, 0);
+        //_iconBackground.transform.localPosition = new Vector3(0, -416, 0);
         //// 玩家角色圖像 & 血條
         //for (int i = 0; i < 4; ++i)
         //{
-        //    AddPlayerIcon(iconBackground.gameObject);
+        //    AddPlayerIcon(_iconBackground.gameObject);
         //}
 	}
 
@@ -156,11 +162,25 @@ public class UI_Battle : GUIFormBase
     {
         CommonFunction.DebugMsgFormat("按下 {0}", UIButton.current.name);
         int iconSelect = -1;
-        if (!int.TryParse(UIButton.current.name, out iconSelect))
+        string indexStr = UIButton.current.name.Substring(5);
+        CommonFunction.DebugMsgFormat("按下的indexStr = =={0}==", indexStr);
+        if (!int.TryParse(indexStr, out iconSelect))
         {
-            CommonFunction.DebugMsgFormat("現在選擇的icon為：{0}，無法解析index，請重新設定", UIButton.current.transform.parent.name);
+            CommonFunction.DebugMsgFormat("現在選擇的icon為：{0}，無法解析index，請重新設定", UIButton.current.name);
             return;
         }
+        if (BattleManager.Instance.Players == null)
+        {
+            CommonFunction.DebugMsg("戰鬥資料沒有玩家！！");
+            return;
+        }
+        if (iconSelect < 0 || iconSelect >= BattleManager.Instance.Players.Length)
+        {
+            CommonFunction.DebugMsgFormat("現在按下的icon為：{0}，index有誤，請檢查", UIButton.current.name);
+        }
+        // 施展技能
+        ActionUnit currentRole = BattleManager.Instance.Players[iconSelect] as ActionUnit;
+        if (currentRole != null) { currentRole.CastExtrimSkill(); }
     }
     #endregion
     #region Boss資訊相關
@@ -193,6 +213,26 @@ public class UI_Battle : GUIFormBase
     }
     #endregion
     #region 玩家圖像相關
+
+    /// <summary>
+    /// 設定PlayerIcon資料
+    /// </summary>
+    /// <param name="playerIndex">Player Index</param>
+    /// <param name="isVisible">是否看的到</param>
+    public void SetPlayerIcon(int playerIndex, bool isVisible)
+    {
+        // 中間有空的加入（如果固定的話，乾脆在建立時設好好了）
+        if (playerIndex >= _iconBtns.Count)
+        {
+            for (int i = _iconBtns.Count; i <= playerIndex; ++i)
+            {
+                AddPlayerIcon(_iconBackground.gameObject);
+            }
+        }
+        // 設定該格資料
+        NGUITools.SetActive(_iconBtns[playerIndex].gameObject, isVisible);
+    }
+
     /// <summary>
     /// 加一個playerIcon
     /// </summary>

@@ -63,7 +63,8 @@ public class GameDetectUpdate : IGameState
     {
         control.DownloadUpdateInfo();
         // fs: Show開始介面
-        control.GUIStation.Form<UI_Start>().Show();
+        //control.GUIStation.Form<UI_Start>().Show();
+        control.GUIStation.ShowAndHideOther(typeof(UI_Start));
         control.GUIStation.Form<UI_Start>().LoginBtnClick = StartLogin;
     }
 
@@ -177,7 +178,7 @@ public class GameLoginNone : IGameState
 
     public void Update(GameControl control)
     {
-        if (control.IsLoginSessionValid)
+        //if (control.IsLoginSessionValid)
             control.ChangeGameState(GameEntered.Instance);
     }
 
@@ -244,9 +245,7 @@ public class GameEntered : IGameState
     public void OnChangeIn(GameControl control)
     {
         //進入遊戲
-        control.GUIStation.Form<UI_Start>().Hide();
-        control.GUIStation.Form<UI_Main_WorldMap>().Show();
-
+        control.GUIStation.ShowAndHideOther(typeof(UI_Main_WorldMap));
     }
     public void Update(GameControl control)
     {
@@ -257,6 +256,42 @@ public class GameEntered : IGameState
         {
             if (_instance == null)
                 _instance = new GameEntered();
+            return _instance;
+        }
+    }
+
+	public void OnChangeOut(GameControl control)
+	{
+		//throw new System.NotImplementedException();
+	}
+}
+
+/// <summary>
+/// 選擇關卡的狀態，此為了讓從戰鬥結束後回到開啟關卡選擇介面
+/// </summary>
+public class GameStageSelect : IGameState
+{
+    private static GameStageSelect _instance = null;
+
+    ~GameStageSelect()
+    {
+        _instance = null;
+    }
+
+    public void OnChangeIn(GameControl control)
+    {
+        // 開啟選關卡介面
+        control.GUIStation.ShowAndHideOther(typeof(UI_Main_StageSelect));
+    }
+    public void Update(GameControl control)
+    {
+    }
+    public static GameStageSelect Instance
+    {
+        get
+        {
+            if (_instance == null)
+                _instance = new GameStageSelect();
             return _instance;
         }
     }
