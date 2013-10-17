@@ -1,0 +1,223 @@
+﻿using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+
+public class UI_Battle : GUIFormBase
+{
+    UILabel _boasNameText; // Boss 名稱
+    UISlider _bossHPBar; // Boss HP 血條
+    UIButton _fastForwardBtn; // 加速鈕
+    UIButton _pauseBtn; // 暫停鈕
+    List<UIButton> _iconBtns = new List<UIButton>(); // 玩家角色圖像
+    List<UISlider> _hpBars = new List<UISlider>(); // 玩家角色血條
+    
+
+     #region 繼承自GUIFormBase的method
+    protected override void CreateAllComponent()
+    {
+        UIAnchor anchor = NGUITools.AddChild<UIAnchor>(gameObject);
+        anchor.uiCamera = _guistation.GUICamera;
+
+        UIPanel panel = NGUITools.AddChild<UIPanel>(anchor.gameObject);
+        // BOSS 名稱
+        _boasNameText = CommonFunction.CreateUILabel(panel.gameObject, "BossName", UIWidget.Pivot.Left, new Vector3(-858, 460, 0), 4,
+            ResourceStation.GetUIFont("MSJH_30"),
+            Color.red, "Boss Name");
+        // Boss HP 血條
+        _bossHPBar = CommonFunction.CreateUIProgressBar(panel.gameObject, "Boss HP Bar", new Vector3(-400, 440, 0), 1,
+            ResourceStation.GetUIAtlas("TestAtlas"),
+            "button_back", "button_back", 835, 122);
+        // 此處暫時作法，一般來說前景和背景圖會是不同的，且不需特別變色才是
+        UISprite[] tempSprites = _bossHPBar.gameObject.GetComponentsInChildren<UISprite>();
+        foreach (UISprite oneSprite in tempSprites)
+        {
+            if (oneSprite.name.Equals("Foreground")) { oneSprite.color = new Color(0.0f / 255.0f, 255.0f / 255.0f, 39.0f / 255.0f); }
+            if (oneSprite.name.Equals("Background")) { oneSprite.color = new Color(255.0f / 255.0f, 4.0f / 255.0f, 4.0f / 255.0f); }
+        }
+        // 加速鈕
+        _fastForwardBtn = CommonFunction.CreateUIButton(panel.gameObject, "FastForward", new Vector3(714, 428, 0), 6,
+            ResourceStation.GetUIAtlas("TestAtlas"),
+            "Fast-forward", 150, 150, null, Color.white, string.Empty);
+        _fastForwardBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
+        _fastForwardBtn.onClick.Add(new EventDelegate(this, "FastForwardBtnClick"));
+        // 暫停鈕
+        _pauseBtn = CommonFunction.CreateUIButton(panel.gameObject, "Pause", new Vector3(884, 428, 0), 5,
+            ResourceStation.GetUIAtlas("TestAtlas"),
+            "pause", 150, 150, null, Color.white, string.Empty);
+        _pauseBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
+        _pauseBtn.onClick.Add(new EventDelegate(this, "PauseBtnClick"));
+        UISprite iconBackground = CommonFunction.CreateUISprite(panel.gameObject, "IconBackground", UISprite.Type.Simple, 0,
+            ResourceStation.GetUIAtlas("TestAtlas"),
+            "pachuri", UIWidget.Pivot.Center, 1920, 248);
+        iconBackground.transform.localPosition = new Vector3(0, -416, 0);
+        // 玩家角色圖像 & 血條
+        for (int i = 0; i < 4; ++i)
+        {
+            AddPlayerIcon(iconBackground.gameObject);
+        }
+    }
+     #endregion
+    #region 固定函式
+    // Use this for initialization
+	void Start () 
+    {
+        //// Boss 名稱
+        //_boasNameText = CommonFunction.CreateUILabel(gameObject, "BossName", UIWidget.Pivot.Left, new Vector3(-858, 460, 0), 4,
+        //    ResourceStation.GetUIFont("MSJH_30"),
+        //    Color.red, "Boss Name");
+        //// Boss HP 血條
+        //_bossHPBar = CommonFunction.CreateUIProgressBar(gameObject, "Boss HP Bar", new Vector3(-400, 440, 0), 1,
+        //    ResourceStation.GetUIAtlas("TestAtlas"),
+        //    "button_back", "button_back", 835, 122);
+        //// 此處暫時作法，一般來說前景和背景圖會是不同的，且不需特別變色才是
+        //UISprite[] tempSprites = _bossHPBar.gameObject.GetComponentsInChildren<UISprite>();
+        //foreach (UISprite oneSprite in tempSprites)
+        //{
+        //    if (oneSprite.name.Equals("Foreground")) { oneSprite.color = new Color(0.0f / 255.0f, 255.0f / 255.0f, 39.0f / 255.0f); }
+        //    if (oneSprite.name.Equals("Background")) { oneSprite.color = new Color(255.0f / 255.0f, 4.0f / 255.0f, 4.0f / 255.0f); }
+        //}
+        //// 加速鈕
+        //_fastForwardBtn = CommonFunction.CreateUIButton(gameObject, "FastForward", new Vector3(714, 428, 0), 6,
+        //    ResourceStation.GetUIAtlas("TestAtlas"),
+        //    "Fast-forward", 150, 150, null, Color.white, string.Empty);
+        //_fastForwardBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
+        //_fastForwardBtn.onClick.Add(new EventDelegate(this, "FastForwardBtnClick"));
+        //// 暫停鈕
+        //_pauseBtn = CommonFunction.CreateUIButton(gameObject, "Pause", new Vector3(884, 428, 0), 5,
+        //    ResourceStation.GetUIAtlas("TestAtlas"),
+        //    "pause", 150, 150, null, Color.white, string.Empty);
+        //_pauseBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
+        //_pauseBtn.onClick.Add(new EventDelegate(this, "PauseBtnClick"));
+        //UISprite iconBackground = CommonFunction.CreateUISprite(gameObject, "IconBackground", UISprite.Type.Simple, 0,
+        //    ResourceStation.GetUIAtlas("TestAtlas"),
+        //    "pachuri", UIWidget.Pivot.Center, 1920, 248);
+        //iconBackground.transform.localPosition = new Vector3(0, -416, 0);
+        //// 玩家角色圖像 & 血條
+        //for (int i = 0; i < 4; ++i)
+        //{
+        //    AddPlayerIcon(iconBackground.gameObject);
+        //}
+	}
+
+    // Update is called once per frame
+    void Update() 
+    {
+
+    }
+
+    protected override void OnDestroy()
+    {
+        foreach (UIButton iconBtn in _iconBtns)
+        {
+            if (iconBtn != null) { NGUITools.Destroy(iconBtn.gameObject); }
+        }
+        _iconBtns = null;
+        foreach (UISlider hpBar in _hpBars)
+        {
+            if (hpBar != null) { NGUITools.Destroy(hpBar.gameObject); }
+        }
+        _hpBars = null;
+        if (_pauseBtn != null) { NGUITools.Destroy(_pauseBtn.gameObject); }
+        _pauseBtn = null;
+        if (_fastForwardBtn != null) { NGUITools.Destroy(_fastForwardBtn.gameObject); }
+        _fastForwardBtn = null;
+        if (_bossHPBar != null) { NGUITools.Destroy(_bossHPBar.gameObject); }
+        _bossHPBar = null;
+        if (_boasNameText != null) { NGUITools.Destroy(_boasNameText.gameObject); }
+        _boasNameText = null;
+        base.OnDestroy();
+    }
+    #endregion
+
+    #region 按下按鈕的反應函式
+    /// <summary>
+    /// 按下加速鈕的反應函式
+    /// </summary>
+    void FastForwardBtnClick()
+    {
+        CommonFunction.DebugMsg("按下「加速鈕」");
+        // TODO : 看是否真是這樣
+        TimeMachine.SetTimeScale(Time.timeScale == 1 ? 5 : (Time.timeScale == 5 ? 10 : 1));
+    }
+
+    /// <summary>
+    /// 按下暫停鈕的反應函式
+    /// </summary>
+    void PauseBtnClick()
+    {
+        CommonFunction.DebugMsg("按下「暫停鈕」");
+        // TODO：
+        TimeMachine.SetTimeScale(0.0f);
+    }
+    /// <summary>
+    /// 按下角色Icon的反應函式
+    /// </summary>
+    void IconBtnClick()
+    {
+        CommonFunction.DebugMsgFormat("按下 {0}", UIButton.current.name);
+        int iconSelect = -1;
+        if (!int.TryParse(UIButton.current.name, out iconSelect))
+        {
+            CommonFunction.DebugMsgFormat("現在選擇的icon為：{0}，無法解析index，請重新設定", UIButton.current.transform.parent.name);
+            return;
+        }
+    }
+    #endregion
+    #region Boss資訊相關
+    /// <summary>
+    /// 設定Boss訊息是否顯示
+    /// </summary>
+    /// <param name="isVisible">是否顯示</param>
+    public void SetBossMessageVisible(bool isVisible)
+    {
+        NGUITools.SetActive(_boasNameText.gameObject, isVisible);
+        NGUITools.SetActive(_bossHPBar.gameObject, isVisible);
+    }
+
+    // BossName
+    public string BossName
+    {
+        set { if (value != null) { _boasNameText.text = value; } }
+    }
+
+    /// <summary>
+    /// 設定Boss血條
+    /// </summary>
+    /// <param name="newBossCurHP">Boss現在HP</param>
+    /// <param name="newBossMaxHP">Boss最大HP</param>
+    public void SetBossHP(int newBossCurHP, int newBossMaxHP)
+    {
+        if (newBossMaxHP < 0) { return; }
+        int curHP = Mathf.Clamp(newBossCurHP, 0, newBossMaxHP);
+        _bossHPBar.value = (float)curHP / (float)newBossMaxHP;
+    }
+    #endregion
+    #region 玩家圖像相關
+    /// <summary>
+    /// 加一個playerIcon
+    /// </summary>
+    /// <param name="parentObj">父物件</param>
+    void AddPlayerIcon(GameObject parentObj)
+    {
+        int playerIndex = _iconBtns.Count;
+
+        UIButton tempIconBtn = CommonFunction.CreateUIButton(parentObj.gameObject, string.Format("Icon_{0}", playerIndex), new Vector3(-656 + 432 * playerIndex, 12, 0), 3,
+            ResourceStation.GetUIAtlas("TestAtlas2"),
+            "chiruno", 180, 180, null, Color.white, string.Empty);
+        tempIconBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
+        tempIconBtn.onClick.Add(new EventDelegate(this, "IconBtnClick"));
+        _iconBtns.Add(tempIconBtn);
+        UISlider tempHPBar = CommonFunction.CreateUIProgressBar(tempIconBtn.gameObject, "HP Bar", new Vector3(-178, -64, 0), 1,
+            ResourceStation.GetUIAtlas("TestAtlas"),
+            "button_back", "button_back", 350, 122);
+        // TODO: 此處暫時作法，一般來說前景和背景圖會是不同的，且不需特別變色才是
+        UISprite[] tempHPBarSprites = tempHPBar.gameObject.GetComponentsInChildren<UISprite>();
+        foreach (UISprite oneSprite in tempHPBarSprites)
+        {
+            if (oneSprite.name.Equals("Foreground")) { oneSprite.color = new Color(0.0f / 255.0f, 255.0f / 255.0f, 39.0f / 255.0f); }
+            if (oneSprite.name.Equals("Background")) { oneSprite.color = new Color(255.0f / 255.0f, 4.0f / 255.0f, 4.0f / 255.0f); }
+        }
+        _hpBars.Add(tempHPBar);
+    }
+    #endregion
+}

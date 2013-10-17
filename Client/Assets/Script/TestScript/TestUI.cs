@@ -33,7 +33,7 @@ public class TestUI : MonoBehaviour {
 							continue;
 						ActionUnit au = BattleManager.Instance.Players[i] as ActionUnit;
 						r.x = i * r.width;
-
+                        // 技能使用
 						if (au.ExtrimSkill != null)
 						{
 							string content = au.ExtrimSkill.Name;
