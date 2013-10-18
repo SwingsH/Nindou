@@ -24,19 +24,19 @@ public class UI_Start : GUIFormBase
         UIPanel panel = NGUITools.AddChild<UIPanel>(anchor.gameObject);
 
         // 登入的全畫面圖按鈕
-        _loginBtn = CommonFunction.CreateUIButton(panel.gameObject, "Login BG", Vector3.zero, 0, 
+        _loginBtn = GUIStation.CreateUIButton(panel.gameObject, "Login BG", Vector3.zero, 0, 
             ResourceStation.GetUIAtlas("TestAtlas"),
             "pachuri", 
             1920, 1080, null, Color.white, string.Empty);
         _loginBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         // 登入文字
-        _loginHint = CommonFunction.CreateUILabel(panel.gameObject, "LoginHint", UIWidget.Pivot.Center, new Vector3(0, -106, 0), 7,
+        _loginHint = GUIStation.CreateUILabel(panel.gameObject, "LoginHint", UIWidget.Pivot.Center, new Vector3(0, -106, 0), 7,
             ResourceStation.GetUIFont("MSJH_25"),
             new Color(1.0f, 0.2f, 0.3f), "點選畫面進入遊戲");
         // 加上event
         _loginBtn.onClick.Add(new EventDelegate(this, "LoginClick"));
         // 繼承按鈕
-        _inheritBtn = CommonFunction.CreateUIButton(panel.gameObject, "Inhert Button", new Vector3(294, -159, 0), 1, 
+        _inheritBtn = GUIStation.CreateUIButton(panel.gameObject, "Inhert Button", new Vector3(294, -159, 0), 1, 
             ResourceStation.GetUIAtlas("TestAtlas"),
             "fb_300_main", 40, 40, null, Color.white, string.Empty);
         _inheritBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
@@ -44,12 +44,12 @@ public class UI_Start : GUIFormBase
         _inheritBtn.onClick.Add(new EventDelegate(this, "InheritClick"));
 
         // 進度條
-        _progress = CommonFunction.CreateUIProgressBar(panel.gameObject, "Progress Bar_Build", new Vector3(-346, -167, 0), 2,
+        _progress = GUIStation.CreateUIProgressBar(panel.gameObject, "Progress Bar_Build", new Vector3(-346, -167, 0), 2,
             ResourceStation.GetUIAtlas("SciFi Atlas"),
             "Dark", "Light", 690, 30);
         NGUITools.SetActive(_progress.gameObject, false);
         // 進度數值
-        _progressShow = CommonFunction.CreateUILabel(_progress.gameObject, "Progress", UIWidget.Pivot.Right, new Vector3(652.67f, -4.0f, 0), 6,
+        _progressShow = GUIStation.CreateUILabel(_progress.gameObject, "Progress", UIWidget.Pivot.Right, new Vector3(652.67f, -4.0f, 0), 6,
             ResourceStation.GetUIFont("MSJH"),
             new Color(1.0f, 0.2f, 0.3f), "0.00");
     }
