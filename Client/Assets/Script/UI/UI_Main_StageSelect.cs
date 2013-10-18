@@ -28,10 +28,10 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         /// <param name="stageUIName">關卡UI名稱</param>
         /// <param name="relativePos">和parent的相對位置</param>
         /// <param name="depth">深度</param>
-        /// <param name="eventDelegate">按下按鈕的反應函式</param>
         /// <param name="stageName">要顯示的關卡名稱</param>
-        public StageSubUI(GameObject parent, string stageUIName, Vector3 relativePos, int depth, EventDelegate clickEventDelegate)
-
+        /// <param name="clickEventDelegate">按下按鈕的反應函式</param>
+        /// <param name="parentDraggablePanel">上層的可拖曳panel</param>
+        public StageSubUI(GameObject parent, string stageUIName, Vector3 relativePos, int depth, EventDelegate clickEventDelegate, UIDraggablePanel parentDraggablePanel)
         {
             // 最上層物件
             _stageSubUIObj = NGUITools.AddChild(parent);
@@ -43,7 +43,11 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
                 "button_back", 1478, 200, null, Color.red, string.Empty);
             _stageBtn.SetColor(Color.white, Color.white, new Color(184.0f / 255.0f, 184.0f / 255.0f, 184.0f / 255.0f, 1.0f), new Color(184.0f / 255.0f, 184.0f / 255.0f, 184.0f / 255.0f, 1.0f));
             _stageBtn.onClick.Add(clickEventDelegate);
-            
+            if (parentDraggablePanel != null)
+            {
+                UIDragPanelContents tempDPC = _stageBtn.gameObject.AddComponent<UIDragPanelContents>();
+                tempDPC.draggablePanel = parentDraggablePanel;
+            }
             // 關卡名稱＆消耗體力說明
             _stageNameText = GUIStation.CreateUILabel(_stageSubUIObj, "StageName", UIWidget.Pivot.Left, new Vector3(-653, 0, 0), depth + 1,
                 ResourceStation.GetUIFont("MSJH_30"),
@@ -66,6 +70,8 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
                 new Vector3(-164, 0, 0), depth + 3,
                 ResourceStation.GetUIFont("MSJH_30"),
                 Color.red, string.Format(GLOBAL_STRING.STAGE_EXPLORE_PROGRESS_TEXT, 0, 1));
+
+            
         }
         #endregion
         #region Dispose -- 資源釋放
@@ -195,6 +201,8 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         anchor.uiCamera = _guistation.GUICamera;
 
         UIPanel panel = NGUITools.AddChild<UIPanel>(anchor.gameObject);
+
+        
         #region 每個主介面都有的部分
         // 背景圖
         UISprite backgroundPic = GUIStation.CreateUISprite(panel.gameObject, "Background", UISprite.Type.Simple, 0,
@@ -251,6 +259,12 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
             "X", 100, 100, null, Color.white, string.Empty);
         _returnPreviousUIBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _returnPreviousUIBtn.onClick.Add(new EventDelegate(this, "ReturnPreviousUI"));
+
+        // ScrollBar
+        UIScrollBar stageSelectScrollBar = GUIStation.CreateUIScrollBar(_stageSelectBackground.gameObject, "StageSelectScrollBar", new Vector3(786, 245, 0), 11,
+            ResourceStation.GetUIAtlas("SciFi Atlas"),
+            "Dark", "Button", 80, 636, UIScrollBar.Direction.Vertical, true);
+
         /// 先建三個 for Test
         for (int i = 0; i < 3; ++i)
         {
@@ -399,7 +413,7 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         int curStageCount = _allSubStage.Count;
         _allSubStage.Add(new StageSubUI(_stageSelectBackground.gameObject, string.Format("Stage_{0}", curStageCount), 
               new Vector3(-76, 150 - curStageCount * 205, 0), 5,
-                new EventDelegate(this, "SelectStage")));
+                new EventDelegate(this, "SelectStage"), null));
         
         SetStageInfo(curStageCount, isOpen, stageName, cost, currentExploreProgress, maxExploreProgress);
         return curStageCount;

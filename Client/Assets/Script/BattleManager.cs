@@ -66,6 +66,13 @@ public class BattleManager : BattleState
 		foreach (Unit eu in Players)
 			if (eu != null)
 				eu.Run();
+
+        // 將玩家角色HP變動更新到UI上
+        for (int i = 0; i < Players.Length; ++i)
+        {
+            if (Players[i] == null || Players[i].Life <= 0) { GameControl.Instance.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true, 0, 1); }
+            else { GameControl.Instance.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true, Players[i].Life, Players[i].MaxLife); }
+        }
 	}
 
 	public void BattleStart()
@@ -464,9 +471,10 @@ public class BattleManager : BattleState
         // fs: 切換完畢後關閉選擇關卡UI，開啟戰鬥UI
         control.GUIStation.ShowAndHideOther(typeof(UI_Battle));
         control.GUIStation.Form<UI_Battle>().SetBossMessageVisible(false);
-        for (int i = 0; i < Players.Length; ++i)
+        for (int i = 0; i <  GLOBALCONST.UI_BATTLE_ROLE_ICON_COUNT; ++i)
         {
-            control.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true);
+            if (i < Players.Length) { control.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true, Players[i].Life, Players[i].MaxLife); }
+            else { control.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, false);} // , 0, 1); }
         }
     }
 

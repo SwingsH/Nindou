@@ -52,14 +52,10 @@ public class UI_Battle : GUIFormBase
             "pachuri", UIWidget.Pivot.Center, 1920, 248);
         _iconBackground.transform.localPosition = new Vector3(0, -416, 0);
         // 玩家角色圖像 & 血條
-        //if (BattleManager.Instance.Players != null)
-        //{
-        //    for (int i = 0; i < BattleManager.Instance.Players.Length; ++i)
-        //    {
-        //        CommonFunction.DebugMsgFormat("player number = {0}", BattleManager.Instance.Players.Length);
-        //        AddPlayerIcon(_iconBackground.gameObject);
-        //    }
-        //}
+        for (int i = 0; i < GLOBALCONST.UI_BATTLE_ROLE_ICON_COUNT; ++i)
+        {
+            AddPlayerIcon(_iconBackground.gameObject);
+        }
     }
      #endregion
     #region 固定函式
@@ -99,7 +95,7 @@ public class UI_Battle : GUIFormBase
         //    "pachuri", UIWidget.Pivot.Center, 1920, 248);
         //_iconBackground.transform.localPosition = new Vector3(0, -416, 0);
         //// 玩家角色圖像 & 血條
-        //for (int i = 0; i < 4; ++i)
+        //for (int i = 0; i < GLOBALCONST.UI_BATTLE_ROLE_ICON_COUNT; ++i)
         //{
         //    AddPlayerIcon(_iconBackground.gameObject);
         //}
@@ -219,18 +215,11 @@ public class UI_Battle : GUIFormBase
     /// </summary>
     /// <param name="playerIndex">Player Index</param>
     /// <param name="isVisible">是否看的到</param>
-    public void SetPlayerIcon(int playerIndex, bool isVisible)
+    public void SetPlayerIcon(int playerIndex, bool isVisible, float life = 0, uint maxLife = 1)
     {
-        // 中間有空的加入（如果固定的話，乾脆在建立時設好好了）
-        if (playerIndex >= _iconBtns.Count)
-        {
-            for (int i = _iconBtns.Count; i <= playerIndex; ++i)
-            {
-                AddPlayerIcon(_iconBackground.gameObject);
-            }
-        }
         // 設定該格資料
         NGUITools.SetActive(_iconBtns[playerIndex].gameObject, isVisible);
+        if (isVisible) { _hpBars[playerIndex].value = (float)life / (float)maxLife; }
     }
 
     /// <summary>

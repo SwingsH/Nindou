@@ -164,7 +164,7 @@ public class ResourceStation {
     }
 
     // 目前尚不知道動態生出不同大小的字體的UIFont，故先事先產出存放在Resources
-    // TODO: 找尋程式中動態生成不同大小字體的UIFont
+    // TODO: 找尋程式中動態生成不同大小字體的UIFont的方法
     static Dictionary<string, UIFont> _uiFonts = new Dictionary<string, UIFont>();
     public static UIFont GetUIFont(string uiFontName)
     {
@@ -180,7 +180,7 @@ public class ResourceStation {
 
     static void UIFont_LoadFromResource(string uiFontName)
     {
-        UIFont uiFont = Resources.Load(GLOBALCONST.DIR_RESOURCES_NGUI + uiFontName, typeof(UIFont)) as UIFont;
+        UIFont uiFont = Resources.Load(GLOBALCONST.DIR_RESOURCES_NGUI_FONT + uiFontName, typeof(UIFont)) as UIFont;
         if (uiFont == null) { return; }
         _uiFonts.Add(uiFontName, uiFont);
     }

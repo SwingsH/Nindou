@@ -227,7 +227,7 @@ public class GUIStation
     }
 
 
-    #region UI相關
+    #region NGUI 基本元件相關
     public static UISprite CreateUISprite(GameObject parentObj, string spriteObjName, UISprite.Type spriteType, int depth, UIAtlas atlas, string spriteName,
         UISprite.Pivot pivot, int width, int height)
     {
@@ -351,6 +351,7 @@ public class GUIStation
     /// </summary>
     /// <param name="parentObj">parent的gameObject</param>
     /// <param name="labelName">label名稱</param>
+    /// <param name="pivot">對位方式</param>
     /// <param name="relativePos">label位置（相對於preantObj）</param>
     /// <param name="depth">深度</param>
     /// <param name="font">使用的Font</param>
@@ -371,6 +372,78 @@ public class GUIStation
         retLabel.MakePixelPerfect();
         return retLabel;
     }
+    /// <summary>
+    /// 依據設定 建立一個Scroll Bar
+    /// </summary>
+    /// <param name="parentObj">parent的gameObject</param>
+    /// <param name="scName">ScrollBar名字</param>
+    /// <param name="relativePos">ScrollBar位置（相對於preantObj）</param>
+    /// <param name="depth">深度</param>
+    /// <param name="atlas">使用的Atlas</param>
+    /// <returns>建出的ScrollBar</returns>
+    public static UIScrollBar CreateUIScrollBar(GameObject parentObj, string scName, Vector3 relativePos, int depth, 
+        UIAtlas atlas, string backgroundName, string foregroundName, int width, int height, UIScrollBar.Direction dir, bool canMoveThumb)
+    {
+        GameObject ScrollBarObject = NGUITools.AddChild(parentObj);
+        ScrollBarObject.name = scName;
+        ScrollBarObject.transform.localPosition = relativePos;
+
+        UISprite bg = CreateUISprite(ScrollBarObject, "Background", UISprite.Type.Sliced, depth, atlas, backgroundName, UIWidget.Pivot.Center, width, height);
+        UISprite fg = CreateUISprite(ScrollBarObject, "Foreground", UISprite.Type.Sliced, depth + 1, atlas, foregroundName, UIWidget.Pivot.Center, width, height);
+        
+        UIScrollBar retSC = ScrollBarObject.AddComponent<UIScrollBar>();
+        retSC.background = bg;
+        retSC.foreground = fg;
+        retSC.direction = dir;
+        retSC.barSize = 0.3f;
+        retSC.value = 0.3f;
+        retSC.ForceUpdate();
+        if (canMoveThumb)
+        {
+            NGUITools.AddWidgetCollider(bg.gameObject);
+            NGUITools.AddWidgetCollider(fg.gameObject);
+        }
+        /*
+         * int depth = NGUITools.CalculateNextDepth(go);
+			go = NGUITools.AddChild(go);
+			go.name = "Scroll Bar";
+
+			UISprite bg = NGUITools.AddWidget<UISprite>(go);
+			bg.type = UISprite.Type.Sliced;
+			bg.name = "Background";
+			bg.depth = depth;
+			bg.atlas = NGUISettings.atlas;
+			bg.spriteName = mScrollBG;
+
+			Vector4 border = bg.border;
+			bg.width = Mathf.RoundToInt(400f + border.x + border.z);
+			bg.height = Mathf.RoundToInt(14f + border.y + border.w);
+			bg.MakePixelPerfect();
+
+			UISprite fg = NGUITools.AddWidget<UISprite>(go);
+			fg.type = UISprite.Type.Sliced;
+			fg.name = "Foreground";
+			fg.atlas = NGUISettings.atlas;
+			fg.spriteName = mScrollFG;
+
+			UIScrollBar sb = go.AddComponent<UIScrollBar>();
+			sb.background = bg;
+			sb.foreground = fg;
+			sb.direction = mScrollDir;
+			sb.barSize = 0.3f;
+			sb.value = 0.3f;
+			sb.ForceUpdate();
+
+			if (mScrollCL)
+			{
+				NGUITools.AddWidgetCollider(bg.gameObject);
+				NGUITools.AddWidgetCollider(fg.gameObject);
+			}
+        */
+        return retSC;
+    }
+
+
     #endregion
 }
 

@@ -48,6 +48,8 @@ public class GLOBALCONST
 
     #region UI相關設定
     public const int LAYER_UI_BASE = 31; // 基本ui layer
+
+    public const int UI_BATTLE_ROLE_ICON_COUNT = 4; // 戰鬥UI會顯示的角色ICON數量
     #endregion
 
     #region 檔名相關常數（無副檔名）
@@ -75,6 +77,9 @@ public class GLOBALCONST
     public static readonly string DIR_ASSETBUNDLE_JSON = DIR_ASSETBUNDLE + "JSON" + Path.AltDirectorySeparatorChar;
     // NGUI資源相關路徑
     public static readonly string DIR_RESOURCES_NGUI = "NGUI" + Path.AltDirectorySeparatorChar;
+
+    public static readonly string DIR_RESOURCES_NGUI_ATLAS = DIR_RESOURCES_NGUI + "Atlas" + Path.AltDirectorySeparatorChar;
+    public static readonly string DIR_RESOURCES_NGUI_FONT = DIR_RESOURCES_NGUI + "Font" + Path.AltDirectorySeparatorChar;
 
     // 資料路徑
     public static readonly string DIR_DATA_ROOT = Application.dataPath +  Path.AltDirectorySeparatorChar;

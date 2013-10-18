@@ -63,7 +63,6 @@ public class GameDetectUpdate : IGameState
     {
         control.DownloadUpdateInfo();
         // fs: Show開始介面
-        //control.GUIStation.Form<UI_Start>().Show();
         control.GUIStation.ShowAndHideOther(typeof(UI_Start));
         control.GUIStation.Form<UI_Start>().LoginBtnClick = StartLogin;
     }
