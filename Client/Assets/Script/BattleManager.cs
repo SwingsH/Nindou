@@ -56,6 +56,9 @@ public class BattleManager : BattleState
 	}
 	UnitGenerater Generater;
 
+	//跳血元件
+	HUDManager hudManager;
+
 	float EffectCountDown;
 
 	void UnitRun()
@@ -118,6 +121,8 @@ public class BattleManager : BattleState
 		if (g.CheckEmpty(pos))
 		{
 			Unit su = Generater.GenerateUnit(PlayerInfos[index]);
+			if (su == null)
+				return;
 			su.Group = eGroup.Player;
 			su.Pos = pos;
 			su.WorldPos = Get_GridWorldPos(pos);
@@ -442,6 +447,35 @@ public class BattleManager : BattleState
 	}
 	#endregion
 
+	#region HUD
+	/// <summary>
+	/// 顯示傷害數字
+	/// </summary>
+	/// <param name="damageType">傷害類型</param>
+	/// <param name="value">數值</param>
+	/// <param name="displayPosition">顯示的位置</param>
+	public static void ShowDamageText(SkillDamageType damageType, int value, Vector3 displayPosition)
+	{
+		if (Instance != null && Instance.hudManager != null)
+			Instance.hudManager.ShowDamageText(damageType, value, displayPosition);
+	}
+	/// <summary>
+	/// 顯示多段攻擊技能傷害數字
+	/// </summary>
+	/// <param name="attacker">攻擊方</param>
+	/// <param name="attackee">受擊方</param>
+	/// <param name="value">數值</param>
+	/// <param name="displayPosition">顯示的位置</param>
+	public static void ShowDamageGroupText(Unit attacker, Unit attackee, int value, Vector3 displayPosition)
+	{
+		if (Instance != null && Instance.hudManager != null)
+		{
+			long callerID = ((long)attacker.GetHashCode() >> 32) ^ (long)attackee.GetHashCode();
+			Instance.hudManager.ShowDamageGroupText(callerID, value, displayPosition);
+		}
+	}
+	#endregion
+
 	public override void OnChangeIn(GameControl control)
 	{
 
@@ -460,6 +494,8 @@ public class BattleManager : BattleState
 		UnitCamera.clearFlags = CameraClearFlags.Depth;
 		UnitCamera.orthographicSize = GLOBALCONST.GameSetting.UNIT_CAMERA_SIZE;
 
+		hudManager = HUDManager.Create(UnitCamera);
+		HUDManager.DisplayLayer = GLOBALCONST.GameSetting.LAYER_UNIT;
 		IsBattleStart = false;
 
 		if (Application.isPlaying)

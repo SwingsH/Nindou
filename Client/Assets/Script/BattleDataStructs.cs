@@ -18,6 +18,9 @@ public struct DamageInfo
 	public float CriticalBonus;
 
 	public string HitParticle;
+
+	//跳血專用，想不到要放哪了
+	public bool MultiHit;
 }
 
 public enum eDirection

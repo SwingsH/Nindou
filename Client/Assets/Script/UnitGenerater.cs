@@ -12,6 +12,8 @@ public class UnitGenerater{
 	}
 	public Unit GenerateUnit(UnitInfo info, bool isPreview)
 	{
+		if (info == null)
+			return null;
 		ActionUnit au = new ActionUnit(isPreview);
 		List<MainSkill> activeSkill = new List<MainSkill>();
 		au.NormalAttack = new MainSkill(TestDataBase.Instance.GetSkillData(info.AttackID));

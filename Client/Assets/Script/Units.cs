@@ -160,20 +160,39 @@ public class AnimUnit : Unit
 	}
 	public override void Damaged(DamageInfo info)
 	{
-		//if (Life > 0)
-		//{
-			if (Random.value < info.Accuracy)
+
+		if (Random.value < info.Accuracy)
+		{
+			float rate = 1;
+			if (Random.value < info.Critical)
 			{
-				float rate = 1;
-				if (Random.value < info.Critical)
-				{
-					rate = 1 + info.CriticalBonus;
-				}
-				Damaged(Mathf.Ceil(rate * info.Power));
-				if(Entity)
-					ParticleManager.Emit(info.HitParticle, Entity.transform.position + Vector3.back*10, Entity.transform.up);
+				rate = 1 + info.CriticalBonus;
 			}
-		//}
+			float value = Mathf.Ceil(rate * info.Power);
+
+			
+
+			//跳血跟受擊效果
+			if (Entity)
+			{
+				ParticleManager.Emit(info.HitParticle, Entity.transform.position + Vector3.back * 10, Entity.transform.up);
+				switch (info.DamageType)
+				{
+					case SkillDamageType.Heal:
+						BattleManager.ShowDamageText(SkillDamageType.Heal, Mathf.RoundToInt(value), Entity.transform.position + Entity.transform.up * 250);
+						break;
+					case SkillDamageType.Damage:
+						if(info.MultiHit)
+							BattleManager.ShowDamageGroupText(info.Attacker, this, Mathf.RoundToInt(value), Entity.transform.position + Entity.transform.up * 250);
+						else
+							BattleManager.ShowDamageText(SkillDamageType.Damage, Mathf.RoundToInt(value), Entity.transform.position + Entity.transform.up * 250);
+						break;
+				}
+			}
+			if (info.DamageType == SkillDamageType.Heal)
+				value *= -1;
+			Damaged(value);
+		}
 	}
 	protected void Damaged(float value)
 	{

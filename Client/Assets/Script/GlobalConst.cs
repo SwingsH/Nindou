@@ -23,7 +23,7 @@ public class GLOBALCONST
 	public class BattleSettingValue
 	{
 		public const ushort DEFAULT_NORMAL_ATTACK = 0;
-		public const float CriticalBonus = 2;
+		public const float CRITICAL_BONUS =0.5f;
 		public const int AllInRangeModeGroup = 10;
 	}
 	public const string HAND_LEFT = "HandL";

@@ -97,7 +97,7 @@ public class MainSkill
 	}
 	public float CriticalBonus
 	{
-		get { return Critical * GLOBALCONST.BattleSettingValue.CriticalBonus; }
+		get { return GLOBALCONST.BattleSettingValue.CRITICAL_BONUS; }
 	}
 	public int range
 	{
@@ -171,7 +171,7 @@ public class MainSkill
 		int DamageTimes = AnimationData.GetAnimClipTriggerEventCount((caster as AnimUnit).Anim, AnimClipName, AnimationSetting.HIT_TAG);
 		if (DamageTimes != 0)
 			di.Power = Mathf.Clamp(Power / DamageTimes, 1, int.MaxValue);
-
+		di.MultiHit = DamageTimes > 1;
 		return di;
 	}
 
