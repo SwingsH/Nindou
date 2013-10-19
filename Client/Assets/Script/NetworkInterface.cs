@@ -50,11 +50,12 @@ public class NetworkInterface
     // Socket 協定相關 (Server to Client)
     public const byte PROTOCOL_KIND_UNKNOW = 101;
 
+    public const int HTTP_PORT = 80;
+    public const string HTTP_IP = "122.116.24.125";
     private const int SOCKET_PORT = 17480;
     private const string HTTP_HEAD = "http";
-    private const string HTTP_IP = "122.116.24.125";
     private const string HTTP_PROTOCOL_PAGE = "{0}://{1}/nindou/protocol.php";
-    private const int HTTP_PORT = 80;
+
     private const string HTTP_FIELD_STR = "s{0}"; // http post form field, string 名稱
     private const string HTTP_FIELD_INT = "i{0}"; // http post form field, int 名稱
 
@@ -283,21 +284,6 @@ public class NetworkInterface
     }
 
     /// <summary>
-    /// 處理收到的 HTTP  todo: remove shortly
-    /// </summary>
-    //private void HandleHTTPProtocal(int kind, int subKind, string responseText)
-    //{
-    //    if (!SocketExist(kind, subKind))
-    //    {
-    //        CommonFunction.DebugError(string.Format("Socket {0}  {1} 不存在", kind, subKind));
-    //        return;
-    //    }
-
-    //    HTTPProtocolEvent eve = _httpProtocolEvents[kind, subKind];
-    //    eve.OnResponse(responseText);
-    //}
-
-    /// <summary>
     /// 依據回應的綜合 http 資料, 帶有多個 command 指示, 來分派處理 method
     /// </summary>
     public void DispatchResponseHTTPCommands(HTTPResponseMixDatas mixDatas)
@@ -389,9 +375,9 @@ public class NetworkInterface
         NetworkHTTPBuffer.ClearSendBuffer();
     }
 
+
     // 協定集中處理區
     #region Protocol Event
-
     //C: 1-1 登入 s1:deviceid
     private void HTTPHandling_Login_1()
     {

@@ -6,6 +6,8 @@ using System.Collections;
 /// </summary>
 public class ResourceUpdater
 {
+    private bool _isUpdating = false;
+ 
     //constructor
     public ResourceUpdater()
     {
@@ -14,5 +16,11 @@ public class ResourceUpdater
     // destructor
     ~ResourceUpdater()
     {
+    }
+
+    public bool IsUpdating
+    {
+        get { return _isUpdating; }
+        set { _isUpdating = value; }
     }
 }

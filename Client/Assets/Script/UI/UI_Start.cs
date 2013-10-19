@@ -24,15 +24,14 @@ public class UI_Start : GUIFormBase
         UIPanel panel = NGUITools.AddChild<UIPanel>(anchor.gameObject);
 
         // 登入的全畫面圖按鈕
-        _loginBtn = GUIStation.CreateUIButton(panel.gameObject, "Login BG", Vector3.zero, 0, 
-            ResourceStation.GetUIAtlas("TestAtlas"),
-            "pachuri", 
-            1920, 1080, null, Color.white, string.Empty);
+        _loginBtn = GUIStation.CreateUIButton(panel.gameObject, "Login BG", Vector3.zero, 0,
+            ResourceStation.GetUIAtlas("Atlas_Backgrounds"),
+            "temp_nindou_bg", GUIStation.ScreenWidth, GUIStation.ScreenHeight, null, Color.white, string.Empty);
         _loginBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         // 登入文字
         _loginHint = GUIStation.CreateUILabel(panel.gameObject, "LoginHint", UIWidget.Pivot.Center, new Vector3(0, -106, 0), 7,
             ResourceStation.GetUIFont("MSJH_25"),
-            new Color(1.0f, 0.2f, 0.3f), "點選畫面進入遊戲");
+            new Color(1.0f, 0.2f, 0.3f), GLOBAL_STRING.UI_START_HINT_1);
         // 加上event
         _loginBtn.onClick.Add(new EventDelegate(this, "LoginClick"));
         // 繼承按鈕
@@ -123,13 +122,6 @@ public class UI_Start : GUIFormBase
     /// </summary>
     private void LoginClick()
     {
-        CommonFunction.DebugMsg("test");
-        if (!IsShowLoading && progressPercent <= 0)
-        {
-            CommonFunction.DebugMsg("test----");
-            progressPercent = 0.0f;
-            SetProgressVisible(true);
-        }
         if (LoginBtnClick != null) { LoginBtnClick(); }
     }
     /// <summary>
@@ -151,5 +143,26 @@ public class UI_Start : GUIFormBase
         //    (Resources.Load("TestUI/SciFi Atlas", typeof(UIAtlas)) as UIAtlas),
         //    "Dark", "Light", 690, 30);
         //}
+    }
+
+    public void ShowNeedUpdateMode()
+    {
+        _loginHint.text = GLOBAL_STRING.UI_START_HINT_2;
+    }
+
+    public void ShowUpdatingMode()
+    {
+        _loginHint.text = GLOBAL_STRING.UI_START_HINT_3;
+        if (!IsShowLoading && progressPercent <= 0)
+        {
+            CommonFunction.DebugMsg("test----");
+            progressPercent = 0.0f;
+            SetProgressVisible(true);
+        }
+    }
+
+    public void ShowReadyEnterGame()
+    {
+        _loginHint.text = GLOBAL_STRING.UI_START_HINT_4;
     }
 }

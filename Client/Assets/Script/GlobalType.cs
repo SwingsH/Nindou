@@ -235,6 +235,17 @@ public class HTTPResponse
     }
 }
 
+/// <summary>
+/// 偵測連線之狀態
+/// </summary>
+public enum ConnectionStatus : byte
+{
+    None ,
+    Connecting ,
+    Success,
+    Failed
+}
+
 // TODO: 測試用
 /// <summary>
 /// 從表格來的場景資料

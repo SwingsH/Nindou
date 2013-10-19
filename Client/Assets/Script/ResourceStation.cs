@@ -158,7 +158,7 @@ public class ResourceStation {
     }
     static void UIAtlas_LoadFromResource(string uiAtlasName)
     {
-        UIAtlas uiAtlas = Resources.Load(GLOBALCONST.DIR_RESOURCES_NGUI + uiAtlasName, typeof(UIAtlas)) as UIAtlas;
+        UIAtlas uiAtlas = Resources.Load(GLOBALCONST.DIR_RESOURCES_NGUI_ATLAS + uiAtlasName, typeof(UIAtlas)) as UIAtlas;
         if (uiAtlas == null) { return; }
         _uiAtlases.Add(uiAtlasName, uiAtlas);
     }

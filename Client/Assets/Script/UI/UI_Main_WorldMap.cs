@@ -38,8 +38,8 @@ public class UI_Main_WorldMap : GUIFormBase
         #region 每個主介面都有的部分
         // 背景圖
         UISprite backgroundPic = GUIStation.CreateUISprite(panel.gameObject, "Background", UISprite.Type.Simple, 0,
-            ResourceStation.GetUIAtlas("TestAtlas"),
-           "pachuri", UIWidget.Pivot.Center, 1920, 1080);
+            ResourceStation.GetUIAtlas("Atlas_Backgrounds"),
+           "temp_nindou_bg", UIWidget.Pivot.Center, 1920, 1080);
         // 「人物」按鈕
         _characterBtn = GUIStation.CreateUIButton(backgroundPic.gameObject, "Character", new Vector3(-701, -449, 0), 1,
             ResourceStation.GetUIAtlas("TestAtlas"),

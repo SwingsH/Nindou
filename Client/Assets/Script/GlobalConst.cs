@@ -78,8 +78,8 @@ public class GLOBALCONST
     // NGUI資源相關路徑
     public static readonly string DIR_RESOURCES_NGUI = "NGUI" + Path.AltDirectorySeparatorChar;
 
-    public static readonly string DIR_RESOURCES_NGUI_ATLAS = DIR_RESOURCES_NGUI + "Atlas" + Path.AltDirectorySeparatorChar;
-    public static readonly string DIR_RESOURCES_NGUI_FONT = DIR_RESOURCES_NGUI + "Font" + Path.AltDirectorySeparatorChar;
+    public static readonly string DIR_RESOURCES_NGUI_ATLAS = DIR_RESOURCES_NGUI + "_Atlas" + Path.AltDirectorySeparatorChar;
+    public static readonly string DIR_RESOURCES_NGUI_FONT = DIR_RESOURCES_NGUI + "_Font" + Path.AltDirectorySeparatorChar;
 
     // 資料路徑
     public static readonly string DIR_DATA_ROOT = Application.dataPath +  Path.AltDirectorySeparatorChar;

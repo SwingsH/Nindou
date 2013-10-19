@@ -27,6 +27,9 @@ public class GUIStation
     private Camera _camera = null;  // 顯示UI用的Camera
     private UICamera _uiCamera = null; // 為了事件處理使用
 
+    public static int ScreenWidth { get; set; }    //螢幕解析度 W
+    public static int ScreenHeight { get; set; }   //螢幕解析度 H
+
     /// <summary>
     /// 顯示UI用的攝影機
     /// </summary>
@@ -52,6 +55,9 @@ public class GUIStation
     public GUIStation(GameControl control)
     {
         _gameControl = control;
+        GUIStation.ScreenHeight = Screen.height;
+        GUIStation.ScreenWidth = Screen.width;
+
         #region 建立必要元件
         // 如果場景上有兩個以上的UIRoot，會管理不到，請將多餘的刪除
         _uiRoot = GameObject.FindObjectOfType(typeof(UIRoot)) as UIRoot;
@@ -447,7 +453,11 @@ public class GUIStation
     #endregion
 }
 
-public static class GUIFunction
+/// <summary>
+/// UI 組件產生用類別, 專案內 ui components 重複性高, 
+/// 避免 ui 取得 image 與 default 值在各 UI class 實作重複性過高, 需要移至此 class
+/// </summary>
+public static class GUIComponents
 {
     /// <summary>
     /// 設定UIButton的各種情況顏色
@@ -464,5 +474,42 @@ public static class GUIFunction
         btn.disabledColor = disableColor;
         btn.pressed = pressedColor;
         btn.hover = hoverColor;
+    }
+
+    /// <summary>
+    /// 建立忍豆豆用之提示框
+    /// </summary>
+    public static UIButton DialogFrame(GameObject parent)
+    {
+        UIButton button = GUIStation.CreateUIButton(parent, "DialogFrame", Vector3.zero, 0,
+                ResourceStation.GetUIAtlas("Atlas_Slices"), "slice_parchment",
+                GUIStation.ScreenWidth/2, GUIStation.ScreenHeight/2, null, Color.white, string.Empty);
+
+        return button;
+    }
+
+    /// <summary>
+    /// 建立忍豆豆用之文字訊息
+    /// todo:  Label 一定建立在 panel or frame 上, parent 應該強訂為 component
+    /// </summary>
+    public static UILabel MessageLabel(GameObject parent, string message, Color color)
+    {
+        UILabel label = GUIStation.CreateUILabel(parent, "DialogMessage", UIWidget.Pivot.Center, new Vector3(0, 0, 0), 7,
+                ResourceStation.GetUIFont("MSJH_25"), color, message);
+        return label;
+    }
+
+    /// <summary>
+    /// 建立忍豆豆用之通用按鈕 1.
+    /// todo:  button 一定建立在 panel or frame 上, parent 應該強訂為 component
+    /// </summary>
+    public static UIButton DialogButton(GameObject parent, string showWord, int depth)
+    {
+        // todo: 不應該讓 UI 實作者處理 depth 這個參數
+        UIButton button = GUIStation.CreateUIButton(parent, "DialogButton", Vector3.zero, depth,
+            ResourceStation.GetUIAtlas("Atlas_Slices"),
+            "slice_button_grey", 81, 32, ResourceStation.GetUIFont("dragonword"), Color.white, showWord);
+
+        return button;
     }
 }

@@ -56,7 +56,8 @@ public class GameDetectUpdate : IGameState
         _instance = null;
     }
 
-    bool _canChangeState = false; // fs : 此處以點擊畫面後才能轉換狀態（開始更新or登入）的作法
+    //sh131019 marked, 轉接到正式流程, remove shortly
+    //bool _canChangeState = false; // fs : 此處以點擊畫面後才能轉換狀態（開始更新or登入）的作法
 
     //game server 進入沒有連線階段, 顯示伺服器選擇
     public void OnChangeIn(GameControl control)
@@ -64,31 +65,44 @@ public class GameDetectUpdate : IGameState
         control.DownloadUpdateInfo();
         // fs: Show開始介面
         control.GUIStation.ShowAndHideOther(typeof(UI_Start));
-        control.GUIStation.Form<UI_Start>().LoginBtnClick = StartLogin;
+        NetworkConnectTester.StartTest(ConnectType.HTTP, NetworkInterface.HTTP_PORT); //開始網路測試
     }
 
     public void Update(GameControl control)
     {
         if (!control.IsUpdateInfoReady) //更新資訊尚未取得
             return;
-        if (_canChangeState)
+
+        NetworkConnectTester.Update();
+        if (NetworkConnectTester.Status != TestStatus.Done)
+            return;
+        NetworkConnectTester.EndTest(); //關閉持續測試連線
+        if (NetworkConnectTester.ServerConnectCapability == false) // 網路無法連線
+        {
+            control.GUIStation.Form<UI_Dialog_Simple>().ShowMessage(GLOBAL_STRING.DIALOG_NETWORK_FAILED, NetworkConnectTester.RetryTest);
+        }
+        else // 網路連線正常
         {
             control.GUIStation.Form<UI_Start>().LoginBtnClick = null;
-            if (control.IsNeedToUpdate) // 需要更新, 切換至更新狀態            
-                control.ChangeGameState(GameResourceUpdating.Instance);
+            if (control.IsNeedToUpdate) // 需要更新, 切換至更新狀態
+            {
+                control.ChangeGameState(GameReatyToUpdate.Instance);
+            }
             else // 不需要更新, 切換至 尚未登入狀態
+            {
                 control.ChangeGameState(GameLoginNone.Instance);
+            }
         }
     }
 
+    // sh131019 marked, 轉接到正式流程, remove shortly
     /// <summary>
     /// 暫時用，讓GameDetectUpdate知道已發生「使用者按下背景的事件」
     /// </summary>
-    public void StartLogin()
-    {
-        _canChangeState = true;
-    }
-
+    //public void StartLogin()
+    //{
+    //    _canChangeState = true;
+    //}
 
     public static GameDetectUpdate Instance
     {
@@ -96,6 +110,55 @@ public class GameDetectUpdate : IGameState
         {
             if (_instance == null)
                 _instance = new GameDetectUpdate();
+            return _instance;
+        }
+    }
+
+	public void OnChangeOut(GameControl control)
+	{
+		//throw new System.NotImplementedException();
+	}
+}
+
+// 進行檔案更新
+public class GameReatyToUpdate: IGameState
+{
+    private static GameReatyToUpdate _instance = null;
+    private static GameControl _control;
+
+    ~GameReatyToUpdate()
+    {
+        _instance = null;
+    }
+
+    // fs : 此處先暫代，進度的資訊應該由GameControl那邊提供
+    float progressPercent = 0.0f;
+
+    //game server 進入沒有連線階段, 顯示伺服器選擇
+    public void OnChangeIn(GameControl control)
+    {
+        _control = control;
+        control.GUIStation.Form<UI_Start>().ShowNeedUpdateMode();
+        control.GUIStation.Form<UI_Start>().LoginBtnClick = GameReatyToUpdate.Change;
+        // fs: 設定進度為0
+        control.GUIStation.Form<UI_Start>().progressPercent = progressPercent;
+    }
+
+    private static void Change()
+    {
+        _control.ChangeGameState(GameResourceUpdating.Instance); //切換到登入狀態
+    }
+
+    public void Update(GameControl control)
+    {
+    }
+
+    public static GameReatyToUpdate Instance
+    {
+        get
+        {
+            if (_instance == null)
+                _instance = new GameReatyToUpdate();
             return _instance;
         }
     }
@@ -122,6 +185,9 @@ public class GameResourceUpdating : IGameState
     //game server 進入沒有連線階段, 顯示伺服器選擇
     public void OnChangeIn(GameControl control)
     {
+        control.StartUpdateFiles();
+        control.GUIStation.Form<UI_Start>().ShowUpdatingMode();
+        control.GUIStation.Form<UI_Start>().LoginBtnClick = null; //更新中不能亂點唷~
         // fs: 設定進度為0
         control.GUIStation.Form<UI_Start>().progressPercent = progressPercent;
     }
@@ -137,7 +203,6 @@ public class GameResourceUpdating : IGameState
             control.GUIStation.Form<UI_Start>().progressPercent = progressPercent;
             return;
         }
-        
         // 更新 over, 切換至 尚未登入狀態
         control.ChangeGameState(GameLoginNone.Instance);
     }
@@ -152,16 +217,18 @@ public class GameResourceUpdating : IGameState
         }
     }
 
-	public void OnChangeOut(GameControl control)
-	{
-		//throw new System.NotImplementedException();
-	}
+    public void OnChangeOut(GameControl control)
+    {
+        //throw new System.NotImplementedException();
+    }
 }
 
-// 檔案已經就緒, 尚未從 game server 取得 login session
+
+// ftp檔案已經就緒, 尚未從 game server 取得 login session
 public class GameLoginNone : IGameState
 {
     private static GameLoginNone _instance = null;
+    private static GameControl _control;
 
     ~GameLoginNone()
     {
@@ -171,14 +238,22 @@ public class GameLoginNone : IGameState
     //game server 進入沒有連線階段, 顯示伺服器選擇
     public void OnChangeIn(GameControl control)
     {
+        _control = control;
+        control.GUIStation.Form<UI_Start>().ShowReadyEnterGame();
+        control.GUIStation.Form<UI_Start>().LoginBtnClick = GameLoginNone.Change;
+
         // fs: 隱藏進度條
         control.GUIStation.Form<UI_Start>().SetProgressVisible(false);
     }
 
+    private static void Change()
+    {
+        _control.ChangeGameState(GameLoging.Instance); //切換到登入狀態
+    }
+
     public void Update(GameControl control)
     {
-        //if (control.IsLoginSessionValid)
-            control.ChangeGameState(GameEntered.Instance);
+
     }
 
     public static GameLoginNone Instance
@@ -197,6 +272,42 @@ public class GameLoginNone : IGameState
 	}
 }
 
+/// <summary>
+/// 送資訊給 server 登入中
+/// </summary>
+public class GameLoging : IGameState
+{
+    private static GameLoging _instance = null;
+
+    ~GameLoging()
+    {
+        _instance = null;
+    }
+
+    public void OnChangeIn(GameControl control)
+    {
+        control.DoLogin();
+    }
+    public void Update(GameControl control)
+    {
+        if (control.IsLoginSessionValid) //登入 session 已經取得
+            control.ChangeGameState(GameEntered.Instance);
+    }
+    public static GameLoging Instance
+    {
+        get
+        {
+            if (_instance == null)
+                _instance = new GameLoging();
+            return _instance;
+        }
+    }
+
+    public void OnChangeOut(GameControl control)
+    {
+        //throw new System.NotImplementedException();
+    }
+}
 // game server 沒有帳號資料, 建立帳號
 public class GameCreatePlayer : IGameState
 {

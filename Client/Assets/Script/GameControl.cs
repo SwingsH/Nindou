@@ -11,6 +11,7 @@ public class GameControl{
     private NetworkInterface _networkInterface = null;
     private IGameState _gameState = null; // 遊戲進行狀態
     private ResourceStation _resource = null;
+    private ResourceUpdater _fileUpdater = null;
     private GUIStation _guiStation = null;
     private string _deviceID = string.Empty;
     private string _loginSession = string.Empty;
@@ -22,6 +23,7 @@ public class GameControl{
         _gameState = GameEmpty.Instance;
         _networkInterface = new NetworkInterface(this);
         _resource = new ResourceStation();
+        _fileUpdater = new ResourceUpdater();
         _guiStation = new GUIStation(this);
 
         //a36ec54e961ee79e8d92247f8a081b47a4c52e55
@@ -110,6 +112,13 @@ public class GameControl{
         CommonFunction.DebugMsg("玩家名稱 : " + _accountData.PlayerName);
     }
 
+    /// <summary>
+    /// 指示 updater 開始更新檔案
+    /// </summary>
+    public void StartUpdateFiles()
+    {
+        _fileUpdater.IsUpdating = true; //todo
+    }
 
     /// <summary>
     /// 從 file server 下載更新資料
@@ -129,6 +138,17 @@ public class GameControl{
         get
         {
             return true;
+        }
+    }
+
+    /// <summary>
+    /// ftp 檔案是否還在更新中
+    /// </summary>
+    public bool IsUpdatingFiles
+    {
+        get
+        {
+            return _fileUpdater.IsUpdating;
         }
     }
 

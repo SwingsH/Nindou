@@ -25,17 +25,17 @@ public class GameMain : MonoBehaviour {
     void OnGUI()
     {
         
-        // todo: 此區是 NGUI 未完成前暫代
-        if (_control.CurrentGameState != null)
-        {
-            if (_control.CurrentGameState == GameLoginNone.Instance)
-            {
-                if (GUI.Button(new Rect((Screen.width - 100) / 2, (Screen.height - 40) / 2, 100, 40), GLOBAL_STRING.UI_BUTTON_1))
-                {
-                    _control.DoLogin();
-                }
-            }
-        }
+        // todo: 此區是 NGUI 未完成前暫代, sh20131019 marked, remove shortly
+        //if (_control.CurrentGameState != null)
+        //{
+        //    if (_control.CurrentGameState == GameLoginNone.Instance)
+        //    {
+        //        if (GUI.Button(new Rect((Screen.width - 100) / 2, (Screen.height - 40) / 2, 100, 40), GLOBAL_STRING.UI_BUTTON_1))
+        //        {
+        //            _control.DoLogin();
+        //        }
+        //    }
+        //}
 		#if UNITY_EDITOR
 		if (_control.CurrentGameState != null)
 			GUI.Box(new Rect((Screen.width - 200), 0, 200, 30), _control.CurrentGameState.ToString());
