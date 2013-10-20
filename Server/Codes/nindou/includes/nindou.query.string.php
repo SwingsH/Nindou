@@ -16,6 +16,7 @@
  //取得玩家帳號
 function db_insert_log( $message )
  {
+ 	$message = str_replace(array("\"", "\'"), '\\"', $message );
  	$generator 	= &new QueryGenerator( 'system_log' );
 	$query 		= $generator->insert(	array( 'log_message' ) , 
 										array( $message ),
@@ -37,17 +38,17 @@ function db_get_account( $device_id )
 }
 
  //新增玩家帳號
-function db_insert_account( $device_id, $session, $inherit_id )
+function db_insert_account( $device_id, $session, $inherit_id, $player_name )
  {
  	$query = ' SELECT * FROM player_account WHERE unique_device = ' . $device_id ;
  	
  	$generator 	= &new QueryGenerator( 'player_account' );
  	
  	// 玩家尚未索取 引繼 password 時先不處理 ?
-	$query 		= $generator->insert(	array( 'unique_device' , 'current_login_session' , 'current_inherit_id' , 'current_inherit_password' ) , 
-										array( $device_id , $session , $inherit_id ,  '' ),
-										array( true , true , true , true  ) 
-										);
+	$query 		= $generator->insert(	
+		array( 'unique_device' , 'current_login_session' , 'current_inherit_id' , 'current_inherit_password', 'player_name' ) , 
+		array( $device_id , $session , $inherit_id ,  '', $player_name  ),
+		array( true , true , true , true, true  ));
 										
  	return  $query ;
 }

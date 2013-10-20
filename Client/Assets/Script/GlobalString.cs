@@ -9,13 +9,19 @@ public static class GLOBAL_STRING
 	public const string GAME_TITLE = "忍豆豆豆風雲";
     public const string UI_BUTTON_1 = "快速登入";
     public const string UI_BUTTON_2 = "重試";
+    public const string UI_BUTTON_3 = "確認";
 
     public const string DIALOG_NETWORK_FAILED = "無法連接網路，\n請先開啟無線上網\n或行動網路";
-    public const string DIALOG_SERVER_FAILED = "無法連線到伺服器";
+    public const string DIALOG_SERVER_FAILED = "無法連線到伺服器，\n或資料出現錯誤";
+    public const string DIALOG_NETWORK_UNKNOW = "資料錯誤";
     public const string UI_START_HINT_1 = "連線中...";
     public const string UI_START_HINT_2 = "點選畫面進行更新";
     public const string UI_START_HINT_3 = "檔案更新中";
     public const string UI_START_HINT_4 = "點選畫面進入遊戲";
+
+    public const string UI_INPUT_HINT_1 = "點選此處輸入名稱";
+
+    public const string UI_LABEL_PLAYER_NAME = "玩家名稱 : {0}";
 
     #region UI_Main （主介面共通）
     public const string CHARACTER_BTN_TEXT = "人物";

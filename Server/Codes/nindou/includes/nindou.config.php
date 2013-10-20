@@ -23,7 +23,7 @@ define('POST_PARAMETER_INTEGER','i%d');
 
 define('IS_DEBUG', true) ;
 
-define('STR_ERROR', 'No Data in this Page ! 請由正常管道進入');
+define('STR_ERROR', 'No Data in this Page ! 請由正常管道進入'); //todo: 改成制式 "連線錯誤訊息,回主選單訊息"
 
 require_once( INCLUDE_PATH . 'class.json.package.php');
 require_once( INCLUDE_PATH . 'class.protocol.php');

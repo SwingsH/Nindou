@@ -26,7 +26,7 @@ public class UI_Start : GUIFormBase
         // 登入的全畫面圖按鈕
         _loginBtn = GUIStation.CreateUIButton(panel.gameObject, "Login BG", Vector3.zero, 0,
             ResourceStation.GetUIAtlas("Atlas_Backgrounds"),
-            "temp_nindou_bg", GUIStation.ScreenWidth, GUIStation.ScreenHeight, null, Color.white, string.Empty);
+            "temp_nindou_bg", GUIStation.MANUAL_SCREEN_WIDTH, GUIStation.MANUAL_SCREEN_HEIGHT, null, Color.white, string.Empty);
         _loginBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         // 登入文字
         _loginHint = GUIStation.CreateUILabel(panel.gameObject, "LoginHint", UIWidget.Pivot.Center, new Vector3(0, -106, 0), 7,

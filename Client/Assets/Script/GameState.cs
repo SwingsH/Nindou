@@ -246,7 +246,7 @@ public class GameLoginNone : IGameState
         control.GUIStation.Form<UI_Start>().SetProgressVisible(false);
     }
 
-    private static void Change()
+    public static void Change()
     {
         _control.ChangeGameState(GameLoging.Instance); //切換到登入狀態
     }
@@ -286,12 +286,28 @@ public class GameLoging : IGameState
 
     public void OnChangeIn(GameControl control)
     {
+        #if SKIP_CONNECT_CHECK
+            control.ChangeGameState(GameEntered.Instance);
+            return;
+        #endif
         control.DoLogin();
     }
     public void Update(GameControl control)
     {
-        if (control.IsLoginSessionValid) //登入 session 已經取得
+        if (control.AccountValid == AccountValidStatus.Unchecked)
+            return;
+
+        if (control.AccountValid == AccountValidStatus.Valid)//帳號存在
+        {
             control.ChangeGameState(GameEntered.Instance);
+            return;
+        }
+
+        if (control.AccountValid == AccountValidStatus.Invalid) //帳號不存在
+        {
+            control.ChangeGameState(GameCreatePlayer.Instance);
+            return;
+        }
     }
     public static GameLoging Instance
     {
@@ -321,7 +337,8 @@ public class GameCreatePlayer : IGameState
     public void OnChangeIn(GameControl control)
     {
         //進入遊戲
-        //control.GUIStation.Form<UI_Start>().Hide();
+        control.GUIStation.ShowAndHideOther(typeof(UI_Start_CreatePlayer));
+        control.GUIStation.Form<UI_Start_CreatePlayer>().SetClickEvent( control.DoCreatePlayer );
     }
     public void Update(GameControl control)
     {

@@ -94,6 +94,7 @@ public class NetworkInterface
     {
         //S: 1-1 登入
         AddHTTPProtocol(PROTOCOL_KIND_LOGIN, 1, HTTPHandling_Login_1, HTTPResponse_Login_1);
+        AddHTTPProtocol(PROTOCOL_KIND_LOGIN, 3, HTTPHandling_DEFAULT, HTTPResponse_Login_3);
     }
 
     /// <summary>
@@ -203,25 +204,45 @@ public class NetworkInterface
     /// </summary>
     public void OnHTTPReceive(string responseText)
     {
-        if (_httpProtocolEvents[_currentHTTPKind, _currentHTTPSubKind].OnResponse != null)
-        {
-            object refObj = Activator.CreateInstance(typeof(HTTPResponseMixDatas));
-            bool isSuccess = DataUtility.DeserializeObject(responseText, ref refObj);
-            _currentResponse = refObj as HTTPResponseMixDatas;
-            CommonFunction.DebugMsg(string.Format("OnHTTPReceive {0},{1},{2}", _currentHTTPKind, _currentHTTPSubKind, responseText));
-        }
-        else
-        {
-            CommonFunction.DebugMsg(" OnHTTPReceive ProtocolEvents null.");
-        }
 
-        // no Interface "Command Pattern"
-        DispatchResponseHTTPCommands(_currentResponse);
+        if (responseText == string.Empty)
+        {
+            _control.ShowConnectError();
 
-        // clear previous
-        _currentIntegerNums = 0;
-        _currentStringNums = 0;
-        NetworkHTTPBuffer.ClearSendBuffer();
+            // clear previous
+            _currentIntegerNums = 0;
+            _currentStringNums = 0;
+            NetworkHTTPBuffer.ClearSendBuffer();
+
+            return;
+        }
+        try
+        {
+            if (_httpProtocolEvents[_currentHTTPKind, _currentHTTPSubKind].OnResponse != null)
+            {
+                object refObj = Activator.CreateInstance(typeof(HTTPResponseMixDatas));
+                bool isSuccess = DataUtility.DeserializeObject(responseText, ref refObj);
+                _currentResponse = refObj as HTTPResponseMixDatas;
+                CommonFunction.DebugMsg(string.Format("OnHTTPReceive {0},{1},{2}", _currentHTTPKind, _currentHTTPSubKind, responseText));
+            }
+            else
+            {
+                CommonFunction.DebugMsg(" OnHTTPReceive ProtocolEvents null.");
+            }
+
+            // no Interface "Command Pattern"
+            DispatchResponseHTTPCommands(_currentResponse);
+
+            // clear previous
+            _currentIntegerNums = 0;
+            _currentStringNums = 0;
+            NetworkHTTPBuffer.ClearSendBuffer();
+        }
+        catch (Exception exception)
+        {
+            CommonFunction.DebugMsg(exception.Message);
+            _control.ShowConnectError();
+        }
     }
 
     /// <summary>
@@ -363,8 +384,6 @@ public class NetworkInterface
     /// </summary>
     private void SendToHTTPServer(byte mainKind, byte subKind)
     {
-        CommonFunction.DebugMsg("SendToHTTPServer");
-
         _currentHTTPKind = mainKind;
         _currentHTTPSubKind = subKind;
         NetworkHTTPBuffer.Packaging(_sendSerial, mainKind, subKind);
@@ -378,13 +397,19 @@ public class NetworkInterface
 
     // 協定集中處理區
     #region Protocol Event
+
+    private void HTTPHandling_DEFAULT()
+    {
+        //show 個 loading bar
+    }
+
     //C: 1-1 登入 s1:deviceid
     private void HTTPHandling_Login_1()
     {
         //show 個 loading bar
     }
 
-    //S: 1-1 登入, s1:session , i1:登入類型(0=登入失敗,1=新帳號登入,2=快速登入,3=更新session)
+    //S: 1-1 登入, s1:session , s2: 玩家名稱, i1:登入類型(0=登入失敗,1=新帳號登入,2=快速登入,3=更新session)
     private void HTTPResponse_Login_1(HTTPResponse responsePack)
     {
         string session = responsePack.PopString();
@@ -393,9 +418,45 @@ public class NetworkInterface
         AccountData accountData = new AccountData();
         accountData.PlayerName = responsePack.PopString();
 
-        CommonFunction.DebugMsg(string.Format("登入成功 : {0} , {1}", session, kind));
+        AccountValidStatus status;
+        switch (kind)
+        {
+            case 1:
+                status = AccountValidStatus.Invalid;
+                break;
+            case 2:
+                status = AccountValidStatus.Valid;
+                break;
+            default:
+                status = AccountValidStatus.Unchecked;
+                break;
+        }
         _control.SetLoginSession(session);
-        _control.SetAccountData(accountData);
+        _control.SetAccountData(status, accountData);
+
+        CommonFunction.DebugMsg(string.Format("登入成功 : {0} , {1}", session, status.ToString()));
+    }
+
+    //S: 1-3 帳號註冊結果, i1:註冊結果(1=成功, 2=失敗)
+    private void HTTPResponse_Login_3(HTTPResponse responsePack)
+    {
+        int kind = responsePack.PopInteger();
+        CommonFunction.DebugMsg(string.Format("註冊結果 : {0} ", kind) );
+
+        switch (kind)
+        {
+            case 1:
+                _control.ChangeGameState(GameEntered.Instance);
+                break;
+            case 2:
+                _control.GUIStation.Form<UI_Dialog_Simple>().ShowMessage(
+                            GLOBAL_STRING.DIALOG_NETWORK_UNKNOW, null);
+                break;
+            default:
+                _control.GUIStation.Form<UI_Dialog_Simple>().ShowMessage(
+                            GLOBAL_STRING.DIALOG_NETWORK_UNKNOW, null);
+                break;
+        }
     }
 
     #endregion

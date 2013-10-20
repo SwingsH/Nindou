@@ -39,10 +39,7 @@ public class NetworkHTTP
 
     private IEnumerator SendAndWait(WWWForm postForm)
     {
-		CommonFunction.DebugMsg(_currentURL);
-		//_currentURL = "http://tw.knowledge.yahoo.com/question/question?qid=1610082401742";
         _currentWWW = new WWW(_currentURL, postForm);
-        //_currentWWW = new WWW(_currentURL);
 
         while (!_currentWWW.isDone)
         {
@@ -50,6 +47,10 @@ public class NetworkHTTP
         }
 
         _responseMethod.Invoke(_currentWWW.text);
+		
+		_currentWWW.Dispose();
+		_currentWWW = null;
+
         yield break;
     }
 }

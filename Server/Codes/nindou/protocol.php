@@ -32,7 +32,7 @@ if($is_post)
 		
 	$serial 	= $_POST[POST_PARAMETER_PROTOCOL_SERIAL] ? (integer) $_POST[POST_PARAMETER_PROTOCOL_SERIAL] : 0 ;
 	$main_kind 	= $_POST[POST_PARAMETER_MAIN_KIND] ? (integer) $_POST[POST_PARAMETER_MAIN_KIND] : 0 ;
-	$sub_kind 	= $_POST[POST_PARAMETER_SUB_KIND] ? (integer) $_POST[POST_PARAMETER_MAIN_KIND] : 0 ;
+	$sub_kind 	= $_POST[POST_PARAMETER_SUB_KIND] ? (integer) $_POST[POST_PARAMETER_SUB_KIND] : 0 ;
 	$arr_arguments = $_POST;
 }
 else
@@ -48,7 +48,7 @@ else
 		
 	$serial 	= $_GET[POST_PARAMETER_PROTOCOL_SERIAL] ? (integer) $_GET[POST_PARAMETER_PROTOCOL_SERIAL] : 0 ;
 	$main_kind 	= $_GET[POST_PARAMETER_MAIN_KIND] ? (integer) $_GET[POST_PARAMETER_MAIN_KIND] : 0 ;
-	$sub_kind 	= $_GET[POST_PARAMETER_SUB_KIND] ? (integer) $_GET[POST_PARAMETER_MAIN_KIND] : 0 ;
+	$sub_kind 	= $_GET[POST_PARAMETER_SUB_KIND] ? (integer) $_GET[POST_PARAMETER_SUB_KIND] : 0 ;
 	$arr_arguments = $_GET;
 }
 

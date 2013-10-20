@@ -51,19 +51,13 @@ public class UI_Dialog_Simple : GUIFormBase
 
     protected override void OnDestroy()
     {
-        //NGUITools.Destroy(_loginBtn.gameObject);
-        //_loginBtn = null;
-        //NGUITools.Destroy(_loginHint.gameObject);
-        //_loginHint = null;
-        //NGUITools.Destroy(_progressShow.gameObject);
-        //_progressShow = null;
-        //NGUITools.Destroy(_progress.gameObject);
-        //_progress = null;
-        //NGUITools.Destroy(_inheritBtn.gameObject);
-        //_inheritBtn = null;
+        NGUITools.Destroy(_dialog.gameObject);
+        _dialog = null;
+        NGUITools.Destroy(_label.gameObject);
+        _label = null;
+        NGUITools.Destroy(_okButton.gameObject);
+        _okButton = null;
 
-        //InheritBtnClick = null;
-        //LoginBtnClick = null;
         base.OnDestroy();
     }
 }

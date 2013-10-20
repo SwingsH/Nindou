@@ -177,6 +177,16 @@ public struct AccountData
 }
 
 /// <summary>
+/// 帳號存續狀態
+/// </summary>
+public enum AccountValidStatus
+{
+    Unchecked, //尚未驗證
+    Invalid,    //已驗證, 帳號不存在
+    Valid       //已驗證, 帳號存在
+}
+
+/// <summary>
 /// 禮物資訊
 /// </summary>
 public struct GiftsData

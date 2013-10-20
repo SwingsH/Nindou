@@ -16,6 +16,7 @@ public class GameControl{
     private string _deviceID = string.Empty;
     private string _loginSession = string.Empty;
     private AccountData _accountData = default(AccountData);
+    private AccountValidStatus _accountStatus = AccountValidStatus.Unchecked;
 
     private GameControl(GameMain main)
     {
@@ -51,12 +52,22 @@ public class GameControl{
             _gameState.Update(this);
     }
 
-    // 一般登入
+    // 一般登入 , C: 1-1 玩家快速登入, s1:deviceid
     public void DoLogin()
     {
-        _networkInterface.PushString(1, 1, _deviceID); // todo: 改用 s1, s2, s3, i1,i2
+        _networkInterface.PushString(1, 1, _deviceID);
         _networkInterface.PushInteger(1, 1, 0);
         _networkInterface.Send(1, 1);
+    }
+
+    // C: 1-3 玩家要求註冊帳號, s1: 裝置ID, s2: 登入session, s3:玩家輸入之名稱
+    public void DoCreatePlayer()
+    {
+        string playerName = _guiStation.Form<UI_Start_CreatePlayer>().CurrentInputAccountName;
+        _networkInterface.PushString(1, 3, _deviceID);
+        _networkInterface.PushString(1, 3, _loginSession);
+        _networkInterface.PushString(1, 3, playerName);
+        _networkInterface.Send(1, 3);
     }
 
     public void ChangeGameState(IGameState newState)
@@ -69,6 +80,11 @@ public class GameControl{
         _gameState = null;
         _gameState = newState;
         _gameState.OnChangeIn(this);
+    }
+
+    public void ShowConnectError()
+    {
+        GUIStation.Form<UI_Dialog_Simple>().ShowMessage(GLOBAL_STRING.DIALOG_SERVER_FAILED, GameLoginNone.Change);
     }
 
     //取得遊戲狀態
@@ -106,8 +122,9 @@ public class GameControl{
     /// <summary>
     /// 留存 account data
     /// </summary>
-    public void SetAccountData(AccountData accountData)
+    public void SetAccountData(AccountValidStatus status, AccountData accountData)
     {
+        _accountStatus = status;
         _accountData = accountData;
         CommonFunction.DebugMsg("玩家名稱 : " + _accountData.PlayerName);
     }
@@ -187,7 +204,23 @@ public class GameControl{
         {
             if (_loginSession == string.Empty)
                 return false;
-            return true; //todo: 當然是 todo, 接 ResourceUpdater
+            return true;
         }
+    }
+
+    /// <summary>
+    /// 帳號存續狀態
+    /// </summary>
+    public AccountValidStatus AccountValid
+    {
+        get
+        {
+            return _accountStatus;
+        }
+    }
+
+    public AccountData Account //todo: protect
+    {
+        get { return _accountData; }
     }
 }
