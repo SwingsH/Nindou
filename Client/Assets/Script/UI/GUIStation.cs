@@ -409,43 +409,7 @@ public class GUIStation
             NGUITools.AddWidgetCollider(bg.gameObject);
             NGUITools.AddWidgetCollider(fg.gameObject);
         }
-        /*
-         * int depth = NGUITools.CalculateNextDepth(go);
-			go = NGUITools.AddChild(go);
-			go.name = "Scroll Bar";
 
-			UISprite bg = NGUITools.AddWidget<UISprite>(go);
-			bg.type = UISprite.Type.Sliced;
-			bg.name = "Background";
-			bg.depth = depth;
-			bg.atlas = NGUISettings.atlas;
-			bg.spriteName = mScrollBG;
-
-			Vector4 border = bg.border;
-			bg.width = Mathf.RoundToInt(400f + border.x + border.z);
-			bg.height = Mathf.RoundToInt(14f + border.y + border.w);
-			bg.MakePixelPerfect();
-
-			UISprite fg = NGUITools.AddWidget<UISprite>(go);
-			fg.type = UISprite.Type.Sliced;
-			fg.name = "Foreground";
-			fg.atlas = NGUISettings.atlas;
-			fg.spriteName = mScrollFG;
-
-			UIScrollBar sb = go.AddComponent<UIScrollBar>();
-			sb.background = bg;
-			sb.foreground = fg;
-			sb.direction = mScrollDir;
-			sb.barSize = 0.3f;
-			sb.value = 0.3f;
-			sb.ForceUpdate();
-
-			if (mScrollCL)
-			{
-				NGUITools.AddWidgetCollider(bg.gameObject);
-				NGUITools.AddWidgetCollider(fg.gameObject);
-			}
-        */
         return retSC;
     }
 

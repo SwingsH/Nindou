@@ -86,7 +86,7 @@ public class GameDetectUpdate : IGameState
             control.GUIStation.Form<UI_Start>().LoginBtnClick = null;
             if (control.IsNeedToUpdate) // 需要更新, 切換至更新狀態
             {
-                control.ChangeGameState(GameReatyToUpdate.Instance);
+                control.ChangeGameState(GameReadyToUpdate.Instance);
             }
             else // 不需要更新, 切換至 尚未登入狀態
             {
@@ -121,12 +121,12 @@ public class GameDetectUpdate : IGameState
 }
 
 // 進行檔案更新
-public class GameReatyToUpdate: IGameState
+public class GameReadyToUpdate : IGameState
 {
-    private static GameReatyToUpdate _instance = null;
+    private static GameReadyToUpdate _instance = null;
     private static GameControl _control;
 
-    ~GameReatyToUpdate()
+    ~GameReadyToUpdate()
     {
         _instance = null;
     }
@@ -139,7 +139,7 @@ public class GameReatyToUpdate: IGameState
     {
         _control = control;
         control.GUIStation.Form<UI_Start>().ShowNeedUpdateMode();
-        control.GUIStation.Form<UI_Start>().LoginBtnClick = GameReatyToUpdate.Change;
+        control.GUIStation.Form<UI_Start>().LoginBtnClick = GameReadyToUpdate.Change;
         // fs: 設定進度為0
         control.GUIStation.Form<UI_Start>().progressPercent = progressPercent;
     }
@@ -153,12 +153,12 @@ public class GameReatyToUpdate: IGameState
     {
     }
 
-    public static GameReatyToUpdate Instance
+    public static GameReadyToUpdate Instance
     {
         get
         {
             if (_instance == null)
-                _instance = new GameReatyToUpdate();
+                _instance = new GameReadyToUpdate();
             return _instance;
         }
     }

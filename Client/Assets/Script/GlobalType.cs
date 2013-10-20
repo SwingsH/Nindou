@@ -246,7 +246,8 @@ public enum ConnectionStatus : byte
     Failed
 }
 
-// TODO: 測試用
+#region 測試用，之後應該刪除或轉為正式使用的class
+// TODO: 測試用，之後應該刪除或轉為正式使用的class
 /// <summary>
 /// 從表格來的場景資料
 /// </summary>
@@ -268,7 +269,7 @@ public class SceneData
         return sb.ToString();
     }
 }
-
+#endregion
 /// <summary>
 /// 區域類型
 /// </summary>
