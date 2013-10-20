@@ -42,36 +42,52 @@ public class UI_Main_WorldMap : GUIFormBase
            "temp_nindou_bg", UIWidget.Pivot.Center, 1920, 1080);
         // 「人物」按鈕
         _characterBtn = GUIStation.CreateUIButton(backgroundPic.gameObject, "Character", new Vector3(-701, -449, 0), 1,
-            ResourceStation.GetUIAtlas("TestAtlas"),
-            "button_back", 300, 80,
+            ResourceStation.GetUIAtlas("Atlas_Slices"),
+            "slice_button_grey", 300, 80,
             ResourceStation.GetUIFont("MSJH_30"),
             Color.red, GLOBAL_STRING.CHARACTER_BTN_TEXT);
         _characterBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _characterBtn.onClick.Add(new EventDelegate(this, "CharacterBtnClick"));
+        UISprite characterImage = GUIStation.CreateUISprite(_characterBtn.gameObject, "CharacterImage", UISprite.Type.Simple, 2,
+            ResourceStation.GetUIAtlas("UI_Main_Atlas"),
+            "person", UIWidget.Pivot.Center, 60, 60);
+        characterImage.transform.localPosition = new Vector3(-83, -2, 0);
         // 「背包」按鈕
         _bagBtn = GUIStation.CreateUIButton(backgroundPic.gameObject, "Bag", new Vector3(-274.2f, -449, 0), 1,
-            ResourceStation.GetUIAtlas("TestAtlas"),
-            "button_back", 300, 80,
+            ResourceStation.GetUIAtlas("Atlas_Slices"),
+            "slice_button_grey", 300, 80,
             ResourceStation.GetUIFont("MSJH_30"),
             Color.red, GLOBAL_STRING.BAG_BTN_TEXT);
         _bagBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _bagBtn.onClick.Add(new EventDelegate(this, "BagBtnClick"));
+        UISprite bagImage = GUIStation.CreateUISprite(_bagBtn.gameObject, "BagImage", UISprite.Type.Simple, 2,
+            ResourceStation.GetUIAtlas("UI_Main_Atlas"),
+            "backpape", UIWidget.Pivot.Center, 60, 60);
+        bagImage.transform.localPosition = new Vector3(-83, -2, 0);
         // 「商店」按鈕
         _shopBtn = GUIStation.CreateUIButton(backgroundPic.gameObject, "Shop", new Vector3(191.78f, -449, 0), 1,
-            ResourceStation.GetUIAtlas("TestAtlas"),
-            "button_back", 300, 80,
+            ResourceStation.GetUIAtlas("Atlas_Slices"),
+            "slice_button_grey", 300, 80,
             ResourceStation.GetUIFont("MSJH_30"),
             Color.red, GLOBAL_STRING.SHOP_BTN_TEXT);
         _shopBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _shopBtn.onClick.Add(new EventDelegate(this, "ShopBtnClick"));
+        UISprite shopImage = GUIStation.CreateUISprite(_shopBtn.gameObject, "ShopImage", UISprite.Type.Simple, 2,
+            ResourceStation.GetUIAtlas("UI_Main_Atlas"),
+            "store", UIWidget.Pivot.Center, 60, 60);
+        shopImage.transform.localPosition = new Vector3(-83, -2, 0);
         // 「好友」按鈕
         _friendBtn = GUIStation.CreateUIButton(backgroundPic.gameObject, "Friend", new Vector3(653.42f, -449, 0), 1,
-            ResourceStation.GetUIAtlas("TestAtlas"),
-            "button_back", 300, 80,
-            ResourceStation.GetUIFont("MSJH_30"),
-            Color.red, GLOBAL_STRING.FRIEND_BTN_TEXT);
+             ResourceStation.GetUIAtlas("Atlas_Slices"),
+             "slice_button_grey", 300, 80,
+             ResourceStation.GetUIFont("MSJH_30"),
+             Color.red, GLOBAL_STRING.FRIEND_BTN_TEXT);
         _friendBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _friendBtn.onClick.Add(new EventDelegate(this, "FriendBtnClick"));
+        UISprite friendImage = GUIStation.CreateUISprite(_friendBtn.gameObject, "FriendImage", UISprite.Type.Simple, 2,
+            ResourceStation.GetUIAtlas("UI_Main_Atlas"),
+            "friend", UIWidget.Pivot.Center, 60, 60);
+        friendImage.transform.localPosition = new Vector3(-83, -2, 0);
         #endregion
         #region 世界地圖部分
         // 世界地圖的背景圖

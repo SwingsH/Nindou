@@ -30,7 +30,7 @@ public class UI_Start : GUIFormBase
         _loginBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         // 登入文字
         _loginHint = GUIStation.CreateUILabel(panel.gameObject, "LoginHint", UIWidget.Pivot.Center, new Vector3(0, -106, 0), 7,
-            ResourceStation.GetUIFont("MSJH_25"),
+            ResourceStation.GetUIFont("MSJH_30"),
             new Color(1.0f, 0.2f, 0.3f), GLOBAL_STRING.UI_START_HINT_1);
         // 加上event
         _loginBtn.onClick.Add(new EventDelegate(this, "LoginClick"));
@@ -49,8 +49,9 @@ public class UI_Start : GUIFormBase
         NGUITools.SetActive(_progress.gameObject, false);
         // 進度數值
         _progressShow = GUIStation.CreateUILabel(_progress.gameObject, "Progress", UIWidget.Pivot.Right, new Vector3(652.67f, -4.0f, 0), 6,
-            ResourceStation.GetUIFont("MSJH"),
+            ResourceStation.GetUIFont("MSJH_30"),
             new Color(1.0f, 0.2f, 0.3f), "0.00");
+        _progressShow.overflowMethod = UILabel.Overflow.ResizeFreely; // fs: 讓文字佔的空間自由地重新配置
     }
     #endregion
 
