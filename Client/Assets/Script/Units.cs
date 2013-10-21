@@ -183,7 +183,7 @@ public class AnimUnit : Unit
 						break;
 					case SkillDamageType.Damage:
 						if(info.MultiHit)
-							BattleManager.ShowDamageGroupText(info.Attacker, this, Mathf.RoundToInt(value), Entity.transform.position + Entity.transform.up * 250);
+							BattleManager.ShowDamageGroupText(info, this, Mathf.RoundToInt(value), Entity.transform.position + Entity.transform.up * 250);
 						else
 							BattleManager.ShowDamageText(SkillDamageType.Damage, Mathf.RoundToInt(value), Entity.transform.position + Entity.transform.up * 250);
 						break;
@@ -314,34 +314,36 @@ public class ActionUnit : AnimUnit
 		}
 	}
 	List<MainSkill> _activeSkills = new List<MainSkill>();
-	public List<MainSkill> ActiveSkills
+	public IList<MainSkill> ActiveSkills
 	{
 		get
 		{
 			//回傳一個新複製的list
 			//防止被加入不合法的技能，這樣只能用set來設技能，set會做檢查
-			return new List<MainSkill>(_activeSkills);
+			//return new List<MainSkill>(_activeSkills);
+			return _activeSkills.AsReadOnly();
 		}
 		set
 		{
-			_activeSkills = value;
+			_activeSkills = new List<MainSkill>(value);
 			CheckSkillList(ref _activeSkills, SkillType.Active);
 		}
 	}
 
 	List<MainSkill> _passiveSkill = new List<MainSkill>();
 
-	public List<MainSkill> PassiveSkill
+	public IList<MainSkill> PassiveSkill
 	{
 		get
 		{
 			//回傳一個新複製的list
 			//防止被加入不合法的技能，這樣只能用set來設技能，set會做檢查
-			return new List<MainSkill>(_passiveSkill);
+			//return new List<MainSkill>(_passiveSkill);
+			return _passiveSkill.AsReadOnly();
 		}
 		set
 		{
-			_passiveSkill = value;
+			_passiveSkill =new List<MainSkill>(value);
 			CheckSkillList(ref _passiveSkill, SkillType.Passive);
 			if (Passive != null)
 				Passive.Reset();
@@ -586,7 +588,7 @@ public class ActionUnit : AnimUnit
 			return;
 		
 		CastInfo info = new CastInfo(skill);
-
+		info.DMGInfo = skill.GenerateDamageInfo(this);
 		CurrentCasting = info;
 		CurrentCasting.Target = GetTarget(skill);
 		skill.CastableTime = Time.time + skill.CoolDown;
@@ -671,11 +673,10 @@ public class ActionUnit : AnimUnit
 			switch (triggerEvent.tag)
 			{
 				case AnimationSetting.HIT_TAG:
-					DamageInfo di = info.skill.GenerateDamageInfo(this);
-					if (info.Target != null)
+					if (info.Target != null && info.DMGInfo.Attacker == this)
 					{
 						foreach (Unit u in info.Target)
-							u.Damaged(di);
+							u.Damaged(info.DMGInfo);
 					}
 					break;
 				case AnimationSetting.ATKSTART_TAG:
@@ -771,4 +772,6 @@ public class CastInfo
 	{
 		EndCount = 0;
 	}
+
+	public DamageInfo DMGInfo;
 }

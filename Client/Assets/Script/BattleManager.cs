@@ -466,11 +466,11 @@ public class BattleManager : BattleState
 	/// <param name="attackee">受擊方</param>
 	/// <param name="value">數值</param>
 	/// <param name="displayPosition">顯示的位置</param>
-	public static void ShowDamageGroupText(Unit attacker, Unit attackee, int value, Vector3 displayPosition)
+	public static void ShowDamageGroupText(DamageInfo info, Unit attackee, int value, Vector3 displayPosition)
 	{
 		if (Instance != null && Instance.hudManager != null)
 		{
-			long callerID = ((long)attacker.GetHashCode() >> 32) ^ (long)attackee.GetHashCode();
+			long callerID = ((long)info.GetHashCode() >> 32) ^ (long)attackee.GetHashCode();
 			Instance.hudManager.ShowDamageGroupText(callerID, value, displayPosition);
 		}
 	}

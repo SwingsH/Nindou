@@ -736,7 +736,9 @@ static public class NGUITools
 		{
 			if (Application.isPlaying)
 			{
-				if (obj is GameObject)
+				//Can't destroy Transform component. If you want to destroy the game object please call 'Destroy' on the game object instead. Destroying the transform component is not allowed.
+				//add && !Application.isEditor
+				if (obj is GameObject && !Application.isEditor)
 				{
 					GameObject go = obj as GameObject;
                     go.transform.parent = null;
