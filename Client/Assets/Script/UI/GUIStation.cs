@@ -78,7 +78,6 @@ public class GUIStation
         // 如果場景上有兩個以上的UICamera會管理不到，請將多餘的刪除
         _uiCamera = GameObject.FindObjectOfType(typeof(UICamera)) as UICamera;
         // 取得UICamera attach上的物件的camera
-        //Camera cam;
         if (_uiCamera == null)
         {   // 沒有UICamera attach的物件，則建立一個新物件並且attach 一個Camera 
             _camera = NGUITools.AddChild<Camera>(_uiRoot.gameObject);
@@ -521,7 +520,8 @@ public static class GUIComponents
     public static UILabel MessageLabel(GameObject parent, string message, Color color)
     {
         UILabel label = GUIStation.CreateUILabel(parent, "DialogMessage", UIWidget.Pivot.Center, new Vector3(0, 0, 0), 7,
-                ResourceStation.GetUIFont("MSJH_30"), color, message);
+            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
+                color, message);
 
         return label;
     }
@@ -535,7 +535,9 @@ public static class GUIComponents
         // todo: 不應該讓 UI 實作者處理 depth 這個參數
         UIButton button = GUIStation.CreateUIButton(parent, "DialogButton", Vector3.zero, depth,
                         ResourceStation.GetUIAtlas("Atlas_Slices"),
-                        "slice_button_grey", 81, 32, ResourceStation.GetUIFont("dragonword"), Color.white, showWord);
+                        "slice_button_grey", 81, 32, 
+                        GUIFontManager.GetUIDynamicFont(UIFontName.DragonWord),
+                        Color.white, showWord);
 
         return button;
     }
@@ -548,7 +550,8 @@ public static class GUIComponents
     {
         // todo: 不應該讓 UI 實作者處理 depth 這個參數
         UIInput input = GUIStation.CreateUIInput(parent, "NormalInput", Color.white, showWord, Vector3.zero, depth,
-                    ResourceStation.GetUIAtlas("Atlas_Slices"), ResourceStation.GetUIFont("dragonword"),
+                    ResourceStation.GetUIAtlas("Atlas_Slices"), 
+                    GUIFontManager.GetUIDynamicFont(UIFontName.DragonWord),
                     "slice_frame_darkbrown", 210, 60);
 
         return input;
@@ -563,10 +566,10 @@ public static class GUIComponents
         int y = -435;
         float iconScale = 1.6f;
 
-        character = GUIStation.CreateUIButton(parent, "Character", new Vector3( x, y, 0), 7,
+        character = GUIStation.CreateUIButton(parent, "Character", new Vector3( x, y, 0), 10,
                             ResourceStation.GetUIAtlas("Atlas_Icons"),
                             "icon_person", (int)(136 * iconScale), (int)(115  * iconScale),
-                            ResourceStation.GetUIFont("MSJH_30"),
+                            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
                             Color.white, GLOBAL_STRING.CHARACTER_BTN_TEXT);
         //調整文字位置
         pos = character.gameObject.GetComponentInChildren<UILabel>().transform;
@@ -574,10 +577,10 @@ public static class GUIComponents
         character.SetColor(Color.white, Color.black, Color.grey, Color.grey);
 
         x = x + leftPadding;
-        bag = GUIStation.CreateUIButton(parent, "Bag", new Vector3( x, y, 0), 7,
+        bag = GUIStation.CreateUIButton(parent, "Bag", new Vector3( x, y, 0), 10,
                             ResourceStation.GetUIAtlas("Atlas_Icons"),
                             "icon_backpape", (int)(135  * iconScale), (int)(122  * iconScale),
-                            ResourceStation.GetUIFont("MSJH_30"),
+                            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH),
                             Color.white, GLOBAL_STRING.BAG_BTN_TEXT);
         //調整文字位置
         pos = bag.gameObject.GetComponentInChildren<UILabel>().transform;
@@ -585,10 +588,10 @@ public static class GUIComponents
         bag.SetColor(Color.white, Color.black, Color.grey, Color.grey);
 
         x = x + leftPadding;
-        shop = GUIStation.CreateUIButton(parent, "Shop", new Vector3(x, y, 0), 7,//+460
+        shop = GUIStation.CreateUIButton(parent, "Shop", new Vector3(x, y, 0), 10,//+460
                             ResourceStation.GetUIAtlas("Atlas_Icons"),
                             "icon_store", (int)(133 * iconScale), (int)(115 * iconScale),
-                            ResourceStation.GetUIFont("MSJH_30"),
+                            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
                             Color.white, GLOBAL_STRING.SHOP_BTN_TEXT);
         //調整文字位置
         pos = shop.gameObject.GetComponentInChildren<UILabel>().transform;
@@ -596,10 +599,10 @@ public static class GUIComponents
         shop.SetColor(Color.white, Color.black, Color.grey, Color.grey);
 
         x = x + leftPadding;
-        friend = GUIStation.CreateUIButton(parent, "Friend", new Vector3(x, y, 0), 7,
+        friend = GUIStation.CreateUIButton(parent, "Friend", new Vector3(x, y, 0), 10,
                                 ResourceStation.GetUIAtlas("Atlas_Icons"),
                                 "icon_friend", (int)(136 * iconScale), (int)(122 * iconScale),
-                                ResourceStation.GetUIFont("MSJH_30"),
+                                GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
                                 Color.white, GLOBAL_STRING.FRIEND_BTN_TEXT);
         //調整文字位置
         pos = friend.gameObject.GetComponentInChildren<UILabel>().transform;

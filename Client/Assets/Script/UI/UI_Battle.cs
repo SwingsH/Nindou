@@ -22,7 +22,7 @@ public class UI_Battle : GUIFormBase
         UIPanel panel = NGUITools.AddChild<UIPanel>(anchor.gameObject);
         // BOSS 名稱
         _boasNameText = GUIStation.CreateUILabel(panel.gameObject, "BossName", UIWidget.Pivot.Left, new Vector3(-858, 460, 0), 4,
-            ResourceStation.GetUIFont("MSJH_30"),
+            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
             Color.red, "Boss Name");
         // Boss HP 血條
         _bossHPBar = GUIStation.CreateUIProgressBar(panel.gameObject, "Boss HP Bar", new Vector3(-400, 440, 0), 1,
@@ -49,7 +49,7 @@ public class UI_Battle : GUIFormBase
         _pauseBtn.onClick.Add(new EventDelegate(this, "PauseBtnClick"));
         _iconBackground = GUIStation.CreateUISprite(panel.gameObject, "IconBackground", UISprite.Type.Simple, 0,
             ResourceStation.GetUIAtlas("TestAtlas"),
-            "pachuri", UIWidget.Pivot.Center, 1920, 248);
+            "pachuri", UIWidget.Pivot.Center, GUIStation.MANUAL_SCREEN_WIDTH, 248);
         _iconBackground.transform.localPosition = new Vector3(0, -416, 0);
         // 玩家角色圖像 & 血條
         for (int i = 0; i < GLOBALCONST.UI_BATTLE_ROLE_ICON_COUNT; ++i)
@@ -62,43 +62,7 @@ public class UI_Battle : GUIFormBase
     // Use this for initialization
 	void Start () 
     {
-        //// Boss 名稱
-        //_boasNameText = GUIStation.CreateUILabel(gameObject, "BossName", UIWidget.Pivot.Left, new Vector3(-858, 460, 0), 4,
-        //    ResourceStation.GetUIFont("MSJH_30"),
-        //    Color.red, "Boss Name");
-        //// Boss HP 血條
-        //_bossHPBar = GUIStation.CreateUIProgressBar(gameObject, "Boss HP Bar", new Vector3(-400, 440, 0), 1,
-        //    ResourceStation.GetUIAtlas("TestAtlas"),
-        //    "button_back", "button_back", 835, 122);
-        //// 此處暫時作法，一般來說前景和背景圖會是不同的，且不需特別變色才是
-        //UISprite[] tempSprites = _bossHPBar.gameObject.GetComponentsInChildren<UISprite>();
-        //foreach (UISprite oneSprite in tempSprites)
-        //{
-        //    if (oneSprite.name.Equals("Foreground")) { oneSprite.color = new Color(0.0f / 255.0f, 255.0f / 255.0f, 39.0f / 255.0f); }
-        //    if (oneSprite.name.Equals("Background")) { oneSprite.color = new Color(255.0f / 255.0f, 4.0f / 255.0f, 4.0f / 255.0f); }
-        //}
-        //// 加速鈕
-        //_fastForwardBtn = GUIStation.CreateUIButton(gameObject, "FastForward", new Vector3(714, 428, 0), 6,
-        //    ResourceStation.GetUIAtlas("TestAtlas"),
-        //    "Fast-forward", 150, 150, null, Color.white, string.Empty);
-        //_fastForwardBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
-        //_fastForwardBtn.onClick.Add(new EventDelegate(this, "FastForwardBtnClick"));
-        //// 暫停鈕
-        //_pauseBtn = GUIStation.CreateUIButton(gameObject, "Pause", new Vector3(884, 428, 0), 5,
-        //    ResourceStation.GetUIAtlas("TestAtlas"),
-        //    "pause", 150, 150, null, Color.white, string.Empty);
-        //_pauseBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
-        //_pauseBtn.onClick.Add(new EventDelegate(this, "PauseBtnClick"));
-        // 角色icon所在的背景圖
-        //_iconBackground = GUIStation.CreateUISprite(gameObject, "IconBackground", UISprite.Type.Simple, 0,
-        //    ResourceStation.GetUIAtlas("TestAtlas"),
-        //    "pachuri", UIWidget.Pivot.Center, 1920, 248);
-        //_iconBackground.transform.localPosition = new Vector3(0, -416, 0);
-        //// 玩家角色圖像 & 血條
-        //for (int i = 0; i < GLOBALCONST.UI_BATTLE_ROLE_ICON_COUNT; ++i)
-        //{
-        //    AddPlayerIcon(_iconBackground.gameObject);
-        //}
+        //CreateAllComponent();
 	}
 
     // Update is called once per frame

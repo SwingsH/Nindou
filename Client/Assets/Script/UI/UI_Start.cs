@@ -30,7 +30,7 @@ public class UI_Start : GUIFormBase
         _loginBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         // 登入文字
         _loginHint = GUIStation.CreateUILabel(panel.gameObject, "LoginHint", UIWidget.Pivot.Center, new Vector3(0, -106, 0), 7,
-            ResourceStation.GetUIFont("MSJH_30"),
+            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH,fontStyle:FontStyle.Bold),
             new Color(1.0f, 0.2f, 0.3f), GLOBAL_STRING.UI_START_HINT_1);
         // 加上event
         _loginBtn.onClick.Add(new EventDelegate(this, "LoginClick"));
@@ -49,7 +49,7 @@ public class UI_Start : GUIFormBase
         NGUITools.SetActive(_progress.gameObject, false);
         // 進度數值
         _progressShow = GUIStation.CreateUILabel(_progress.gameObject, "Progress", UIWidget.Pivot.Right, new Vector3(652.67f, -4.0f, 0), 6,
-            ResourceStation.GetUIFont("MSJH_30"),
+            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
             new Color(1.0f, 0.2f, 0.3f), "0.00");
         _progressShow.overflowMethod = UILabel.Overflow.ResizeFreely; // fs: 讓文字佔的空間自由地重新配置
     }
@@ -67,15 +67,15 @@ public class UI_Start : GUIFormBase
 
     protected override void OnDestroy()
     {
-        NGUITools.Destroy(_loginBtn.gameObject);
+        if (_loginBtn != null) { NGUITools.Destroy(_loginBtn.gameObject); }
         _loginBtn = null;
-        NGUITools.Destroy(_loginHint.gameObject);
+        if (_loginHint != null) { NGUITools.Destroy(_loginHint.gameObject); }
         _loginHint = null;
-        NGUITools.Destroy(_progressShow.gameObject);
+        if (_progressShow != null) { NGUITools.Destroy(_progressShow.gameObject); }
         _progressShow = null;
-        NGUITools.Destroy(_progress.gameObject);
+        if (_progress != null) { NGUITools.Destroy(_progress.gameObject); }
         _progress = null;
-        NGUITools.Destroy(_inheritBtn.gameObject);
+        if (_inheritBtn != null) { NGUITools.Destroy(_inheritBtn.gameObject); }
         _inheritBtn = null;
 
         InheritBtnClick = null;

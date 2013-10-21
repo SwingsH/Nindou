@@ -100,7 +100,7 @@ public class GameControl{
     {
         get { return _guiStation; }
     }
-    
+
     /// <summary>
     /// 為了掌握整個遊戲 Coroutine 使用量, 請集中使用此 method 進行 Coroutine
     /// todo: 可以考慮使用 CoroutineManager

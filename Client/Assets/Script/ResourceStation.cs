@@ -163,9 +163,12 @@ public class ResourceStation {
         _uiAtlases.Add(uiAtlasName, uiAtlas);
     }
 
-    // 目前尚不知道動態生出不同大小的字體的UIFont，故先事先產出存放在Resources
-    // TODO: 找尋程式中動態生成不同大小字體的UIFont的方法
     static Dictionary<string, UIFont> _uiFonts = new Dictionary<string, UIFont>();
+    /// <summary>
+    /// 取得Resource中的UI字型，一般情形下請使用GUIFontManager.GetUIDynamicFont()取得字型
+    /// </summary>
+    /// <param name="uiFontName">字型名稱</param>
+    /// <returns>對應的UIFont</returns>
     public static UIFont GetUIFont(string uiFontName)
     {
         if (string.IsNullOrEmpty(uiFontName)) { return null; }

@@ -50,6 +50,7 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
             //    "button_back", 1478, 200, null, Color.red, string.Empty);
             //_stageBtn.SetColor(Color.white, Color.white, new Color(184.0f / 255.0f, 184.0f / 255.0f, 184.0f / 255.0f, 1.0f), new Color(184.0f / 255.0f, 184.0f / 255.0f, 184.0f / 255.0f, 1.0f));
             _stageBtn = GUIComponents.StageWideButton(_stageSubUIObj, depth);
+			_stageBtnBG = _stageBtn.tweenTarget.GetComponent<UISprite>();
             _stageBtn.onClick.Add(clickEventDelegate);
 
             if (parentDraggablePanel != null)
@@ -59,15 +60,15 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
             }
             // 關卡名稱＆消耗體力說明
             _stageNameText = GUIStation.CreateUILabel(_stageSubUIObj, "StageName", UIWidget.Pivot.Left, new Vector3(-653, 0, 0), depth + 1,
-                ResourceStation.GetUIFont("MSJH_30"),
+                GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
                 Color.white, string.Empty);
             // 「點擊觀看開啟條件」的提示文字
             _hintText = GUIStation.CreateUILabel(_stageSubUIObj, "HintText", UIWidget.Pivot.Left, new Vector3(-120, 0, 0), depth + 1,
-                ResourceStation.GetUIFont("MSJH_30"),
+                GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
                 Color.white, GLOBAL_STRING.STAGE_OPEN_HINT_TEXT);
             // 「未開啟」的提示文字
             _nonOpenText = GUIStation.CreateUILabel(_stageSubUIObj, "NonOpenText", UIWidget.Pivot.Center, new Vector3(430, 0, 0), depth + 1,
-                ResourceStation.GetUIFont("MSJH_30"),
+                GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
                 Color.red, GLOBAL_STRING.STAGE_NOT_OPEN_TEXT);
             // 探索度的背景圖
             _exploreProgressBackground = GUIStation.CreateUISprite(_stageSubUIObj, "ExploreProgress", UISprite.Type.Simple, depth + 2,
@@ -77,7 +78,7 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
             // 探索度的文字
             _exploreProgressText = GUIStation.CreateUILabel(_exploreProgressBackground.gameObject, "ExploreProgressText", UIWidget.Pivot.Left,
                 new Vector3(-104, -10, 0), depth + 3,
-                ResourceStation.GetUIFont("MSJH_30"),
+                GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
                 Color.white, string.Format(GLOBAL_STRING.STAGE_EXPLORE_PROGRESS_TEXT, 0, 1));
 
             
@@ -241,7 +242,7 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         //_characterBtn = GUIStation.CreateUIButton(backgroundPic.gameObject, "Character", new Vector3(-701, -449, 0), 1,
         //    ResourceStation.GetUIAtlas("TestAtlas"),
         //    "button_back", 300, 80,
-        //    ResourceStation.GetUIFont("MSJH_30"),
+        //    GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle: FontStyle.Bold);
         //    Color.red, GLOBAL_STRING.CHARACTER_BTN_TEXT);
         //_characterBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _characterBtn.onClick.Add(new EventDelegate(this, "CharacterBtnClick"));
@@ -251,7 +252,7 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         //_bagBtn = GUIStation.CreateUIButton(backgroundPic.gameObject, "Bag", new Vector3(-274.2f, -449, 0), 1,
         //    ResourceStation.GetUIAtlas("TestAtlas"),
         //    "button_back", 300, 80,
-        //    ResourceStation.GetUIFont("MSJH_30"),
+        //    GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle: FontStyle.Bold)
         //    Color.red, GLOBAL_STRING.BAG_BTN_TEXT);
         //_bagBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _bagBtn.onClick.Add(new EventDelegate(this, "BagBtnClick"));
@@ -261,7 +262,7 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         //_shopBtn = GUIStation.CreateUIButton(backgroundPic.gameObject, "Shop", new Vector3(191.78f, -449, 0), 1,
         //    ResourceStation.GetUIAtlas("TestAtlas"),
         //    "button_back", 300, 80,
-        //    ResourceStation.GetUIFont("MSJH_30"),
+        //    GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
         //    Color.red, GLOBAL_STRING.SHOP_BTN_TEXT);
         //_shopBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _shopBtn.onClick.Add(new EventDelegate(this, "ShopBtnClick"));
@@ -270,7 +271,7 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         //_friendBtn = GUIStation.CreateUIButton(backgroundPic.gameObject, "Friend", new Vector3(653.42f, -449, 0), 1,
         //    ResourceStation.GetUIAtlas("TestAtlas"),
         //    "button_back", 300, 80,
-        //    ResourceStation.GetUIFont("MSJH_30"),
+        //    GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
         //    Color.red, GLOBAL_STRING.FRIEND_BTN_TEXT);
         //_friendBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _friendBtn.onClick.Add(new EventDelegate(this, "FriendBtnClick"));
@@ -291,21 +292,18 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         stageName.transform.localPosition = new Vector3(-249, 342, 0);
         // 場景名稱
         _stageNameText = GUIStation.CreateUILabel(stageName.gameObject, "StageNameText", UIWidget.Pivot.Left, new Vector3(-246, -26, 0), 3,
-            ResourceStation.GetUIFont("MSJH_30"), Color.white, "場景名稱：靈山");
+            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
+            Color.white, "場景名稱：靈山");
         // 場景進度
         _stageProgress = GUIStation.CreateUILabel(stageName.gameObject, "StageProgress", UIWidget.Pivot.Center, new Vector3(233, -26, 0), 3,
-            ResourceStation.GetUIFont("MSJH_30"), Color.red, "探索度：80%");
+            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
+            Color.white, "探索度：80%");
         // 回到上一層的按鈕
         _returnPreviousUIBtn = GUIStation.CreateUIButton(_stageSelectBackground.gameObject, "X", new Vector3(783, 321, 0), 4,
             ResourceStation.GetUIAtlas("UI_Main_Atlas"),
             "close", 100, 100, null, Color.white, string.Empty);
         _returnPreviousUIBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _returnPreviousUIBtn.onClick.Add(new EventDelegate(this, "ReturnPreviousUI"));
-
-        // ScrollBar
-        UIScrollBar stageSelectScrollBar = GUIStation.CreateUIScrollBar(_stageSelectBackground.gameObject, "StageSelectScrollBar", new Vector3(786, 245, 0), 11,
-            ResourceStation.GetUIAtlas("SciFi Atlas"),
-            "Dark", "Button", 80, 636, UIScrollBar.Direction.Vertical, true);
 
         UIPanel stageSelectPanel = NGUITools.AddChild<UIPanel>(_stageSelectBackground.gameObject);
         stageSelectPanel.name = "StageSelect";
@@ -314,7 +312,6 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         stageSelectPanel.clipSoftness = new Vector2(10, 10);
         
         _stageSelectDraggablePanel = stageSelectPanel.gameObject.AddComponent<UIDraggablePanel>();
-        _stageSelectDraggablePanel.verticalScrollBar = stageSelectScrollBar;
         _stageSelectDraggablePanel.scale = new Vector3(0, 1, 0); // 限制只有垂直方向可拖曳
 
         _stageSelectGrid = NGUITools.AddChild<UIGrid>(stageSelectPanel.gameObject);
@@ -324,14 +321,15 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         _stageSelectGrid.hideInactive = true;
         _stageSelectGrid.transform.localPosition = new Vector3(0.0f, 200.0f, 0.0f);
 
-        _stageSelectGrid.gameObject.AddComponent<UICenterOnChild>();
+        UICenterOnChild tempCOC = _stageSelectGrid.gameObject.AddComponent<UICenterOnChild>();
 
-        /// 先建三個 for Test
+        /// for Test
         for (int i = 0; i < 4; ++i)
         {
             AddStageInfo(i != 2, string.Format("靈山 - 山腳下 - {0}", i + 1), i + 1, i * 3 + 2, 25);
         }
-
+        // 強制將第一個置中
+        tempCOC.Recenter();
     }
     #endregion
     #region 固定函式
@@ -421,6 +419,9 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
     void ReturnPreviousUI()
     {
         CommonFunction.DebugMsg("按下返回(X)按鈕");
+        // TODO: 如果確定只能從主介面點選關卡地圖進入此介面，則直接回到進入遊戲狀態即可
+        //       否則會需要處理「回到上一個開啟介面」的功能
+        GameControl.Instance.ChangeGameState(GameEntered.Instance);
     }
     /// <summary>
     /// 按下選擇關卡的按鈕
