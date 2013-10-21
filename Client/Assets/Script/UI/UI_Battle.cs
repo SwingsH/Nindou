@@ -20,6 +20,9 @@ public class UI_Battle : GUIFormBase
         anchor.uiCamera = _guistation.GUICamera;
 
         UIPanel panel = NGUITools.AddChild<UIPanel>(anchor.gameObject);
+        // boss 圖片
+
+
         // BOSS 名稱
         _boasNameText = GUIStation.CreateUILabel(panel.gameObject, "BossName", UIWidget.Pivot.Left, new Vector3(-858, 460, 0), 4,
             GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
