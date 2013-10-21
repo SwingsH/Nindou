@@ -37,8 +37,9 @@ public class GameMain : MonoBehaviour {
         //    }
         //}
 		#if UNITY_EDITOR
-		if (_control.CurrentGameState != null)
-			GUI.Box(new Rect((Screen.width - 200), 0, 200, 30), _control.CurrentGameState.ToString());
+        if (_control != null)
+		    if (_control.CurrentGameState != null)
+			    GUI.Box(new Rect((Screen.width - 200), 0, 200, 30), _control.CurrentGameState.ToString());
 		#endif
 		
     }

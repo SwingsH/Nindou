@@ -52,6 +52,7 @@ public class NetworkInterface
 
     public const int HTTP_PORT = 80;
     public const string HTTP_IP = "122.116.24.125";
+    //public const string HTTP_IP = "127.0.0.1";
     private const int SOCKET_PORT = 17480;
     private const string HTTP_HEAD = "http";
     private const string HTTP_PROTOCOL_PAGE = "{0}://{1}/nindou/protocol.php";

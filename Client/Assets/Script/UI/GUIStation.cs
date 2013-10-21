@@ -562,7 +562,6 @@ public static class GUIComponents
         int x = margin;
         int y = -435;
         float iconScale = 1.6f;
-        CommonFunction.DebugMsg(string.Format("{0},{1},{2},{3}" , margin, leftPadding, x, y));
 
         character = GUIStation.CreateUIButton(parent, "Character", new Vector3( x, y, 0), 7,
                             ResourceStation.GetUIAtlas("Atlas_Icons"),
