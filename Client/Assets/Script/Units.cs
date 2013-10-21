@@ -179,13 +179,13 @@ public class AnimUnit : Unit
 				switch (info.DamageType)
 				{
 					case SkillDamageType.Heal:
-						BattleManager.ShowDamageText(SkillDamageType.Heal, Mathf.RoundToInt(value), Entity.transform.position + Entity.transform.up * 250);
+						BattleManager.ShowDamageText(SkillDamageType.Heal, Mathf.RoundToInt(value), Entity.transform.position + Entity.transform.up * 250 + Entity.transform.forward * -5);
 						break;
 					case SkillDamageType.Damage:
 						if (info.MultiHit)
-							BattleManager.ShowDamageGroupText(info, this, Mathf.RoundToInt(value), Entity.transform.position + Entity.transform.up * 250);
+							BattleManager.ShowDamageGroupText(info, this, Mathf.RoundToInt(value), Entity.transform.position + Entity.transform.up * 250 + Entity.transform.forward * -5);
 						else
-							BattleManager.ShowDamageText(SkillDamageType.Damage, Mathf.RoundToInt(value), Entity.transform.position + Entity.transform.up * 250);
+							BattleManager.ShowDamageText(SkillDamageType.Damage, Mathf.RoundToInt(value), Entity.transform.position + Entity.transform.up * 250 + Entity.transform.forward * -5);
 						break;
 				}
 			}

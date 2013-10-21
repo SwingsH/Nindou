@@ -261,7 +261,6 @@ public class HUDManager : MonoBehaviour {
 	public void ShowDamageGroupText(long callerID, int value, Vector3 position)
 	{
 		Vector3 localPosition = transform.InverseTransformPoint(position);
-
 		//一樣跳單次的
 		ShowDamageText(value, localPosition);
 
@@ -272,7 +271,7 @@ public class HUDManager : MonoBehaviour {
 			GroupText.Add(callerID, text);
 		}
 		//一起跳會被蓋住，所以群組的往前一點
-		SetDamageGroupAnim(text, localPosition - Vector3.forward);
+		SetDamageGroupAnim(text, localPosition - Vector3.forward * 10);
 		text.IntValue += value;
 		text.Play();
 	}
@@ -398,17 +397,15 @@ public class HUDTextInfo
 		//位移動畫
 		if (PosXCurve.length > 0 || PosYCurve.length > 0)
 		{
-			//z 不用變先暫存
-			float z = textComponent.transform.localPosition.z;
 			Vector3 newPos;
 			if (PosSeperateXY)
 			{
 				newPos.x = PosStart.x + PosOffset.x * PosXCurve.Evaluate(normalTime);
 				newPos.y = PosStart.y + PosOffset.y * PosYCurve.Evaluate(normalTime);
+				newPos.z = PosStart.z;
 			}
 			else
 				newPos = PosStart + PosOffset * PosXCurve.Evaluate(normalTime);
-			newPos.z = z;
 			textComponent.transform.localPosition = newPos;
 		}
 		else
