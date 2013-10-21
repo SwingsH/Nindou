@@ -1,6 +1,6 @@
 ﻿Shader "Custom/GrayScaleColorEffect" {
 	Properties {
-		_ReplaceColor("MaskColor",Color) = (1,1,1,1)
+		_EffectColor("MaskColor",Color) = (1,1,1,1)
 	}
 	SubShader {
 		Tags { "RenderType"="Opaque" "Queue" = "Overlay"}
@@ -18,7 +18,7 @@
 		
 		sampler2D _GrabTex;
 		float4 _GrabTex_TexelSize;
-		float4 _ReplaceColor;
+		float4 _EffectColor;
 		struct appdata_t {
 			float4 vertex : POSITION;
 			float2 texcoord: TEXCOORD0;
@@ -44,7 +44,7 @@
 		half4 frag( v2f i ) : COLOR
 		{	
 			half4 col = tex2Dproj( _GrabTex, i.uvgrab);
-			col.rgb = Luminance(col.rgb) * _ReplaceColor.rgb;
+			col.rgb = Luminance(col.rgb) * _EffectColor.rgb;
 			return col;
 		}
 		ENDCG

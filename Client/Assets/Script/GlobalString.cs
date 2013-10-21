@@ -39,4 +39,8 @@ public static class GLOBAL_STRING
     public const string STAGE_NAME_TEXT = "{0}\n消耗體力：{1} PT";
     public const string STAGE_EXPLORE_PROGRESS_TEXT = "探索度：{0}/{1}";
     #endregion
+
+	#region HUD String
+	public const string HUD_MISS = "miss";
+	#endregion
 }
