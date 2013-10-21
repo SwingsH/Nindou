@@ -170,7 +170,7 @@ public class AnimUnit : Unit
 			}
 			float value = Mathf.Ceil(rate * info.Power);
 
-			
+
 
 			//跳血跟受擊效果
 			if (Entity)
@@ -179,13 +179,13 @@ public class AnimUnit : Unit
 				switch (info.DamageType)
 				{
 					case SkillDamageType.Heal:
-						BattleManager.ShowDamageText(SkillDamageType.Heal, Mathf.RoundToInt(value), Entity.transform.position + Entity.transform.up * 250);
+						BattleManager.ShowDamageText(SkillDamageType.Heal, Mathf.RoundToInt(value), Entity.transform.position + Entity.transform.up * 250 + Entity.transform.forward * -5);
 						break;
 					case SkillDamageType.Damage:
-						if(info.MultiHit)
-							BattleManager.ShowDamageGroupText(info, this, Mathf.RoundToInt(value), Entity.transform.position + Entity.transform.up * 250);
+						if (info.MultiHit)
+							BattleManager.ShowDamageGroupText(info, this, Mathf.RoundToInt(value), Entity.transform.position + Entity.transform.up * 250 + Entity.transform.forward * -5);
 						else
-							BattleManager.ShowDamageText(SkillDamageType.Damage, Mathf.RoundToInt(value), Entity.transform.position + Entity.transform.up * 250);
+							BattleManager.ShowDamageText(SkillDamageType.Damage, Mathf.RoundToInt(value), Entity.transform.position + Entity.transform.up * 250 + Entity.transform.forward * -5);
 						break;
 				}
 			}
@@ -193,6 +193,9 @@ public class AnimUnit : Unit
 				value *= -1;
 			Damaged(value);
 		}
+		else if (Entity)
+			BattleManager.ShowMissText(Entity.transform.position + Entity.transform.up * 250);
+		
 	}
 	protected void Damaged(float value)
 	{

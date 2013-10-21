@@ -131,7 +131,7 @@ public class UnitGenerater{
 		{
 			foreach (SmoothMoves.BoneAnimation ba in baLIst)
 			{
-				GameObject.Destroy(ba);
+				GameObject.Destroy(ba.gameObject);
 			}
 		}
 		UnitGrave.Clear();

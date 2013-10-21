@@ -5,7 +5,7 @@ using System.Collections.Generic;
 /*
  * 2013/8/16
  * 戰鬥單位出現跟消失和戰鬥結果管理 
- * 單位移動是個自移動，不過要透
+ * 單位移動是個自移動，不過要透過這個改格子資料的位置
  */
 public class BattleManager : BattleState
 {
@@ -58,7 +58,8 @@ public class BattleManager : BattleState
 
 	//跳血元件
 	HUDManager hudManager;
-
+	//後製元件
+	PostEffectManager postEffectManager;
 	float EffectCountDown;
 
 	void UnitRun()
@@ -297,13 +298,19 @@ public class BattleManager : BattleState
 		switch (group)
 		{
 			case eGroup.Enemy:
-				if(EnemyInfos.Count != 0)
+				if (EnemyInfos.Count != 0)
 					RandomEnemy(3, 0);
 				else
+				{
 					IsBattleStart = false;
+					Result = BattleResult.Win;
+				}
 				break;
 			case eGroup.Player:
-				IsBattleStart = false;
+				{
+					IsBattleStart = false;
+					Result = BattleResult.Lose;
+				}
 				break;
 		}
 		if(!IsBattleStart)
@@ -324,10 +331,6 @@ public class BattleManager : BattleState
 		result += targetCam.transform.forward * (currentPos.z - current.transform.position.z) * 30;
 		result.z += currentPos.x *0.1f;
 		return result;
-	}
-
-	public void BattleResult(bool Win)
-	{
 	}
 
 	#region Grid Control
@@ -474,6 +477,18 @@ public class BattleManager : BattleState
 			Instance.hudManager.ShowDamageGroupText(callerID, value, displayPosition);
 		}
 	}
+
+	/// <summary>
+	/// 顯示未擊中
+	/// </summary>
+	/// <param name="displayPosition">顯示的位置</param>
+	public static void ShowMissText(Vector3 displayPosition)
+	{
+		if (Instance != null && Instance.hudManager != null)
+		{
+			Instance.hudManager.ShowText(GLOBAL_STRING.HUD_MISS, displayPosition, Vector3.left, Color.red, 0.5f);
+		}
+	}
 	#endregion
 
 	public override void OnChangeIn(GameControl control)
@@ -494,13 +509,22 @@ public class BattleManager : BattleState
 		UnitCamera.clearFlags = CameraClearFlags.Depth;
 		UnitCamera.orthographicSize = GLOBALCONST.GameSetting.UNIT_CAMERA_SIZE;
 
+		postEffectManager = UnitCamera.gameObject.AddComponent<PostEffectManager>();
+		postEffectManager.TargetCamera = UnitCamera;
+		//
 		hudManager = HUDManager.Create(UnitCamera);
 		HUDManager.DisplayLayer = GLOBALCONST.GameSetting.LAYER_UNIT;
+
 		IsBattleStart = false;
 
+		//讀取測試資料
 		if (Application.isPlaying)
 			TestDataBase.IniInstance();
+
+		//戰鬥格子資料
 		g = new GridInfo(Vector3.one, GLOBALCONST.GameSetting.GRID_SIZE, GLOBALCONST.GameSetting.GRID_COUNT_W, GLOBALCONST.GameSetting.GRID_COUNT_L);
+
+		//角色產生器
 		Generater = new UnitGenerater();
 
 		BattleStart();
@@ -521,9 +545,11 @@ public class BattleManager : BattleState
 
 	public override void OnChangeOut(GameControl control)
 	{
-		Unit_Clear();
+		//Unit_Clear();
 		Generater.ClearGrave();
 		TimeMachine.SetTimeScale(1);
+		if(Result == BattleResult.Lose)
+			postEffectManager.DefaultEffect_1();
 	}
 }
 public struct GridPos
@@ -1056,11 +1082,20 @@ public abstract class BattleState : IGameState
 		}
 	}
 	public static uint BattleID;
+	public static BattleResult Result = BattleResult.None;
+	
 	public abstract void OnChangeIn(GameControl control);
 
 	public abstract void Update(GameControl control);
 
 	public abstract void OnChangeOut(GameControl control);
+
+	public enum BattleResult
+	{
+		None,
+		Lose,
+		Win,
+	}
 }
 
 
@@ -1086,6 +1121,7 @@ public class BattleEntering : BattleState
 	{
 		Application.LoadLevel("BattleField");
 		TimeMachine.SetTimeScale(1);
+		Result = BattleResult.None;
 	}
 
 	public override void Update(GameControl control)
@@ -1112,22 +1148,92 @@ public class BattleLeaving :BattleState
 			return _instance;
 		}
 	}
+
+	float ChangeTime;
+	bool DisplayResult;
 	public override void OnChangeIn(GameControl control)
 	{
 		BattleID = uint.MinValue;
-		Application.LoadLevel("Empty");
+		if (Result != BattleResult.None)
+		{
+			ChangeTime = Time.realtimeSinceStartup + 5;
+			DisplayResult = true;
+			#region 臨時顯示結果文字
+			//產生顯示結果的TextMesh
+			TextMesh tm = new GameObject("HUDText").AddComponent<TextMesh>();
+			UIFont uifont = ResourceStation.GetUIFont("MSJH_30");
+			if (uifont != null)
+				tm.font = uifont.dynamicFont;
+			else
+			{
+				Object[] obj = Resources.FindObjectsOfTypeAll(typeof(Font));
+				if (obj.Length > 0)
+					tm.font = obj[0] as Font;
+				else
+					CommonFunction.DebugError("找不到可用的font");
+			}
+			tm.fontSize = 100;
+			tm.characterSize = 80;
+			tm.lineSpacing = 0.8f;
+			if(tm.font != null)
+				tm.renderer.sharedMaterial = tm.font.material;
+			tm.anchor = TextAnchor.LowerCenter;
+			tm.text = BattleState.Result.ToString();
+			if (BattleManager.UnitCamera != null)
+			{
+				tm.gameObject.layer = GLOBALCONST.GameSetting.LAYER_UNIT;
+				tm.transform.position =BattleManager.UnitCamera.transform.InverseTransformPoint(BattleManager.UnitCamera.transform.forward * (BattleManager.UnitCamera.nearClipPlane + 0.1f));
+				tm.transform.rotation = BattleManager.UnitCamera.transform.rotation;
+			}
+
+
+			TextMesh tm1 = GameObject.Instantiate(tm) as TextMesh;
+			tm1.characterSize = 10;
+			tm1.text = "Tab To Continue";
+			tm1.anchor = TextAnchor.UpperLeft;
+
+			#endregion
+		}
+		else
+		{
+			DisplayResult = false; 
+			ChangeTime = 0;
+			CommonFunction.DebugError("無結果的進入戰鬥結果錯誤");
+			Application.LoadLevel("Empty");
+		}
 	}
 
 	public override void Update(GameControl control)
 	{
-        // fs : 改變GameState到GameStageSelect時，會關閉除了UI_Main_StageSelect以外的介面，
-        //      此時會使用DestroyImmediate刪除UIDrawCall，如果在LoadLevel()尚未完成時呼叫，
-        //      會出現「Destroying GameObjects immediately is not permitted during physics trigger/contact or animation event callbacks...」的錯誤訊息，
-        //      故要在Update中持續等待LoadLevel()完成後才呼叫。
-        if (Application.loadedLevelName == "Empty")
-        {
-            GameControl.Instance.ChangeGameState(GameStageSelect.Instance);
-        }
+		if (Input.anyKey)
+		{
+			SkipResult();
+		}
+		if (DisplayResult)
+		{
+			if (Time.realtimeSinceStartup > ChangeTime)
+			{
+				Application.LoadLevel("Empty");
+				DisplayResult = false;
+			}
+		}
+		else
+		{
+			// fs : 改變GameState到GameStageSelect時，會關閉除了UI_Main_StageSelect以外的介面，
+			//      此時會使用DestroyImmediate刪除UIDrawCall，如果在LoadLevel()尚未完成時呼叫，
+			//      會出現「Destroying GameObjects immediately is not permitted during physics trigger/contact or animation event callbacks...」的錯誤訊息，
+			//      故要在Update中持續等待LoadLevel()完成後才呼叫。
+			if (Application.loadedLevelName == "Empty")
+			{
+				GameControl.Instance.ChangeGameState(GameStageSelect.Instance);
+			}
+		}
+	}
+
+	public static void SkipResult()
+	{
+		if(_instance != null)
+			_instance.ChangeTime = 0;
 	}
 
 	public override void OnChangeOut(GameControl control)

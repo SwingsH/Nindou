@@ -1,6 +1,6 @@
 ﻿Shader "Custom/MaskEffect" {
 	Properties {
-		_MaskColor("MaskColor",Color) = (1,0.3,0.3,1)
+		_EffectColor("MaskColor",Color) = (1,0.3,0.3,1)
 	}
 	SubShader {
 		Tags { "RenderType"="Opaque" "Queue" = "Overlay"}
@@ -8,7 +8,7 @@
 		GrabPass{"_GrabTex"}
 		pass{			
 			SetTexture[_GrabTex]{
-				constantColor [_MaskColor]
+				constantColor [_EffectColor]
 				combine texture * constant
 			}
 		}

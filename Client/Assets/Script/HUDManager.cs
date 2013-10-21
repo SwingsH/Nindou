@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 
+//HUD (head-up display) 
+//目前只有跳血數字顯示
 public class HUDManager : MonoBehaviour {
 
 	static int _displayLayer;
@@ -29,8 +31,9 @@ public class HUDManager : MonoBehaviour {
 		}
 	}
 
-	const float ShiftUnit = 70;
+	const float ShiftUnit = 20;
 	const int POOL_SIZE = 10;
+	AnimationCurve ColorFadeOutCurve = new AnimationCurve(new Keyframe(0.8f, 0f, 0f, 0f), new Keyframe(1f, 1f, 2f, 2f));
 	/// <summary>
 	/// 產生一個HUDManager
 	/// </summary>
@@ -126,6 +129,7 @@ public class HUDManager : MonoBehaviour {
 		tm.transform.localRotation = Quaternion.identity;
 		return result;
 	}
+	//取得字型，從回收區，沒有回收的就產生一個新的
 	HUDTextInfo GetText()
 	{
 		HUDTextInfo result = null;
@@ -143,7 +147,6 @@ public class HUDManager : MonoBehaviour {
 
 	void SetDamageAnim(HUDTextInfo info, Vector3 position)
 	{
-		info.textComponent.transform.localPosition = position;
 		info.PosSeperateXY = true;
 		info.PosStart = position;
 		info.PosEnd = (Vector2)position + new Vector2(ShiftUnit * Random.Range(-2f,2f),ShiftUnit * -Random.Range(0.5f,3f));
@@ -162,16 +165,15 @@ public class HUDManager : MonoBehaviour {
 	//多段攻擊的總傷害文字
 	void SetDamageGroupAnim(HUDTextInfo info, Vector3 position)
 	{
-		info.textComponent.transform.localPosition = position;
 		info.PosStart = position;
-		info.PosEnd = (Vector2)position + new Vector2(0, 0.5f * ShiftUnit);
+		info.PosEnd = position + new Vector3(0, 0.5f * ShiftUnit);
 		info.PosXCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 		info.PosYCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 		info.Duration = 1.5f;
 
 		info.ColorStart = info.ColorEnd = Color.yellow;
 		info.ColorEnd.a = 0;
-		info.ColorCurve = new AnimationCurve(new Keyframe(0.8f, 0f, 0f, 0f), new Keyframe(1f, 1f, 2f, 2f));
+		info.ColorCurve = ColorFadeOutCurve;
 
 		info.ScaleSeperateXY = false;
 		info.ScaleStart = Vector2.one; 
@@ -180,7 +182,6 @@ public class HUDManager : MonoBehaviour {
 	}
 	void SetHealAnim(HUDTextInfo info, Vector3 position)
 	{
-		info.textComponent.transform.localPosition = position;
 		info.PosSeperateXY = true;
 		info.PosStart = position;
 		info.PosEnd = (Vector2)position + new Vector2(ShiftUnit * Random.Range(-1f, 1f), ShiftUnit * Random.Range(0.5f, 1f));
@@ -190,24 +191,52 @@ public class HUDManager : MonoBehaviour {
 
 		info.ColorStart = info.ColorEnd = Color.green;
 		info.ColorEnd.a = 0;
-		info.ColorCurve = new AnimationCurve(new Keyframe(0.8f, 0f, 0f, 0f), new Keyframe(1f, 1f, 2f, 2f));
+		info.ColorCurve = ColorFadeOutCurve;
 
 		info.ScaleStart = info.ScaleEnd = Vector3.one;
 		info.ScaleXCurve = new AnimationCurve();
 		info.ScaleYCurve = new AnimationCurve();
 	}
 
-	public void ShowDamageText(int value, Vector3 position)
+
+	/// <summary>
+	/// 一般文字
+	/// </summary>
+	/// <param name="text">文字</param>
+	/// <param name="worldPosition">位置（世界座標）</param>
+	/// <param name="moveDirection">往哪個方向移動</param>
+	/// <param name="color">顏色</param>
+	/// <param name="Duration">顯示時間</param>
+	public void ShowText(string text, Vector3 worldPosition, Vector3 moveDirection, Color color, float Duration)
 	{
-		ShowDamageText(SkillDamageType.Damage, value, position);
+		Vector3 localPosition = transform.InverseTransformPoint(worldPosition);
+		HUDTextInfo textinfo = GetText();
+		textinfo.ClearAnimation();
+
+		textinfo.ColorStart = color;
+		textinfo.ColorCurve = ColorFadeOutCurve;
+		color.a = 0;
+		textinfo.ColorEnd = color;
+
+		textinfo.PosXCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
+		textinfo.PosStart = localPosition;
+		textinfo.PosEnd = localPosition + moveDirection.normalized * ShiftUnit * 3;
+		textinfo.Text = text;
+		textinfo.Play();
+		DisplayText.Add(textinfo);
 	}
-	public void ShowHealText(int value, Vector3 position)
+
+	public void ShowDamageText(int value, Vector3 worldPosition)
 	{
-		ShowDamageText(SkillDamageType.Heal, value, position);
+		ShowDamageText(SkillDamageType.Damage, value, worldPosition);
 	}
-	public void ShowDamageText(SkillDamageType damageType, int value, Vector3 position)
+	public void ShowHealText(int value, Vector3 worldPosition)
 	{
-		Vector3 localPosition = transform.InverseTransformPoint(position);
+		ShowDamageText(SkillDamageType.Heal, value, worldPosition);
+	}
+	public void ShowDamageText(SkillDamageType damageType, int value, Vector3 worldPosition)
+	{
+		Vector3 localPosition = transform.InverseTransformPoint(worldPosition);
 		HUDTextInfo text = GetText();
 		switch (damageType)
 		{
@@ -232,7 +261,6 @@ public class HUDManager : MonoBehaviour {
 	public void ShowDamageGroupText(long callerID, int value, Vector3 position)
 	{
 		Vector3 localPosition = transform.InverseTransformPoint(position);
-
 		//一樣跳單次的
 		ShowDamageText(value, localPosition);
 
@@ -243,7 +271,7 @@ public class HUDManager : MonoBehaviour {
 			GroupText.Add(callerID, text);
 		}
 		//一起跳會被蓋住，所以群組的往前一點
-		SetDamageGroupAnim(text, localPosition - Vector3.forward);
+		SetDamageGroupAnim(text, localPosition - Vector3.forward * 10);
 		text.IntValue += value;
 		text.Play();
 	}
@@ -316,9 +344,9 @@ public class HUDTextInfo
 	//位移
 	//xy的動畫曲線是否要分開，不分開都用PosXCurve
 	public bool PosSeperateXY = true;
-	public Vector2 PosStart = new Vector2(0, 0);
-	public Vector2 PosEnd = new Vector2(0, 0);
-	Vector2 PosOffset = new Vector2();
+	public Vector3 PosStart = new Vector3(0, 0);
+	public Vector3 PosEnd = new Vector3(0, 0);
+	Vector3 PosOffset = new Vector2();
 	/// <summary>
 	/// X方向移動的AnimationCurve
 	/// </summary>
@@ -369,17 +397,15 @@ public class HUDTextInfo
 		//位移動畫
 		if (PosXCurve.length > 0 || PosYCurve.length > 0)
 		{
-			//z 不用變先暫存
-			float z = textComponent.transform.localPosition.z;
 			Vector3 newPos;
 			if (PosSeperateXY)
 			{
 				newPos.x = PosStart.x + PosOffset.x * PosXCurve.Evaluate(normalTime);
 				newPos.y = PosStart.y + PosOffset.y * PosYCurve.Evaluate(normalTime);
+				newPos.z = PosStart.z;
 			}
 			else
-				newPos = PosStart + PosEnd * PosXCurve.Evaluate(normalTime);
-			newPos.z = z;
+				newPos = PosStart + PosOffset * PosXCurve.Evaluate(normalTime);
 			textComponent.transform.localPosition = newPos;
 		}
 		else
@@ -442,5 +468,19 @@ public class HUDTextInfo
 	{
 		if (textComponent != null)
 			textComponent.gameObject.SetActive(true);
+	}
+
+	public void ClearAnimation()
+	{
+		PosSeperateXY = false;
+		PosStart= PosEnd = Vector3.zero;
+		PosXCurve = PosYCurve = new AnimationCurve();
+
+		ScaleSeperateXY = false;
+		ScaleXCurve = ScaleYCurve = new AnimationCurve();
+		ScaleStart = ScaleEnd = Vector3.one;
+
+		ColorStart = ColorEnd = Color.white;
+		ColorCurve = new AnimationCurve();
 	}
 }
