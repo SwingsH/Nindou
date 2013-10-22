@@ -40,8 +40,9 @@ public class UI_Main_WorldMap : GUIFormBase
         // 背景圖
         // sh20131020 marked, 確認後移除
         //UISprite backgroundPic = GUIStation.CreateUISprite(panel.gameObject, "Background", UISprite.Type.Simple, 0,
-        //    ResourceStation.GetUIAtlas("Atlas_Backgrounds"),
-        //   "temp_nindou_bg", UIWidget.Pivot.Center, 1920, 1080);
+        //    ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_BACKGROUNDS),
+        //    GLOBALCONST.SPRITE_WORLDMAP_BG,
+        //    UIWidget.Pivot.Center, 1920, 1080);
         UISprite backgroundPic = GUIComponents.WorldMapBackground(panel.gameObject, 0);
 
         GUIComponents.MainMenuButtons(backgroundPic.gameObject, out _characterBtn, out _shopBtn, out _friendBtn, out _bagBtn);
@@ -49,8 +50,9 @@ public class UI_Main_WorldMap : GUIFormBase
         // 「人物」按鈕
         // sh20131020 marked, 確認後移除
         //_characterBtn = GUIStation.CreateUIButton(backgroundPic.gameObject, "Character", new Vector3(-701, -449, 0), 1,
-        //    ResourceStation.GetUIAtlas("TestAtlas"),
-        //    "button_back", 300, 80,
+        //    ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST),
+        //    GLOBALCONST.SPRITE_TEST_BUTTON_BACK
+        //    300, 80,
         //    GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle: FontStyle.Bold),
         //    Color.red, GLOBAL_STRING.CHARACTER_BTN_TEXT);
         //_characterBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
@@ -59,8 +61,9 @@ public class UI_Main_WorldMap : GUIFormBase
         // 「背包」按鈕
         // sh20131020 marked, 確認後移除
         //_bagBtn = GUIStation.CreateUIButton(backgroundPic.gameObject, "Bag", new Vector3(-274.2f, -449, 0), 1,
-        //    ResourceStation.GetUIAtlas("TestAtlas"),
-        //    "button_back", 300, 80,
+        //    ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST),
+        //    GLOBALCONST.SPRITE_TEST_BUTTON_BACK
+        //    300, 80,
         //    GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle: FontStyle.Bold),
         //    Color.red, GLOBAL_STRING.BAG_BTN_TEXT);
         //_bagBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
@@ -69,8 +72,9 @@ public class UI_Main_WorldMap : GUIFormBase
         // 「商店」按鈕
         // sh20131020 marked, 確認後移除
         //_shopBtn = GUIStation.CreateUIButton(backgroundPic.gameObject, "Shop", new Vector3(191.78f, -449, 0), 1,
-        //    ResourceStation.GetUIAtlas("TestAtlas"),
-        //    "button_back", 300, 80,
+        //    ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST),
+        //    GLOBALCONST.SPRITE_TEST_BUTTON_BACK
+        //    300, 80,
         //    GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle: FontStyle.Bold),
         //    Color.red, GLOBAL_STRING.SHOP_BTN_TEXT);
         //_shopBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
@@ -78,8 +82,9 @@ public class UI_Main_WorldMap : GUIFormBase
 
         // 「好友」按鈕
         //_friendBtn = GUIStation.CreateUIButton(backgroundPic.gameObject, "Friend", new Vector3(653.42f, -449, 0), 1,
-        //    ResourceStation.GetUIAtlas("TestAtlas"),
-        //    "button_back", 300, 80,
+        //    ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST),
+        //    GLOBALCONST.SPRITE_TEST_BUTTON_BACK
+        //    300, 80,
         //    GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle: FontStyle.Bold),
         //    Color.red, GLOBAL_STRING.FRIEND_BTN_TEXT);
         //_friendBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
@@ -90,15 +95,18 @@ public class UI_Main_WorldMap : GUIFormBase
         // 世界地圖的背景圖
         // sh20131020 marked, 確認後移除
         //UISprite worldMap = GUIStation.CreateUISprite(backgroundPic.gameObject, "WorldMap", UISprite.Type.Simple, 1,
-        //    ResourceStation.GetUIAtlas("TestAtlas2"),
-        //    "chiruno", UIWidget.Pivot.Center, 1760, 838);
+        //    ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_SLICES), 
+        //    GLOBALCONST.SPRITE_PARCHMENT,
+        //    UIWidget.Pivot.Center, 1760, 838);
         //worldMap.transform.localPosition = new Vector3(10, 35, 0);
         UISprite worldMap = GUIComponents.StageFrame(backgroundPic.gameObject);
 
         // 體力條
         _stamina = GUIStation.CreateUIProgressBar(worldMap.gameObject, "Stamina", new Vector3(-698.7f, 329.38f, 0), 8,
-            ResourceStation.GetUIAtlas("TestAtlas"),
-            "button_back", "button_back", 418, 84);
+            ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST),
+            //"button_back", "button_back", 
+            GLOBALCONST.SPRITE_TEST_BUTTON_BACK, GLOBALCONST.SPRITE_TEST_BUTTON_BACK,
+            418, 84);
         // 此處暫時作法，一般來說前景和背景圖會是不同的
         UISprite[] tempSprites = _stamina.gameObject.GetComponentsInChildren<UISprite>();
         foreach (UISprite oneSprite in tempSprites)
@@ -121,27 +129,35 @@ public class UI_Main_WorldMap : GUIFormBase
 
         // 「人物頭像」按鈕
         _headPictureBtn = GUIStation.CreateUIButton(worldMap.gameObject, "HeadPicture", new Vector3(0, 318.37f, 0), 5,
-            ResourceStation.GetUIAtlas("TestAtlas"),
-            "pachuri", 150, 150,
+            ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST),
+            //"pachuri", 
+            GLOBALCONST.SPRITE_TEST_PLAYER_HEAD,
+            150, 150,
             null, Color.white, string.Empty);
         _headPictureBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _headPictureBtn.onClick.Add(new EventDelegate(this, "HeadPictureBtnClick"));
         // 「點數」
         UISprite pointBasePic = GUIStation.CreateUISprite(worldMap.gameObject, "Point", UISprite.Type.Sliced, 6,
-            ResourceStation.GetUIAtlas("TestAtlas"),
-            "button_back", UIWidget.Pivot.Center, 418, 84);
+            ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST),
+            //"button_back", 
+            GLOBALCONST.SPRITE_TEST_BUTTON_BACK,
+            UIWidget.Pivot.Center, 418, 84);
         pointBasePic.transform.localPosition = new Vector3(347, 328, 0);
         UISprite pointGraphPic = GUIStation.CreateUISprite(pointBasePic.gameObject, "PointGraph", UISprite.Type.Simple, 7,
-            ResourceStation.GetUIAtlas("TestAtlas"),
-            "gold", UIWidget.Pivot.Center, 50, 50);
+            ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST),
+            //"gold", 
+            GLOBALCONST.SPRITE_TEST_POINT_GRAPH,
+            UIWidget.Pivot.Center, 50, 50);
         pointGraphPic.transform.localPosition = new Vector3(-155.85f, 0, 0);
         _pointText = GUIStation.CreateUILabel(pointBasePic.gameObject, "PointText", UIWidget.Pivot.Left, new Vector3(-107.25f, -5.65f, 0), 10,
             GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle: FontStyle.Bold),
             Color.red, string.Format("目前點數：{0}", _gamePoint));
         // 「選單」按鈕
         _menuBtn = GUIStation.CreateUIButton(worldMap.gameObject, "Menu", new Vector3(669.55f, 330.39f, 0), 2,
-            ResourceStation.GetUIAtlas("TestAtlas"),
-            "button_back", 100, 100,
+            ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST),
+            //"button_back", 
+            GLOBALCONST.SPRITE_TEST_BUTTON_BACK,
+            100, 100,
             GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle: FontStyle.Bold),
             Color.red, GLOBAL_STRING.MENU_BTN_TEXT);
         _menuBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
@@ -152,8 +168,10 @@ public class UI_Main_WorldMap : GUIFormBase
             Color.red, GLOBAL_STRING.WARNING_LABEL_TEXT);
         // 「關卡」按鈕
         _stageBtn = GUIStation.CreateUIButton(worldMap.gameObject, "Stage", new Vector3(-9, -97, 0), 4,
-            ResourceStation.GetUIAtlas("Atlas_Backgrounds"),
-            "Night_Blade_1", 300, 375,
+            ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_BACKGROUNDS),
+            //"Night_Blade_1", 
+            GLOBALCONST.SPRITE_BUTTON_STAGE,
+            300, 375,
             null, Color.white, string.Empty);
         _stageBtn.SetColor(Color.white, Color.black, Color.grey, Color.grey);
         _stageBtn.onClick.Add(new EventDelegate(this, "StageBtnClick"));

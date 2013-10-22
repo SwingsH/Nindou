@@ -475,7 +475,8 @@ public static class GUIComponents
     public static UIButton DialogFrame(GameObject parent)
     {
         UIButton button = GUIStation.CreateUIButton(parent, "DialogFrame", Vector3.zero, 0,
-                ResourceStation.GetUIAtlas("Atlas_Slices"), "slice_parchment",
+                ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_SLICES), 
+                GLOBALCONST.SPRITE_PARCHMENT,
                 GUIStation.MANUAL_SCREEN_WIDTH / 2, GUIStation.MANUAL_SCREEN_HEIGHT / 2, null, Color.white, string.Empty);
 
         return button;
@@ -487,7 +488,9 @@ public static class GUIComponents
     public static UISprite StageFrame(GameObject parent)
     {
         UISprite button = GUIStation.CreateUISprite(parent, "StageFrame", UISprite.Type.Sliced, 1,
-                ResourceStation.GetUIAtlas("Atlas_Slices"), "slice_parchment", UIWidget.Pivot.Center,
+                ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_SLICES), 
+                GLOBALCONST.SPRITE_PARCHMENT,
+                UIWidget.Pivot.Center,
                 (int)(GUIStation.MANUAL_SCREEN_WIDTH * 0.95f), (int)(GUIStation.MANUAL_SCREEN_HEIGHT * 0.95f));
 
         return button;
@@ -500,8 +503,9 @@ public static class GUIComponents
     {
         int height = CalculateStageWideButtonHeight();
         UIButton button = GUIStation.CreateUIButton(parent, "StageBtn", Vector3.zero, depth,
-                ResourceStation.GetUIAtlas("Atlas_Slices"),
-                "slice_frame_lightbrown", (int)(GUIStation.MANUAL_SCREEN_WIDTH * 0.9f), height, null, Color.red, string.Empty);
+                ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_SLICES),
+                GLOBALCONST.SPRITE_FRAME_LIGHTBROWN,
+                (int)(GUIStation.MANUAL_SCREEN_WIDTH * 0.9f), height, null, Color.red, string.Empty);
         button.SetColor(Color.white, Color.white, new Color(184.0f / 255.0f, 184.0f / 255.0f, 184.0f / 255.0f, 1.0f), new Color(184.0f / 255.0f, 184.0f / 255.0f, 184.0f / 255.0f, 1.0f));
 
         return button;
@@ -534,8 +538,10 @@ public static class GUIComponents
     {
         // todo: 不應該讓 UI 實作者處理 depth 這個參數
         UIButton button = GUIStation.CreateUIButton(parent, "DialogButton", Vector3.zero, depth,
-                        ResourceStation.GetUIAtlas("Atlas_Slices"),
-                        "slice_button_grey", 81, 32, 
+                        ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_SLICES),
+                        //"slice_button_grey", 
+                        GLOBALCONST.SPRITE_BUTTON_GREY,
+                        81, 32, 
                         GUIFontManager.GetUIDynamicFont(UIFontName.DragonWord),
                         Color.white, showWord);
 
@@ -550,9 +556,10 @@ public static class GUIComponents
     {
         // todo: 不應該讓 UI 實作者處理 depth 這個參數
         UIInput input = GUIStation.CreateUIInput(parent, "NormalInput", Color.white, showWord, Vector3.zero, depth,
-                    ResourceStation.GetUIAtlas("Atlas_Slices"), 
+                    ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_SLICES),
                     GUIFontManager.GetUIDynamicFont(UIFontName.DragonWord),
-                    "slice_frame_darkbrown", 210, 60);
+                    GLOBALCONST.SPRITE_FRAME_DARKBROWN,
+                    210, 60);
 
         return input;
     }
@@ -567,8 +574,10 @@ public static class GUIComponents
         float iconScale = 1.6f;
 
         character = GUIStation.CreateUIButton(parent, "Character", new Vector3( x, y, 0), 10,
-                            ResourceStation.GetUIAtlas("Atlas_Icons"),
-                            "icon_person", (int)(136 * iconScale), (int)(115  * iconScale),
+                            ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_ICONS),
+                            //"icon_person", 
+                            GLOBALCONST.SPRITE_ICON_PERSON,
+                            (int)(136 * iconScale), (int)(115  * iconScale),
                             GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
                             Color.white, GLOBAL_STRING.CHARACTER_BTN_TEXT);
         //調整文字位置
@@ -578,8 +587,10 @@ public static class GUIComponents
 
         x = x + leftPadding;
         bag = GUIStation.CreateUIButton(parent, "Bag", new Vector3( x, y, 0), 10,
-                            ResourceStation.GetUIAtlas("Atlas_Icons"),
-                            "icon_backpape", (int)(135  * iconScale), (int)(122  * iconScale),
+                            ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_ICONS),
+                            //"icon_backpape", 
+                            GLOBALCONST.SPRITE_ICON_BAG,
+                            (int)(135  * iconScale), (int)(122  * iconScale),
                             GUIFontManager.GetUIDynamicFont(UIFontName.MSJH),
                             Color.white, GLOBAL_STRING.BAG_BTN_TEXT);
         //調整文字位置
@@ -589,8 +600,10 @@ public static class GUIComponents
 
         x = x + leftPadding;
         shop = GUIStation.CreateUIButton(parent, "Shop", new Vector3(x, y, 0), 10,//+460
-                            ResourceStation.GetUIAtlas("Atlas_Icons"),
-                            "icon_store", (int)(133 * iconScale), (int)(115 * iconScale),
+                            ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_ICONS),
+                            //"icon_store", 
+                            GLOBALCONST.SPRITE_ICON_STORE,
+                            (int)(133 * iconScale), (int)(115 * iconScale),
                             GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
                             Color.white, GLOBAL_STRING.SHOP_BTN_TEXT);
         //調整文字位置
@@ -600,8 +613,10 @@ public static class GUIComponents
 
         x = x + leftPadding;
         friend = GUIStation.CreateUIButton(parent, "Friend", new Vector3(x, y, 0), 10,
-                                ResourceStation.GetUIAtlas("Atlas_Icons"),
-                                "icon_friend", (int)(136 * iconScale), (int)(122 * iconScale),
+                                ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_ICONS),
+                                //"icon_friend", 
+                                GLOBALCONST.SPRITE_ICON_FRIEND,
+                                (int)(136 * iconScale), (int)(122 * iconScale),
                                 GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
                                 Color.white, GLOBAL_STRING.FRIEND_BTN_TEXT);
         //調整文字位置
@@ -616,7 +631,10 @@ public static class GUIComponents
     public static UISprite MainBackground(GameObject parent, int depth )
     {
         UISprite background = GUIStation.CreateUISprite(parent, "Background", UISprite.Type.Simple, depth,
-                                ResourceStation.GetUIAtlas("Atlas_Backgrounds"), "temp_nindou_bg", UIWidget.Pivot.Center,
+                                ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_BACKGROUNDS),
+                                //"temp_nindou_bg", 
+                                GLOBALCONST.SPRITE_NINDOU_BG,
+                                UIWidget.Pivot.Center,
                                 GUIStation.MANUAL_SCREEN_WIDTH, GUIStation.MANUAL_SCREEN_HEIGHT);
         return background;
     }
@@ -627,7 +645,10 @@ public static class GUIComponents
     public static UISprite WorldMapBackground(GameObject parent, int depth)
     {
         UISprite background = GUIStation.CreateUISprite(parent, "Background", UISprite.Type.Simple, depth,
-                                ResourceStation.GetUIAtlas("Atlas_Backgrounds"), "shape1170", UIWidget.Pivot.Center,
+                                ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_BACKGROUNDS),
+                                //"shape1170", 
+                                GLOBALCONST.SPRITE_WORLDMAP_BG,
+                                UIWidget.Pivot.Center,
                                 GUIStation.MANUAL_SCREEN_WIDTH, GUIStation.MANUAL_SCREEN_HEIGHT);
         return background;
     }
@@ -635,8 +656,10 @@ public static class GUIComponents
     public static UISprite WorldMap(GameObject parent)
     {
         UISprite worldMap = GUIStation.CreateUISprite(parent, "WorldMap", UISprite.Type.Simple, 1,
-            ResourceStation.GetUIAtlas("Atlas_Backgrounds"),
-            "nindou_3_bg", UIWidget.Pivot.Center, 1760, 838);
+            ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_BACKGROUNDS),
+            //"nindou_3_bg", 
+            GLOBALCONST.SPRITE_WORLDMAP,
+            UIWidget.Pivot.Center, 1760, 838);
         worldMap.transform.localPosition = new Vector3(10, 35, 0);
 
         return worldMap;

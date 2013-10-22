@@ -34,6 +34,14 @@ public static class CommonFunction
     {
         Debug.LogError(errorMsg);
     }
+
+    /// <summary>
+    /// 依照string.Format的格式輸入參數，印出由string.Format回傳的錯誤訊息
+    /// </summary>
+    public static void DebugErrorFormat(string format, params object[] args)
+    {
+        Debug.LogError(string.Format(format, args));
+    }
     #endregion
 
     #region 轉換成字串

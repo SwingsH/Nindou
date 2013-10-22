@@ -46,8 +46,9 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
             // 底圖＆按鈕
             // sh20131020 marked, 確認後移除
             //_stageBtn = GUIStation.CreateUIButton(_stageSubUIObj, "StageBtn", Vector3.zero, depth,
-            //    ResourceStation.GetUIAtlas("TestAtlas"),
-            //    "button_back", 1478, 200, null, Color.red, string.Empty);
+            //    ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST),
+            //    GLOBALCONST.SPRITE_TEST_BUTTON_BACK
+            // 1478, 200, null, Color.red, string.Empty);
             //_stageBtn.SetColor(Color.white, Color.white, new Color(184.0f / 255.0f, 184.0f / 255.0f, 184.0f / 255.0f, 1.0f), new Color(184.0f / 255.0f, 184.0f / 255.0f, 184.0f / 255.0f, 1.0f));
             _stageBtn = GUIComponents.StageWideButton(_stageSubUIObj, depth);
 			_stageBtnBG = _stageBtn.tweenTarget.GetComponent<UISprite>();
@@ -72,8 +73,10 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
                 Color.red, GLOBAL_STRING.STAGE_NOT_OPEN_TEXT);
             // 探索度的背景圖
             _exploreProgressBackground = GUIStation.CreateUISprite(_stageSubUIObj, "ExploreProgress", UISprite.Type.Simple, depth + 2,
-                ResourceStation.GetUIAtlas("Atlas_Icons"),
-                "complete", UIWidget.Pivot.Center, 522, 148);
+                ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_ICONS),
+                //"complete", 
+                GLOBALCONST.SPRITE_ICON_EXPLORE,
+                UIWidget.Pivot.Center, 522, 148);
             _exploreProgressBackground.transform.localPosition = new Vector3(430, 0, 0);
             // 探索度的文字
             _exploreProgressText = GUIStation.CreateUILabel(_exploreProgressBackground.gameObject, "ExploreProgressText", UIWidget.Pivot.Left,
@@ -148,7 +151,7 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
                 
                 if (_stageBtnBG != null)
                 {
-                    _stageBtnBG.spriteName = _stageOpen ? "slice_frame_lightbrown" : "slice_frame_darkbrown";
+                    _stageBtnBG.spriteName = _stageOpen ? GLOBALCONST.SPRITE_FRAME_LIGHTBROWN : GLOBALCONST.SPRITE_FRAME_DARKBROWN;
                 }
                 NGUITools.SetActive(_hintText.gameObject, !_stageOpen);
                 NGUITools.SetActive(_nonOpenText.gameObject, !_stageOpen);
@@ -231,8 +234,9 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         // 背景圖
         // sh20131020 marked, 確認後移除
         //UISprite backgroundPic = GUIStation.CreateUISprite(panel.gameObject, "Background", UISprite.Type.Simple, 0,
-        //    ResourceStation.GetUIAtlas("Atlas_Backgrounds"),
-        //   "temp_nindou_bg", UIWidget.Pivot.Center, 1920, 1080);
+        //   ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_BACKGROUNDS),
+        //   GLOBALCONST.SPRITE_NINDOU_BG
+        // UIWidget.Pivot.Center, 1920, 1080);
         UISprite backgroundPic = GUIComponents.MainBackground(panel.gameObject, 0);
 
         GUIComponents.MainMenuButtons(backgroundPic.gameObject, out _characterBtn, out _shopBtn, out _friendBtn, out _bagBtn);
@@ -240,8 +244,9 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         // 「人物」按鈕
         // sh20131020 marked, 確認後移除
         //_characterBtn = GUIStation.CreateUIButton(backgroundPic.gameObject, "Character", new Vector3(-701, -449, 0), 1,
-        //    ResourceStation.GetUIAtlas("TestAtlas"),
-        //    "button_back", 300, 80,
+        //    ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST),
+        //    GLOBALCONST.SPRITE_TEST_BUTTON_BACK,
+        //    300, 80,
         //    GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle: FontStyle.Bold);
         //    Color.red, GLOBAL_STRING.CHARACTER_BTN_TEXT);
         //_characterBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
@@ -250,8 +255,9 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         // 「背包」按鈕
         // sh20131020 marked, 確認後移除
         //_bagBtn = GUIStation.CreateUIButton(backgroundPic.gameObject, "Bag", new Vector3(-274.2f, -449, 0), 1,
-        //    ResourceStation.GetUIAtlas("TestAtlas"),
-        //    "button_back", 300, 80,
+        //    ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST),
+        //    GLOBALCONST.SPRITE_TEST_BUTTON_BACK,
+        //    300, 80,
         //    GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle: FontStyle.Bold)
         //    Color.red, GLOBAL_STRING.BAG_BTN_TEXT);
         //_bagBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
@@ -260,8 +266,9 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         // 「商店」按鈕
         // sh20131020 marked, 確認後移除
         //_shopBtn = GUIStation.CreateUIButton(backgroundPic.gameObject, "Shop", new Vector3(191.78f, -449, 0), 1,
-        //    ResourceStation.GetUIAtlas("TestAtlas"),
-        //    "button_back", 300, 80,
+        //    ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST),
+        //    GLOBALCONST.SPRITE_TEST_BUTTON_BACK,
+        //    300, 80,
         //    GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
         //    Color.red, GLOBAL_STRING.SHOP_BTN_TEXT);
         //_shopBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
@@ -269,8 +276,9 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
 
         // 「好友」按鈕
         //_friendBtn = GUIStation.CreateUIButton(backgroundPic.gameObject, "Friend", new Vector3(653.42f, -449, 0), 1,
-        //    ResourceStation.GetUIAtlas("TestAtlas"),
-        //    "button_back", 300, 80,
+        //    ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST),
+        //    GLOBALCONST.SPRITE_TEST_BUTTON_BACK,
+        //    300, 80,
         //    GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
         //    Color.red, GLOBAL_STRING.FRIEND_BTN_TEXT);
         //_friendBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
@@ -280,15 +288,18 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         // 關卡選擇背景圖
         // sh20131020 marked, 確認後移除
         //_stageSelectBackground = GUIStation.CreateUISprite(backgroundPic.gameObject, "StageSelectBackGround", UISprite.Type.Simple, 1,
-        //    ResourceStation.GetUIAtlas("TestAtlas2"),
-        //    "chiruno", UIWidget.Pivot.Center, 1760, 838);
+        //     ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_SLICES), 
+        //    GLOBALCONST.SPRITE_PARCHMENT,        
+        //     UIWidget.Pivot.Center, 1760, 838);
         //_stageSelectBackground.transform.localPosition = new Vector3(10, 35, 0);
         _stageSelectBackground = GUIComponents.StageFrame(backgroundPic.gameObject);
 
         // 場景名稱、進度的背景圖
         UISprite stageName = GUIStation.CreateUISprite(_stageSelectBackground.gameObject, "StageName", UISprite.Type.Simple, 2,
-            ResourceStation.GetUIAtlas("UI_Main_Atlas"),
-            "title", UIWidget.Pivot.Center, 1044, 94);
+            ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_MAIN),
+            //"title", 
+            GLOBALCONST.SPRITE_STAGE_TITLE,
+            UIWidget.Pivot.Center, 1044, 94);
         stageName.transform.localPosition = new Vector3(-249, 342, 0);
         // 場景名稱
         _stageNameText = GUIStation.CreateUILabel(stageName.gameObject, "StageNameText", UIWidget.Pivot.Left, new Vector3(-246, -26, 0), 3,
@@ -300,8 +311,10 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
             Color.white, "探索度：80%");
         // 回到上一層的按鈕
         _returnPreviousUIBtn = GUIStation.CreateUIButton(_stageSelectBackground.gameObject, "X", new Vector3(783, 321, 0), 4,
-            ResourceStation.GetUIAtlas("UI_Main_Atlas"),
-            "close", 100, 100, null, Color.white, string.Empty);
+            ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_MAIN),
+            //"close", 
+            GLOBALCONST.SPRITE_ICON_CLOSE,
+            100, 100, null, Color.white, string.Empty);
         _returnPreviousUIBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _returnPreviousUIBtn.onClick.Add(new EventDelegate(this, "ReturnPreviousUI"));
 
