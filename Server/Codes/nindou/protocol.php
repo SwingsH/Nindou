@@ -52,7 +52,7 @@ else
 	$arr_arguments = $_GET;
 }
 
-$protocol = &new Protocol();
+$protocol = new Protocol();
 $protocol->handle( $serial, $main_kind, $sub_kind, $arr_arguments);
 
 ?>

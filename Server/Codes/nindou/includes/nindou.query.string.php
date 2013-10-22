@@ -17,7 +17,7 @@
 function db_insert_log( $message )
  {
  	$message = str_replace(array("\"", "\'"), '\\"', $message );
- 	$generator 	= &new QueryGenerator( 'system_log' );
+ 	$generator 	= new QueryGenerator( 'system_log' );
 	$query 		= $generator->insert(	array( 'log_message' ) , 
 										array( $message ),
 										array( true ) 
@@ -42,7 +42,7 @@ function db_insert_account( $device_id, $session, $inherit_id, $player_name )
  {
  	$query = ' SELECT * FROM player_account WHERE unique_device = ' . $device_id ;
  	
- 	$generator 	= &new QueryGenerator( 'player_account' );
+ 	$generator 	= new QueryGenerator( 'player_account' );
  	
  	// 玩家尚未索取 引繼 password 時先不處理 ?
 	$query 		= $generator->insert(	
@@ -56,7 +56,7 @@ function db_insert_account( $device_id, $session, $inherit_id, $player_name )
  //新增玩家帳號
 function db_update_account( $device_id, $session )
  {
- 	$generator 	= &new QueryGenerator( 'player_account' );
+ 	$generator 	= new QueryGenerator( 'player_account' );
 	$query = $generator->update( array( 'current_login_session' => $session ),
 								 array( true ) ,  
 								"  WHERE unique_device = '" . $device_id ."' " );
@@ -318,7 +318,7 @@ function test_store_appre(){
 		$query = " SELECT * FROM prs_appreciation_commend_prod WHERE app_seq  = " . $row[ 'app_seq' ] ; 
 		$rec = db_getrow( $query ) ;
 		if( intval( $rec ) == 0 ){
-			$Quicker = &new DBQuicker( 'prs_appreciation_commend_prod' ) ;
+			$Quicker = new DBQuicker( 'prs_appreciation_commend_prod' ) ;
 			$query = $Quicker->insert( array( 'app_seq' , 'commend_prod' ) , array( $row[ 'app_seq' ] , $row[ 'commend_prod' ] ) ,
 									array( false , true ) ) ;
 			db_execute( $query ) ;
@@ -331,7 +331,7 @@ function test_store_appre(){
 		$query = " SELECT * FROM prs_appreciation_type_tag WHERE app_seq  = " . $row[ 'app_seq' ] ; 
 		$rec = db_getrow( $query ) ;
 		if( intval( $rec ) == 0 ){
-			$Quicker = &new DBQuicker( 'prs_appreciation_type_tag' ) ;
+			$Quicker = new DBQuicker( 'prs_appreciation_type_tag' ) ;
 			$query = $Quicker->insert( array( 'app_seq' , 'type_tag' ) , array( $row[ 'app_seq' ] , $row[ 'type_tag' ] ) ,
 									array( false , true ) ) ;
 			db_execute( $query ) ;
@@ -352,7 +352,7 @@ function test_store_user_favor(){
 		
 		if( intval( db_getrow( " SELECT * FROM prs_user_favor_type_tag WHERE uf_seq = " . $uf_seq ) ) == 0  ){ 
 			$type_tag = $row[ 'type_tag' ]  == "" ? '未填推薦商品' :  $row[ 'type_tag' ] ;
-			$Quicker = &new DBQuicker( 'prs_user_favor_type_tag' ) ;
+			$Quicker = new DBQuicker( 'prs_user_favor_type_tag' ) ;
 			$query = $Quicker->insert( array( 'uf_seq' , 'type_tag' ) , array( $uf_seq , $type_tag ) , array( false , true )) ;
 			
 			db_execute( $query ) ;

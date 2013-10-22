@@ -50,7 +50,7 @@ class JsonPackageGroup
 	
 	public function Add($main, $sub)
 	{
-		$newpack = &new JsonPackage($main, $sub);
+		$newpack = new JsonPackage($main, $sub);
 		array_push( $this->Packages, $newpack ) ;
 	}
 	

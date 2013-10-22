@@ -100,17 +100,17 @@ class Protocol
 		$row = $db->sql_fetchrow($data_res);
 		if(gettype($row) == 'boolean')
 			$row = array();
-		$account_data = &new AccountData($row);
+		$account_data = new AccountData($row);
 		
 		// prepare response data
 		switch( $login_result )
 		{
 			case 1: // 不存在帳號
-				$pack = &new JsonPackage($this->current_mainkind, $this->current_subkind);
+				$pack = new JsonPackage($this->current_mainkind, $this->current_subkind);
 				$pack->PushStr($new_session); // 新的 session
 				$pack->PushStr("");
 				$pack->PushInt($login_result);
-				$package_group = &new JsonPackageGroup($this->current_serial, $this->current_mainkind, $this->current_subkind);
+				$package_group = new JsonPackageGroup($this->current_serial, $this->current_mainkind, $this->current_subkind);
 				$package_group->AddPackage($pack);
 				
 				echo json_encode($package_group);
@@ -118,11 +118,11 @@ class Protocol
 			break;
 			
 			case 2: // 已存在帳號
-				$pack = &new JsonPackage($this->current_mainkind, $this->current_subkind);
+				$pack = new JsonPackage($this->current_mainkind, $this->current_subkind);
 				$pack->PushStr($new_session); // 新的 session
 				$pack->PushStr($account_data->player_name);
 				$pack->PushInt($login_result);
-				$package_group = &new JsonPackageGroup($this->current_serial, $this->current_mainkind, $this->current_subkind);
+				$package_group = new JsonPackageGroup($this->current_serial, $this->current_mainkind, $this->current_subkind);
 				$package_group->AddPackage($pack);
 				
 				echo json_encode($package_group);
@@ -176,22 +176,20 @@ class Protocol
 		else
 			$register_result = 2;
 			
-		$pack = &new JsonPackage($this->current_mainkind, $this->current_subkind);
+		$pack = new JsonPackage($this->current_mainkind, $this->current_subkind);
 		$pack->PushInt($register_result);
-		$package_group = &new JsonPackageGroup($this->current_serial, $this->current_mainkind, $this->current_subkind);
+		$package_group = new JsonPackageGroup($this->current_serial, $this->current_mainkind, $this->current_subkind);
 		$package_group->AddPackage($pack);
 				
 		echo json_encode($package_group);
 		exit;
 	}
 	
-
-	
 	private function handle_command_error($func_name = '')
 	{
-		$pack = &new JsonPackage(0, 0); //s error kind 0, 0
+		$pack = new JsonPackage(0, 0); //s error kind 0, 0
 		$pack->PushStr( "error in " . $func_name . '()' );
-		$package_group = &new JsonPackageGroup($this->current_serial, $this->current_mainkind, $this->current_subkind);
+		$package_group = new JsonPackageGroup($this->current_serial, $this->current_mainkind, $this->current_subkind);
 		$package_group->AddPackage($pack);
 		echo json_encode($package_group);
 	}
