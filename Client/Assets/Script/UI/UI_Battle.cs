@@ -4,14 +4,22 @@ using System.Collections.Generic;
 
 public class UI_Battle : GUIFormBase
 {
-    UILabel _boasNameText; // Boss 名稱
+    const int BOSS_ICON_WIDTH = 138;
+    const int BOSS_ICON_HEIGHT = 123;
+    const int ROLE_ICON_PLATE_BG_WIDTH = GUIStation.MANUAL_SCREEN_WIDTH;
+    const int ROLE_ICON_PLATE_BG_HEIGHT = 248;
+    const int ROLE_ICON_WIDTH = 408;
+    const int ROLE_ICON_HEIGHT = 331;
+
+    UISprite _bossPic; // Boss示意圖
+    UILabel _bossNameText; // Boss 名稱
     UISlider _bossHPBar; // Boss HP 血條
     UIButton _fastForwardBtn; // 加速鈕
     UIButton _pauseBtn; // 暫停鈕
     UISprite _iconBackground; // 角色icon所在的背景圖
     List<UIButton> _iconBtns = new List<UIButton>(); // 玩家角色圖像
     List<UISlider> _hpBars = new List<UISlider>(); // 玩家角色血條
-    
+    List<UILabel> _roleNames = new List<UILabel>(); // 玩家角色名字
 
      #region 繼承自GUIFormBase的method
     protected override void CreateAllComponent()
@@ -20,48 +28,44 @@ public class UI_Battle : GUIFormBase
         anchor.uiCamera = _guistation.GUICamera;
 
         UIPanel panel = NGUITools.AddChild<UIPanel>(anchor.gameObject);
-        // boss 圖片
-
-
+        // BOSS 圖片
+        _bossPic = UIImageManager.CreateUISprite(panel.gameObject, SpriteName.BOSS_PIC);
+        //// TODO:sprite設定，之後統整出去---
+        _bossPic.name = "Boss Pic";
+        _bossPic.transform.localPosition = new Vector3(-400, 440, 0);
+        _bossPic.depth = 3;
+        _bossPic.width = BOSS_ICON_WIDTH;
+        _bossPic.height = BOSS_ICON_HEIGHT;
+        ////---------------------------------
         // BOSS 名稱
-        _boasNameText = GUIStation.CreateUILabel(panel.gameObject, "BossName", UIWidget.Pivot.Left, new Vector3(-858, 460, 0), 4,
-            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
-            Color.red, "Boss Name");
+        _bossNameText = GUIStation.CreateUILabel(_bossPic.gameObject, "Boss Name", UIWidget.Pivot.Left, new Vector3(73, -8, 0), 4,
+            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.UI_BATTLE_BOSS_NAME, FontStyle.Bold),
+            Color.white, "Boss名稱哈哈琳");
         // Boss HP 血條
-        _bossHPBar = GUIStation.CreateUIProgressBar(panel.gameObject, "Boss HP Bar", new Vector3(-400, 440, 0), 1,
-            ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST),
-            //"button_back", "button_back", 
-            GLOBALCONST.SPRITE_TEST_BUTTON_BACK, GLOBALCONST.SPRITE_TEST_BUTTON_BACK,
-            835, 122);
-        // 此處暫時作法，一般來說前景和背景圖會是不同的，且不需特別變色才是
-        UISprite[] tempSprites = _bossHPBar.gameObject.GetComponentsInChildren<UISprite>();
-        foreach (UISprite oneSprite in tempSprites)
-        {
-            if (oneSprite.name.Equals("Foreground")) { oneSprite.color = new Color(0.0f / 255.0f, 255.0f / 255.0f, 39.0f / 255.0f); }
-            if (oneSprite.name.Equals("Background")) { oneSprite.color = new Color(255.0f / 255.0f, 4.0f / 255.0f, 4.0f / 255.0f); }
-        }
+        _bossHPBar = GUIStation.CreateUIProgressBar(_bossPic.gameObject, "Boss HP Bar", new Vector3(0, -25, 0), 1,
+            SpriteName.HP_FG, SpriteName.BOSS_HP_BG, 999, 72);
+        // 調整FG位置&slider全滿時大小
+        _bossHPBar.foreground.localPosition = new Vector3(32, 1, 0);
+        _bossHPBar.fullSize = new Vector2(826, 28);
         // 加速鈕
         _fastForwardBtn = GUIStation.CreateUIButton(panel.gameObject, "FastForward", new Vector3(714, 428, 0), 6,
-            ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST),
-            //"Fast-forward", 
-            GLOBALCONST.SPRITE_TEST_FAST_FORWARD,
-            150, 150, null, Color.white, string.Empty);
+            SpriteName.FAST_FORWARD_BTN, 150, 150, null, Color.white, string.Empty);
         _fastForwardBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _fastForwardBtn.onClick.Add(new EventDelegate(this, "FastForwardBtnClick"));
         // 暫停鈕
         _pauseBtn = GUIStation.CreateUIButton(panel.gameObject, "Pause", new Vector3(884, 428, 0), 5,
-            ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST),
-            //"pause", 
-            GLOBALCONST.SPRITE_TEST_PAUSE,
-            150, 150, null, Color.white, string.Empty);
+            SpriteName.PAUSE, 150, 150, null, Color.white, string.Empty);
         _pauseBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _pauseBtn.onClick.Add(new EventDelegate(this, "PauseBtnClick"));
-        _iconBackground = GUIStation.CreateUISprite(panel.gameObject, "IconBackground", UISprite.Type.Simple, 0,
-            ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST),
-            //"pachuri", 
-            GLOBALCONST.SPRITE_TEST_BATTLE_ICON_BG,
-            UIWidget.Pivot.Center, GUIStation.MANUAL_SCREEN_WIDTH, 248);
-        _iconBackground.transform.localPosition = new Vector3(0, -416, 0);
+        // 放置角色Icon的背景圖版
+        _iconBackground = UIImageManager.CreateUISprite(panel.gameObject, SpriteName.ROLE_ICON_PLATE);
+        // TODO:sprite設定，之後統整出去---
+        _iconBackground.name = "IconBackground";
+        _iconBackground.transform.localPosition = new Vector3(0, -398, 0);
+        _iconBackground.depth = 0;
+        _iconBackground.width = ROLE_ICON_PLATE_BG_WIDTH;
+        _iconBackground.height = ROLE_ICON_PLATE_BG_HEIGHT;
+        // --------------------------------
         // 玩家角色圖像 & 血條
         for (int i = 0; i < GLOBALCONST.UI_BATTLE_ROLE_ICON_COUNT; ++i)
         {
@@ -84,6 +88,11 @@ public class UI_Battle : GUIFormBase
 
     protected override void OnDestroy()
     {
+        foreach (UILabel roleName in _roleNames)
+        {
+            if (roleName != null) { NGUITools.Destroy(roleName.gameObject); }
+        }
+        _roleNames = null;
         foreach (UIButton iconBtn in _iconBtns)
         {
             if (iconBtn != null) { NGUITools.Destroy(iconBtn.gameObject); }
@@ -100,8 +109,10 @@ public class UI_Battle : GUIFormBase
         _fastForwardBtn = null;
         if (_bossHPBar != null) { NGUITools.Destroy(_bossHPBar.gameObject); }
         _bossHPBar = null;
-        if (_boasNameText != null) { NGUITools.Destroy(_boasNameText.gameObject); }
-        _boasNameText = null;
+        if (_bossNameText != null) { NGUITools.Destroy(_bossNameText.gameObject); }
+        _bossNameText = null;
+        if (_bossPic != null) { NGUITools.Destroy(_bossPic.gameObject); }
+        _bossPic = null;
         base.OnDestroy();
     }
     #endregion
@@ -161,14 +172,13 @@ public class UI_Battle : GUIFormBase
     /// <param name="isVisible">是否顯示</param>
     public void SetBossMessageVisible(bool isVisible)
     {
-        NGUITools.SetActive(_boasNameText.gameObject, isVisible);
-        NGUITools.SetActive(_bossHPBar.gameObject, isVisible);
+        NGUITools.SetActive(_bossPic.gameObject, isVisible);
     }
 
     // BossName
     public string BossName
     {
-        set { if (value != null) { _boasNameText.text = value; } }
+        set { if (value != null) { _bossNameText.text = value; } }
     }
 
     /// <summary>
@@ -204,28 +214,25 @@ public class UI_Battle : GUIFormBase
     void AddPlayerIcon(GameObject parentObj)
     {
         int playerIndex = _iconBtns.Count;
-
-        UIButton tempIconBtn = GUIStation.CreateUIButton(parentObj.gameObject, string.Format("Icon_{0}", playerIndex), new Vector3(-656 + 432 * playerIndex, 12, 0), 3,
-            ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST2),
-            //"chiruno", 
-            GLOBALCONST.SPRITE_TEST_PLAYER_ICON,
-            180, 180, null, Color.white, string.Empty);
+        // 角色按鈕兼底圖
+        UIButton tempIconBtn = GUIStation.CreateUIButton(parentObj, string.Format("Icon_{0}", playerIndex), new Vector3(-656 + 432 * playerIndex, 12, 0), 3,
+            SpriteName.ROLE_ICON,  ROLE_ICON_WIDTH, ROLE_ICON_HEIGHT, null, Color.white, string.Empty);
+        tempIconBtn.tweenTarget.name = "Role BG";
         tempIconBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         tempIconBtn.onClick.Add(new EventDelegate(this, "IconBtnClick"));
         _iconBtns.Add(tempIconBtn);
-        UISlider tempHPBar = GUIStation.CreateUIProgressBar(tempIconBtn.gameObject, "HP Bar", new Vector3(-178, -64, 0), 1,
-            ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST),
-            //"button_back", "button_back", 
-            GLOBALCONST.SPRITE_TEST_BUTTON_BACK, GLOBALCONST.SPRITE_TEST_BUTTON_BACK,
-            350, 122);
-        // TODO: 此處暫時作法，一般來說前景和背景圖會是不同的，且不需特別變色才是
-        UISprite[] tempHPBarSprites = tempHPBar.gameObject.GetComponentsInChildren<UISprite>();
-        foreach (UISprite oneSprite in tempHPBarSprites)
-        {
-            if (oneSprite.name.Equals("Foreground")) { oneSprite.color = new Color(0.0f / 255.0f, 255.0f / 255.0f, 39.0f / 255.0f); }
-            if (oneSprite.name.Equals("Background")) { oneSprite.color = new Color(255.0f / 255.0f, 4.0f / 255.0f, 4.0f / 255.0f); }
-        }
+        // 角色血條
+        UISlider tempHPBar = GUIStation.CreateUIProgressBar(tempIconBtn.gameObject, "Role HP Bar", Vector3.zero, 2, 
+            SpriteName.HP_FG, SpriteName.NONE, 4, 4);
+        // 調整位置& Slider全滿時大小
+        tempHPBar.foreground.localPosition = new Vector3(-106, -104, 0);
+        tempHPBar.fullSize = new Vector2(205, 28);
         _hpBars.Add(tempHPBar);
+        // 角色名字
+        UILabel tempRoleName = GUIStation.CreateUILabel(tempIconBtn.gameObject, "Role Name", UIWidget.Pivot.Center, new Vector3(74, -63, 0), 4,
+            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.UI_BATTLE_ROLE_NAME, FontStyle.Bold),
+            Color.red, "玩家一二三四");
+        _roleNames.Add(tempRoleName);
     }
     #endregion
 }

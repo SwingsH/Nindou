@@ -20,6 +20,8 @@ public enum UIFontSize
     MEDIUM = 30,
     LARGE = 50,
     HUD = 30,
+    UI_BATTLE_BOSS_NAME = 40, // 戰鬥UI中，boss名字的文字大小
+    UI_BATTLE_ROLE_NAME = 40, // 戰鬥UI中，我方角色名字的文字大小
 }
 
 /// <summary>
@@ -51,7 +53,7 @@ public class GUIFontManager
     [Conditional("DEVELOP_DEBUG")]
     private static void CheckInputUIFontData(UIFontName fontNameEnum, UIFontSize fontSizeEnum, ref bool isOK)
     {
-        CommonFunction.DebugMsgFormat("Check font");
+        //CommonFunction.DebugMsgFormat("Check font");
         isOK = false;
         StringValue fontName;
         if (!CommonFunction.GetAttribute<StringValue>(fontNameEnum, out fontName))
@@ -80,7 +82,7 @@ public class GUIFontManager
     /// <returns>對應的key</returns>
     private static string GetUIDynamicFontsKey(StringValue fontName, UIFontSize fontSize, FontStyle fontStyle)
     {
-        return string.Format("{0}_{1}_{2}", fontName.Value, fontSize.ToString(), fontStyle.ToString());
+        return string.Format("{0}_{1}_{2}", fontName.Value, (int)fontSize, fontStyle.ToString());
     }
 
     /// <summary>
@@ -92,15 +94,16 @@ public class GUIFontManager
     /// <returns></returns>
     public static UIFont GetUIDynamicFont(UIFontName fontNameEnum, UIFontSize fontSizeEnum = UIFontSize.MEDIUM, FontStyle fontStyle = FontStyle.Normal)
     {
-        CommonFunction.DebugMsgFormat("GUIFontManger.GETUIDynamicFont()");
+        //CommonFunction.DebugMsgFormat("GUIFontManger.GETUIDynamicFont()");
         bool dataIsOK = true;
         CheckInputUIFontData(fontNameEnum, fontSizeEnum, ref dataIsOK);
         if (!dataIsOK) { return null; }
-        CommonFunction.DebugMsgFormat("{0}_{1}_{2} 通過測試", fontNameEnum, fontSizeEnum, fontStyle);
+        //CommonFunction.DebugMsgFormat("{0}_{1}_{2} 通過測試", fontNameEnum, fontSizeEnum, fontStyle);
         // 到此步表示fontName的值沒問題
         StringValue fontName;
         CommonFunction.GetAttribute<StringValue>(fontNameEnum, out fontName);
 
+        //CommonFunction.DebugMsgFormat("Key = {0}", GetUIDynamicFontsKey(fontName, fontSizeEnum, fontStyle));
         UIFont retUIFont;
         if (!_uiDynamicFonts.TryGetValue(GetUIDynamicFontsKey(fontName, fontSizeEnum, fontStyle), out retUIFont))
         {

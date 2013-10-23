@@ -48,7 +48,7 @@ public class GLOBALCONST
 
     #region UI相關設定
     public const int LAYER_UI_BASE = 31; // 基本ui layer
-
+    // 戰鬥UI
     public const int UI_BATTLE_ROLE_ICON_COUNT = 4; // 戰鬥UI會顯示的角色ICON數量
 
 
@@ -77,6 +77,7 @@ public class GLOBALCONST
     public const string SPRITE_STAGE_TITLE = "title";
     public const string SPRITE_ICON_CLOSE = "close";
     public const string SPRITE_BUTTON_STAGE = "Night_Blade_1";
+    public const string SPRITE_BOSS_PIC = "bosspic";
     // 測試用的Sprite名，之後要將其刪除，改用美術來的圖
     public const string SPRITE_TEST_BUTTON_BACK = "button_back";
     public const string SPRITE_TEST_FAST_FORWARD = "Fast-forward";

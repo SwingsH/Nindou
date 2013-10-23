@@ -289,6 +289,53 @@ public class GUIStation
     /// <param name="btnName">按鈕名稱</param>
     /// <param name="relativePos">按鈕位置（相對於preantObj）</param>
     /// <param name="depth">深度</param>
+    /// <param name="btnBG">按鈕使用的圖的資訊</param>
+    /// <param name="width">按鈕寬度</param>
+    /// <param name="height">按鈕高度</param>
+    /// <param name="font">使用的字型</param>
+    /// <param name="btnLabelText">按鈕標籤文字(沒有傳入字體時無作用)</param>
+    /// <param name="btnLabelColor">按鈕標籤顏色(沒有傳入字體時無作用)</param>
+    /// <returns>建出的UIButton</returns>
+    public static UIButton CreateUIButton(GameObject parentObj, string btnName, Vector3 relativePos, int depth, SpriteName btnBG, int width, int height,
+        UIFont font, Color btnLabelColor, string btnLabelText)
+    {
+        GameObject retButtonObj = NGUITools.AddChild(parentObj);
+        retButtonObj.name = btnName;
+        retButtonObj.transform.localPosition = relativePos;
+        // 設定按鈕背景圖
+        UISprite bg = UIImageManager.CreateUISprite(retButtonObj, btnBG);
+        bg.name = "Background";
+        bg.type = UISprite.Type.Sliced;
+        bg.depth = depth;
+        bg.MakePixelPerfect(); // 如果type = simple or filled 會改回近原大小，故在呼叫此函式和才修改寬高      
+        bg.width = width;
+        bg.height = height;
+        // font
+        if (font != null)
+        {
+            UILabel lbl = NGUITools.AddWidget<UILabel>(retButtonObj);
+            lbl.font = font;
+            lbl.text = btnLabelText;
+            lbl.color = btnLabelColor;
+            lbl.MakePixelPerfect();
+        }
+        // Add a Collider
+        NGUITools.AddWidgetCollider(retButtonObj);
+        // Add the scripts
+        retButtonObj.AddComponent<UIPlaySound>();
+        UIButton retBtn = retButtonObj.AddComponent<UIButton>();
+        retBtn.tweenTarget = bg.gameObject;
+
+        return retBtn;
+    }
+
+    /// <summary>
+    /// 依據設定 建立一個UIButton
+    /// </summary>
+    /// <param name="parentObj">parent的gameObject</param>
+    /// <param name="btnName">按鈕名稱</param>
+    /// <param name="relativePos">按鈕位置（相對於preantObj）</param>
+    /// <param name="depth">深度</param>
     /// <param name="atlas">使用的Atlas</param>
     /// <param name="spriteName">使用的Sprite名稱</param>
     /// <param name="width">按鈕寬度</param>
@@ -322,7 +369,56 @@ public class GUIStation
 
         return retBtn;
     }
-    
+
+    /// <summary>
+    /// 依據設定 建立一個Progress Bar
+    /// </summary>
+    /// <param name="parentObj">parent的GameObject</param>
+    /// <param name="progressBarName">Progress Bar名稱</param>
+    /// <param name="relativePos">Progress Bar位置（相對於parentObj）</param>
+    /// <param name="depth">深度</param>
+    /// <param name="foreground">前景圖資訊</param>
+    /// <param name="background">背景圖資訊</param>
+    /// <param name="width">Progress Bar（=背景圖）寬度 </param>
+    /// <param name="height">Progress Bar（=背景圖）高度</param>
+    /// <returns>建出的 ProgressBar</returns>
+    public static UISlider CreateUIProgressBar(GameObject parentObj, string progressBarName, Vector3 relativePos, int depth,
+        SpriteName foreground, SpriteName background, int width, int height)
+    {
+        GameObject progressBarObject = NGUITools.AddChild(parentObj);
+        progressBarObject.name = progressBarName;
+        progressBarObject.transform.localPosition = relativePos;
+
+        // Background sprite (傳入空值，不產生sprite
+        if (background != SpriteName.NONE)
+        {
+            UISprite back = UIImageManager.CreateUISprite(progressBarObject, background);
+            back.name = "Background";
+            back.depth = depth;
+            back.pivot = UIWidget.Pivot.Left;
+            back.transform.localPosition = Vector3.zero;
+            back.MakePixelPerfect(); // 如果type = simple or filled 會改回近原大小，故在呼叫此函式和才修改寬高      
+            back.width = width;
+            back.height = height;
+        }
+        // Foreground sprite
+        UISprite front = UIImageManager.CreateUISprite(progressBarObject, foreground);
+        front.name = "Foreground";
+        front.depth = depth + 1;
+        front.pivot = UIWidget.Pivot.Left;
+        front.transform.localPosition = Vector3.zero;
+        front.MakePixelPerfect(); // 如果type = simple or filled 會改回近原大小，故在呼叫此函式和才修改寬高      
+        front.width = width;
+        front.height = height;
+        
+        // Add the slider script
+        UISlider retSilder = progressBarObject.AddComponent<UISlider>();
+        retSilder.foreground = front.transform;
+        retSilder.value = 0.0f;
+
+        return retSilder;
+    }
+
     /// <summary>
     /// 依據設定 建立一個Progress Bar
     /// </summary>

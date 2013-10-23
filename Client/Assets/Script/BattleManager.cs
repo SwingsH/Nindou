@@ -534,7 +534,7 @@ public class BattleManager : BattleState
         for (int i = 0; i <  GLOBALCONST.UI_BATTLE_ROLE_ICON_COUNT; ++i)
         {
             if (i < Players.Length) { control.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true, Players[i].Life, Players[i].MaxLife); }
-            else { control.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, false);} // , 0, 1); }
+            else { control.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, false);}
         }
     }
 
@@ -1161,7 +1161,7 @@ public class BattleLeaving :BattleState
 			#region 臨時顯示結果文字
 			//產生顯示結果的TextMesh
 			TextMesh tm = new GameObject("HUDText").AddComponent<TextMesh>();
-			UIFont uifont = ResourceStation.GetUIFont("MSJH_30");
+            UIFont uifont = GUIFontManager.GetUIDynamicFont(UIFontName.MSJH);
 			if (uifont != null)
 				tm.font = uifont.dynamicFont;
 			else
