@@ -197,8 +197,9 @@ class MySqlDB
 		}
 		if($query_id)
 		{
-			$this->row[$query_id] = @mysql_fetch_array($query_id);
-			return $this->row[$query_id];
+			$index_query_id = (int) $query_id;
+			$this->row[$index_query_id] = @mysql_fetch_array($query_id);
+			return $this->row[$index_query_id];
 		}
 		else
 		{
