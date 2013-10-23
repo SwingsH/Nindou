@@ -50,6 +50,44 @@ public class GLOBALCONST
     public const int LAYER_UI_BASE = 31; // 基本ui layer
 
     public const int UI_BATTLE_ROLE_ICON_COUNT = 4; // 戰鬥UI會顯示的角色ICON數量
+
+
+    // 使用的Atlas名，先集中在此
+    public const string ATLAS_SLICES = "Atlas_Slices"; // 有切九宮格的圖片存在的Atlas
+    public const string ATLAS_ICONS = "Atlas_Icons";   // 存放icon的Atlas
+    public const string ATLAS_BACKGROUNDS = "Atlas_Backgrounds"; // 存放背景的Atlas
+    public const string ATLAS_MAIN = "UI_Main_Atlas"; // 主介面用圖的Atlas
+    // 測試用的Atlas名，之後要將其刪除，改用美術來的圖
+    public const string ATLAS_TEST = "TestAtlas";
+    public const string ATLAS_TEST2 = "TestAtlas2";
+    public const string ATLAS_SCIFI = "SciFi Atlas";
+    // 使用的Sprite名，先集中在此
+    public const string SPRITE_PARCHMENT = "slice_parchment";
+    public const string SPRITE_FRAME_LIGHTBROWN = "slice_frame_lightbrown";
+    public const string SPRITE_FRAME_DARKBROWN = "slice_frame_darkbrown";
+    public const string SPRITE_BUTTON_GREY = "slice_button_grey";
+    public const string SPRITE_ICON_PERSON = "icon_person";
+    public const string SPRITE_ICON_BAG = "icon_backpape";
+    public const string SPRITE_ICON_STORE = "icon_store";
+    public const string SPRITE_ICON_FRIEND = "icon_friend";
+    public const string SPRITE_ICON_EXPLORE = "complete";
+    public const string SPRITE_NINDOU_BG = "temp_nindou_bg";
+    public const string SPRITE_WORLDMAP_BG = "shape1170";
+    public const string SPRITE_WORLDMAP = "nindou_3_bg";
+    public const string SPRITE_STAGE_TITLE = "title";
+    public const string SPRITE_ICON_CLOSE = "close";
+    public const string SPRITE_BUTTON_STAGE = "Night_Blade_1";
+    // 測試用的Sprite名，之後要將其刪除，改用美術來的圖
+    public const string SPRITE_TEST_BUTTON_BACK = "button_back";
+    public const string SPRITE_TEST_FAST_FORWARD = "Fast-forward";
+    public const string SPRITE_TEST_PAUSE = "pause";
+    public const string SPRITE_TEST_BATTLE_ICON_BG = "pachuri";
+    public const string SPRITE_TEST_PLAYER_ICON = "chiruno";
+    public const string SPRITE_TEST_PLAYER_HEAD = "pachuri";
+    public const string SPRITE_TEST_POINT_GRAPH = "gold";
+    public const string SPRITE_TEST_BUTTON_INHERIT = "fb_300_main";
+    public const string SPRITE_TEST_PROGRESS_BG = "Dark";
+    public const string SPRITE_TEST_PROGRESS_FG = "Light";
     #endregion
 
     #region 檔名相關常數（無副檔名）

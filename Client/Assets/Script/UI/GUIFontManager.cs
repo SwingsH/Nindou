@@ -43,13 +43,13 @@ public class GUIFontManager
 
 
     /// <summary>
-    /// 確認傳入的資料是否沒問題，此為Debug模式才使用，正式版的Enum資料必定通過此檢查
+    /// 確認傳入的Enum資料是否沒問題，此為Debug模式才使用，正式版的Enum資料必定通過此檢查
     /// </summary>
     /// <param name="fontNameEnum">字型名稱的Enum</param>
     /// <param name="fontSizeEnum">字型大小的Enum</param>
     /// <param name="isOK">資料是否沒問題</param>
     [Conditional("DEVELOP_DEBUG")]
-    private static void CheckInpuUIFontData(UIFontName fontNameEnum, UIFontSize fontSizeEnum, ref bool isOK)
+    private static void CheckInputUIFontData(UIFontName fontNameEnum, UIFontSize fontSizeEnum, ref bool isOK)
     {
         CommonFunction.DebugMsgFormat("Check font");
         isOK = false;
@@ -94,7 +94,7 @@ public class GUIFontManager
     {
         CommonFunction.DebugMsgFormat("GUIFontManger.GETUIDynamicFont()");
         bool dataIsOK = true;
-        CheckInpuUIFontData(fontNameEnum, fontSizeEnum, ref dataIsOK);
+        CheckInputUIFontData(fontNameEnum, fontSizeEnum, ref dataIsOK);
         if (!dataIsOK) { return null; }
         CommonFunction.DebugMsgFormat("{0}_{1}_{2} 通過測試", fontNameEnum, fontSizeEnum, fontStyle);
         // 到此步表示fontName的值沒問題

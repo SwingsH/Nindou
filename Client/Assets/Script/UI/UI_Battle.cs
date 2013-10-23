@@ -29,8 +29,10 @@ public class UI_Battle : GUIFormBase
             Color.red, "Boss Name");
         // Boss HP 血條
         _bossHPBar = GUIStation.CreateUIProgressBar(panel.gameObject, "Boss HP Bar", new Vector3(-400, 440, 0), 1,
-            ResourceStation.GetUIAtlas("TestAtlas"),
-            "button_back", "button_back", 835, 122);
+            ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST),
+            //"button_back", "button_back", 
+            GLOBALCONST.SPRITE_TEST_BUTTON_BACK, GLOBALCONST.SPRITE_TEST_BUTTON_BACK,
+            835, 122);
         // 此處暫時作法，一般來說前景和背景圖會是不同的，且不需特別變色才是
         UISprite[] tempSprites = _bossHPBar.gameObject.GetComponentsInChildren<UISprite>();
         foreach (UISprite oneSprite in tempSprites)
@@ -40,19 +42,25 @@ public class UI_Battle : GUIFormBase
         }
         // 加速鈕
         _fastForwardBtn = GUIStation.CreateUIButton(panel.gameObject, "FastForward", new Vector3(714, 428, 0), 6,
-            ResourceStation.GetUIAtlas("TestAtlas"),
-            "Fast-forward", 150, 150, null, Color.white, string.Empty);
+            ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST),
+            //"Fast-forward", 
+            GLOBALCONST.SPRITE_TEST_FAST_FORWARD,
+            150, 150, null, Color.white, string.Empty);
         _fastForwardBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _fastForwardBtn.onClick.Add(new EventDelegate(this, "FastForwardBtnClick"));
         // 暫停鈕
         _pauseBtn = GUIStation.CreateUIButton(panel.gameObject, "Pause", new Vector3(884, 428, 0), 5,
-            ResourceStation.GetUIAtlas("TestAtlas"),
-            "pause", 150, 150, null, Color.white, string.Empty);
+            ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST),
+            //"pause", 
+            GLOBALCONST.SPRITE_TEST_PAUSE,
+            150, 150, null, Color.white, string.Empty);
         _pauseBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _pauseBtn.onClick.Add(new EventDelegate(this, "PauseBtnClick"));
         _iconBackground = GUIStation.CreateUISprite(panel.gameObject, "IconBackground", UISprite.Type.Simple, 0,
-            ResourceStation.GetUIAtlas("TestAtlas"),
-            "pachuri", UIWidget.Pivot.Center, GUIStation.MANUAL_SCREEN_WIDTH, 248);
+            ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST),
+            //"pachuri", 
+            GLOBALCONST.SPRITE_TEST_BATTLE_ICON_BG,
+            UIWidget.Pivot.Center, GUIStation.MANUAL_SCREEN_WIDTH, 248);
         _iconBackground.transform.localPosition = new Vector3(0, -416, 0);
         // 玩家角色圖像 & 血條
         for (int i = 0; i < GLOBALCONST.UI_BATTLE_ROLE_ICON_COUNT; ++i)
@@ -198,14 +206,18 @@ public class UI_Battle : GUIFormBase
         int playerIndex = _iconBtns.Count;
 
         UIButton tempIconBtn = GUIStation.CreateUIButton(parentObj.gameObject, string.Format("Icon_{0}", playerIndex), new Vector3(-656 + 432 * playerIndex, 12, 0), 3,
-            ResourceStation.GetUIAtlas("TestAtlas2"),
-            "chiruno", 180, 180, null, Color.white, string.Empty);
+            ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST2),
+            //"chiruno", 
+            GLOBALCONST.SPRITE_TEST_PLAYER_ICON,
+            180, 180, null, Color.white, string.Empty);
         tempIconBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         tempIconBtn.onClick.Add(new EventDelegate(this, "IconBtnClick"));
         _iconBtns.Add(tempIconBtn);
         UISlider tempHPBar = GUIStation.CreateUIProgressBar(tempIconBtn.gameObject, "HP Bar", new Vector3(-178, -64, 0), 1,
-            ResourceStation.GetUIAtlas("TestAtlas"),
-            "button_back", "button_back", 350, 122);
+            ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST),
+            //"button_back", "button_back", 
+            GLOBALCONST.SPRITE_TEST_BUTTON_BACK, GLOBALCONST.SPRITE_TEST_BUTTON_BACK,
+            350, 122);
         // TODO: 此處暫時作法，一般來說前景和背景圖會是不同的，且不需特別變色才是
         UISprite[] tempHPBarSprites = tempHPBar.gameObject.GetComponentsInChildren<UISprite>();
         foreach (UISprite oneSprite in tempHPBarSprites)

@@ -47,6 +47,32 @@ public class DoubleStringValue : System.Attribute
 }
 
 /// <summary>
+/// 存放UISprite會用到的Atlas和Sprite名稱 
+/// </summary>
+public class EnumUISpriteConfig : System.Attribute
+{
+
+    private string _atlasName;
+    private string _spriteName;
+
+    public EnumUISpriteConfig(string atlasName, string spriteName)
+    {
+        _atlasName = atlasName;
+        _spriteName = spriteName;
+    }
+
+    public string AtlasName
+    {
+        get { return _atlasName; }
+    }
+
+    public string SpriteName
+    {
+        get { return _spriteName; }
+    }
+}
+
+/// <summary>
 /// 自定義屬性宣告, FileValue, 路徑與副檔名相關, 以小寫為基準
 /// </summary>
 public class EnumResourceConfig : System.Attribute
