@@ -92,7 +92,7 @@ public class BattleManager : BattleState
 
 		EffectCountDown = 3f;
 
-		PlayerInfos.AddRange(TestDataBase.Instance.playerInfo);
+		PlayerInfos.AddRange(InformalDataBase.Instance.playerInfo);
 		
 		if (Application.isPlaying)
 		{
@@ -104,11 +104,11 @@ public class BattleManager : BattleState
 	void IniEnemyData(uint battleID)
 	{
 		EnemyInfos.Clear();
-		List<Battle> battleList = TestDataBase.Instance.GetBattleData(battleID);
+		List<Battle> battleList = InformalDataBase.Instance.GetBattleData(battleID);
 
 		foreach (Battle bt in battleList)
 		{
-			NPCData npcData = TestDataBase.Instance.GetNPCData(bt.NPCID);
+			NPCData npcData = InformalDataBase.Instance.GetNPCData(bt.NPCID);
 			if (npcData == null)
 				continue;
 			EnemyNumbers en = new EnemyNumbers();
@@ -519,7 +519,7 @@ public class BattleManager : BattleState
 
 		//讀取測試資料
 		if (Application.isPlaying)
-			TestDataBase.IniInstance();
+			InformalDataBase.IniInstance();
 
 		//戰鬥格子資料
 		g = new GridInfo(Vector3.one, GLOBALCONST.GameSetting.GRID_SIZE, GLOBALCONST.GameSetting.GRID_COUNT_W, GLOBALCONST.GameSetting.GRID_COUNT_L);
@@ -549,7 +549,7 @@ public class BattleManager : BattleState
 		Generater.ClearGrave();
 		TimeMachine.SetTimeScale(1);
 		if(Result == BattleResult.Lose)
-			postEffectManager.DefaultEffect_1();
+			postEffectManager.SetDefaultEffect_1(BattleState.instance);
 	}
 }
 public struct GridPos
@@ -1238,6 +1238,6 @@ public class BattleLeaving :BattleState
 
 	public override void OnChangeOut(GameControl control)
 	{
-
+		Result = BattleResult.None;
 	}
 }

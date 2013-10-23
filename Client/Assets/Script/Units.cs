@@ -87,7 +87,37 @@ public class AnimUnit : Unit
 		set
 		{
 			base.Entity = value;
-			Anim = Entity.GetComponentInChildren<BoneAnimation>();
+			if (Entity != null)
+				Anim = Entity.GetComponent<BoneAnimation>();
+			else
+				Anim = null;
+		}
+	}
+	public Vector3 WorldUpperCenter
+	{
+		get
+		{
+			if (Entity != null)
+			{
+				return Entity.transform.TransformPoint(SpriteBounds.center + new Vector3(0, SpriteBounds.extents.y));
+			}
+			else
+				return WorldPos;
+		}
+	}
+	/// <summary>
+	/// 目前原始圖檔是面向右邊，所以前面指的是右邊
+	/// </summary>
+	public Vector3 WorldForwardCenter
+	{
+		get
+		{
+			if (Entity != null)
+			{
+				return Entity.transform.TransformPoint(SpriteBounds.center + new Vector3(SpriteBounds.extents.x,0));
+			}
+			else
+				return WorldPos;
 		}
 	}
 	public virtual BoneAnimation Anim
@@ -95,6 +125,11 @@ public class AnimUnit : Unit
 		get;
 		protected set;
 	}
+	public Vector3 LWeaponTip;
+	public Vector3 RWeaponTip;
+	//角色圖片的範圍
+	public Bounds SpriteBounds;
+	//角色圖片元件
 	public Sprite[] Sprites = new Sprite[0];
 	public override uint MaxLife
 	{
@@ -179,13 +214,13 @@ public class AnimUnit : Unit
 				switch (info.DamageType)
 				{
 					case SkillDamageType.Heal:
-						BattleManager.ShowDamageText(SkillDamageType.Heal, Mathf.RoundToInt(value), Entity.transform.position + Entity.transform.up * 250 + Entity.transform.forward * -5);
+						BattleManager.ShowDamageText(SkillDamageType.Heal, Mathf.RoundToInt(value), WorldUpperCenter);
 						break;
 					case SkillDamageType.Damage:
 						if (info.MultiHit)
-							BattleManager.ShowDamageGroupText(info, this, Mathf.RoundToInt(value), Entity.transform.position + Entity.transform.up * 250 + Entity.transform.forward * -5);
+							BattleManager.ShowDamageGroupText(info, this, Mathf.RoundToInt(value), WorldUpperCenter);
 						else
-							BattleManager.ShowDamageText(SkillDamageType.Damage, Mathf.RoundToInt(value), Entity.transform.position + Entity.transform.up * 250 + Entity.transform.forward * -5);
+							BattleManager.ShowDamageText(SkillDamageType.Damage, Mathf.RoundToInt(value), WorldUpperCenter);
 						break;
 				}
 			}
@@ -194,7 +229,7 @@ public class AnimUnit : Unit
 			Damaged(value);
 		}
 		else if (Entity)
-			BattleManager.ShowMissText(Entity.transform.position + Entity.transform.up * 250);
+			BattleManager.ShowMissText(WorldUpperCenter);
 		
 	}
 	protected void Damaged(float value)
@@ -280,7 +315,7 @@ public class ActionUnit : AnimUnit
 					foreach (SpecialEffect spe in value.SPEffect)
 						if (spe.EffectType == (byte)SPEffectType.ExtrimSkill)
 						{
-							ExtrimSkill = new MainSkill(TestDataBase.Instance.GetSkillData(spe.EffectPower));
+							ExtrimSkill = new MainSkill(InformalDataBase.Instance.GetSkillData(spe.EffectPower));
 						}
 					_normalAttack = value;
 				}
@@ -730,7 +765,9 @@ public class ActionUnit : AnimUnit
 	public override void ClearReference()
 	{
 		base.ClearReference();
-		Anim.UnregisterUserTriggerDelegate(AnimUserTriggerDelegate);
+		if(Anim != null)
+			Anim.UnregisterUserTriggerDelegate(AnimUserTriggerDelegate);
+		Entity = null;
 	}
 	
 	public static void CheckSkillList(ref List<MainSkill> skills, SkillType specifiedType)

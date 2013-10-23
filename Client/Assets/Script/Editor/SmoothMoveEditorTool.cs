@@ -102,7 +102,6 @@ public class SmoothMoveEditorTool {
 			{
 				foreach (AnimationClipBone acb in acsm.bones)
 				{
-
 					for (int i = 0; i < acb.keyframes.Count; i++)
 					{
 						acb.keyframes[i].localPosition3.val.z = 0.1f * (acb.keyframes[i].depth - 5);
@@ -111,6 +110,32 @@ public class SmoothMoveEditorTool {
 			}
 		}
 	}
+
+	//危險，使用時請小心，一次性使用後封印程式碼
+	//[MenuItem("Assets/AnimationData/OffsetBonePos")]
+	//public static void SetAnimationData_OffsetBonePos()
+	//{
+	//    Vector3 v3 = new Vector3(-18.75f, 110f, 0);
+	//    string BoneName = "Body";
+
+	//    BoneAnimationData baData = Selection.activeObject as BoneAnimationData;
+	//    if (baData)
+	//    {
+	//        foreach (AnimationClipSM acsm in baData.animationClips)
+	//        {
+	//            foreach (AnimationClipBone acb in acsm.bones)
+	//            {
+	//                if (BoneName == baData.boneDataList[acb.boneDataIndex].boneName)
+	//                {
+	//                    for (int i = 0; i < acb.keyframes.Count; i++)
+	//                    {
+	//                        acb.keyframes[i].localPosition3.val += v3;
+	//                    }
+	//                }
+	//            }
+	//        }
+	//    }
+	//}
 	#endregion
 
 	

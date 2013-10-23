@@ -8,6 +8,8 @@ using System.Xml.Serialization;
 using SmoothMoves;
 using Resources = UnityEngine.Resources;
 using System.Reflection;
+
+
 /// <summary>
 /// 中文
 /// </summary>
@@ -180,56 +182,17 @@ public static class EditorTools {
 	[MenuItem("Tools/QuickTest")]
 	public static void QuickTest()
 	{
-		Dictionary<Transform, List<int>> td = new Dictionary<Transform, List<int>>();
-		Transform t = new GameObject().transform;
-		td.Add(t, new List<int>());
-		foreach (KeyValuePair<Transform, List<int>> kvp in td)
-		{
-			Debug.Log(kvp.Key);
-			Debug.Log(kvp.Value);
-		}
-		Debug.Log(GameObject.FindObjectsOfType(typeof(Transform)).Length);
-		GameObject.DestroyImmediate(t.gameObject);
-		Debug.Log(GameObject.FindObjectsOfType(typeof(Transform)).Length);
-		Resources.UnloadUnusedAssets();
-		Debug.Log(GameObject.FindObjectsOfType(typeof(Transform)).Length);
-		List<Transform> removeKey = new List<Transform>();
-		foreach (KeyValuePair<Transform, List<int>> kvp in td)
-		{
-			Debug.Log(kvp.Key);
-			Debug.Log(kvp.Value);
-			if (kvp.Key == null)
-				removeKey.Add(kvp.Key);
-		}
-		foreach (Transform trans in removeKey)
-		{
-			Debug.Log(trans);
-			Debug.Log(trans == null);
-			Debug.Log(object.Equals(trans,null));
-			Debug.Log(object.ReferenceEquals(trans, null));
-			Debug.Log(td.Remove(trans));
-		}
-		try
-		{
-			Debug.Log(td.Remove(null));
-		}
-		catch (System.Exception e)
-		{
-			Debug.Log(e.Message);
-		}
-		Debug.Log(GameObject.FindObjectsOfType(typeof(Transform)).Length);
-		Resources.UnloadUnusedAssets();
-		Debug.Log(GameObject.FindObjectsOfType(typeof(Transform)).Length);
-		Transform tn = null;
-		Debug.Log(td.ContainsKey(t));
-		//Debug.Log(td.ContainsKey(tn));
-		
-		Debug.Log(t == null);
-		Debug.Log(t.name);
-		Debug.Log(td.ContainsKey(null));
+		Camera c = Camera.main;
+		PostEffectManager pem = c.gameObject.AddComponent<PostEffectManager>();
+		pem.TargetCamera = c;
+		pem.SetDefaultEffect_1(c, 6);
+		pem.SetDefaultEffect_2(pem, 3);
 	}
 
-
+	static void paramstest(params KeyValuePair<string,object>[] objs)
+	{
+		Debug.Log(objs.Length);
+	}
 	[MenuItem("Tools/QuickTest1")]
 	public static void QuickTest1()
 	{

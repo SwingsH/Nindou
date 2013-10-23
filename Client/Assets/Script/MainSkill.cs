@@ -27,10 +27,10 @@ public class MainSkill
 
 	public MainSkill(ushort SkillID)
 	{
-		SkillData = TestDataBase.Instance.GetSkillData(SkillID);
+		SkillData = InformalDataBase.Instance.GetSkillData(SkillID);
 		_speffect = new SpecialEffect[SkillData.SPEffect.Length];
 		for (int i = 0; i < SkillData.SPEffect.Length; i++)
-			_speffect[i] = TestDataBase.Instance.GetSPEffect(SkillData.SPEffect[i]);
+			_speffect[i] = InformalDataBase.Instance.GetSPEffect(SkillData.SPEffect[i]);
 		Passive.Reset();
 		State.Reset();
 	}
@@ -39,7 +39,7 @@ public class MainSkill
 		SkillData = skillData;
 		_speffect = new SpecialEffect[SkillData.SPEffect.Length];
 		for (int i = 0; i < SkillData.SPEffect.Length; i++)
-			_speffect[i] = TestDataBase.Instance.GetSPEffect(SkillData.SPEffect[i]);
+			_speffect[i] = InformalDataBase.Instance.GetSPEffect(SkillData.SPEffect[i]);
 		Passive.Reset();
 		State.Reset();
 	}
