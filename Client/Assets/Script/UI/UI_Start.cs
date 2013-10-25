@@ -25,9 +25,7 @@ public class UI_Start : GUIFormBase
 
         // 登入的全畫面圖按鈕
         _loginBtn = GUIStation.CreateUIButton(panel.gameObject, "Login BG", Vector3.zero, 0,
-            ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_BACKGROUNDS),
-            //"temp_nindou_bg", 
-            GLOBALCONST.SPRITE_NINDOU_BG,
+            SpriteName.MAIN_BG,
             GUIStation.MANUAL_SCREEN_WIDTH, GUIStation.MANUAL_SCREEN_HEIGHT, null, Color.white, string.Empty);
         _loginBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         // 登入文字
@@ -37,10 +35,8 @@ public class UI_Start : GUIFormBase
         // 加上event
         _loginBtn.onClick.Add(new EventDelegate(this, "LoginClick"));
         // 繼承按鈕
-        _inheritBtn = GUIStation.CreateUIButton(panel.gameObject, "Inhert Button", new Vector3(294, -159, 0), 1, 
-            ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST),
-            //"fb_300_main", 
-            GLOBALCONST.SPRITE_TEST_BUTTON_INHERIT,
+        _inheritBtn = GUIStation.CreateUIButton(panel.gameObject, "Inhert Button", new Vector3(294, -159, 0), 1,
+            SpriteName.BTN_INHERIT,
             40, 40, null, Color.white, string.Empty);
         _inheritBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         // 加上event
@@ -48,10 +44,9 @@ public class UI_Start : GUIFormBase
 
         // 進度條
         _progress = GUIStation.CreateUIProgressBar(panel.gameObject, "Progress Bar_Build", new Vector3(-346, -167, 0), 2,
-            ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_SCIFI),
-            //"Dark", "Light", 
-            GLOBALCONST.SPRITE_TEST_PROGRESS_BG, GLOBALCONST.SPRITE_TEST_PROGRESS_FG,
-            690, 30);
+                                                    SpriteName.PROGRESS_FG, SpriteName.PROGRESS_BG,
+                                                    690, 30);
+
         NGUITools.SetActive(_progress.gameObject, false);
         // 進度數值
         _progressShow = GUIStation.CreateUILabel(_progress.gameObject, "Progress", UIWidget.Pivot.Right, new Vector3(652.67f, -4.0f, 0), 6,

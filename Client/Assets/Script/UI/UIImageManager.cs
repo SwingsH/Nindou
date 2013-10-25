@@ -4,19 +4,50 @@ using System.Collections.Generic;
 using System.Diagnostics;
 
 /// <summary>
-/// 會使用到的常用Sprite名稱
+/// NGUI介面會使用到的Sprite名稱，請將所有NGUI會用到的介面圖名稱統整在這
 /// </summary>
 public enum SpriteName
 {
-    NONE, // 空圖
+    //  UIAtlas名稱, Sprite名稱
+    [EnumUISpriteConfig("", "")]                                    NONE, // 空圖
     [EnumUISpriteConfig("Atlas_Slices", "slice_parchment")]         DIALOG_FRAME, // 對話提示框    
+
+    [EnumUISpriteConfig("Atlas_Slices", "slice_parchment")]         STAGE_FRAME, // 關卡選擇外層框
+
     [EnumUISpriteConfig("Atlas_Icons", "bosspic")]                  BOSS_PIC, // BOSS 圖
     [EnumUISpriteConfig("Atlas_Icons", "bossblood1")]               BOSS_HP_BG, // BOSS HP底圖
     [EnumUISpriteConfig("Atlas_Slices", "bossbloodbase")]           HP_FG, // HP的前景圖
-    [EnumUISpriteConfig("TestAtlas", "Fast-forward")]               FAST_FORWARD_BTN, // 加速鈕圖
     [EnumUISpriteConfig("Atlas_Icons", "pause")]                    PAUSE, // 暫停圖
     [EnumUISpriteConfig("Atlas_Slices", "plate")]                   ROLE_ICON_PLATE, // 戰鬥UI 放置角色Icon的背景圖版
-    [EnumUISpriteConfig("Atlas_Icons", "player")]                   ROLE_ICON, // 角色Icon
+    [EnumUISpriteConfig("Atlas_Icons", "icon_role")]                ROLE_ICON, // 角色Icon
+    [EnumUISpriteConfig("Atlas_Icons", "role_hp_bg")]               ROLE_HP_BG, // 角色HP底圖
+    [EnumUISpriteConfig("Atlas_Backgrounds", "Night_Blade_1")]      MAIN_STAGE_BG, // 主介面進入探索的底圖
+    [EnumUISpriteConfig("Atlas_Icons", "icon_friend")]              ICON_FRIEND, // 主介面的好友圖
+    [EnumUISpriteConfig("Atlas_Icons", "icon_person")]              ICON_PERSON, // 主介面的人物圖
+    [EnumUISpriteConfig("Atlas_Icons", "icon_backpape")]            ICON_BAG, // 主介面的背包圖
+    [EnumUISpriteConfig("Atlas_Icons", "icon_store")]               ICON_STORE, // 主介面的商店圖
+
+
+    [EnumUISpriteConfig("Atlas_Backgrounds", "nindou_3_bg")]        WORLDMAP, // 世界地圖
+    [EnumUISpriteConfig("Atlas_Backgrounds", "shape1170")]          WORLDMAP_BG, // 主介面世界底圖
+    [EnumUISpriteConfig("Atlas_Backgrounds", "temp_nindou_bg")]     MAIN_BG, // 遊戲主要底圖
+    [EnumUISpriteConfig("Atlas_Slices", "slice_frame_lightbrown")]  STAGE_BG, // 選關卡的底圖
+
+
+    [EnumUISpriteConfig("UI_Main_Atlas", "title")]                  STAGE_TITLE_BG, // 關卡標題背景圖
+    [EnumUISpriteConfig("Atlas_Icons", "complete")]                 EXPLORE_PROGRESS_BG, // 選擇子關卡的探索度
+
+
+
+    [EnumUISpriteConfig("Atlas_Slices", "slice_button_grey")]       BTN_GENERIC_BG, // 一般的按鈕底圖
+    [EnumUISpriteConfig("UI_Main_Atlas", "close")]                  BTN_CLOSE, // 關閉按鈕圖
+
+    // TODO：改成正式用圖
+    [EnumUISpriteConfig("TestAtlas", "gold")]                       POINT_PIC, // 點數指示圖
+    [EnumUISpriteConfig("TestAtlas", "fb_300_main")]                BTN_INHERIT, // 繼承按鈕圖
+    [EnumUISpriteConfig("TestAtlas", "Fast-forward")]               BTN_FAST_FORWARD, // 加速鈕圖
+    [EnumUISpriteConfig("SciFi Atlas", "Dark")]                     PROGRESS_BG, // 進度條底圖
+    [EnumUISpriteConfig("SciFi Atlas", "Light")]                    PROGRESS_FG, // 進度條前景圖
 }
 
 
@@ -24,7 +55,7 @@ public enum SpriteName
 /// <summary>
 /// NGUI的Atlas & Sprite管理器
 /// </summary>
-public class UIImageManager
+public static class UIImageManager
 {
     /// <summary>
     /// 確認傳入的Enum資料是否沒問題，此為Debug模式才使用，正式版的Enum資料必定通過此檢查

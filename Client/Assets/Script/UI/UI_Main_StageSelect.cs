@@ -12,6 +12,9 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
     /// </summary>
     private class StageSubUI : System.IDisposable
     {
+        const int EXPLORE_PROGRESS_BG_WIDTH = 522;
+        const int EXPLORE_PROGRESS_BG_HEIGHT = 148;
+
         private GameObject _stageSubUIObj; // 最上層物件
         private UIButton _stageBtn; // 關卡按鈕
         private UISprite _stageBtnBG; // 關卡按鈕的背景圖
@@ -44,12 +47,6 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
                 tempDPC.draggablePanel = parentDraggablePanel;
             }
             // 底圖＆按鈕
-            // sh20131020 marked, 確認後移除
-            //_stageBtn = GUIStation.CreateUIButton(_stageSubUIObj, "StageBtn", Vector3.zero, depth,
-            //    ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST),
-            //    GLOBALCONST.SPRITE_TEST_BUTTON_BACK
-            // 1478, 200, null, Color.red, string.Empty);
-            //_stageBtn.SetColor(Color.white, Color.white, new Color(184.0f / 255.0f, 184.0f / 255.0f, 184.0f / 255.0f, 1.0f), new Color(184.0f / 255.0f, 184.0f / 255.0f, 184.0f / 255.0f, 1.0f));
             _stageBtn = GUIComponents.StageWideButton(_stageSubUIObj, depth);
 			_stageBtnBG = _stageBtn.tweenTarget.GetComponent<UISprite>();
             _stageBtn.onClick.Add(clickEventDelegate);
@@ -61,30 +58,27 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
             }
             // 關卡名稱＆消耗體力說明
             _stageNameText = GUIStation.CreateUILabel(_stageSubUIObj, "StageName", UIWidget.Pivot.Left, new Vector3(-653, 0, 0), depth + 1,
-                GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
+                GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
                 Color.white, string.Empty);
             // 「點擊觀看開啟條件」的提示文字
             _hintText = GUIStation.CreateUILabel(_stageSubUIObj, "HintText", UIWidget.Pivot.Left, new Vector3(-120, 0, 0), depth + 1,
-                GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
+                GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
                 Color.white, GLOBAL_STRING.STAGE_OPEN_HINT_TEXT);
             // 「未開啟」的提示文字
             _nonOpenText = GUIStation.CreateUILabel(_stageSubUIObj, "NonOpenText", UIWidget.Pivot.Center, new Vector3(430, 0, 0), depth + 1,
-                GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
+                GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
                 Color.red, GLOBAL_STRING.STAGE_NOT_OPEN_TEXT);
             // 探索度的背景圖
-            _exploreProgressBackground = GUIStation.CreateUISprite(_stageSubUIObj, "ExploreProgress", UISprite.Type.Simple, depth + 2,
-                ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_ICONS),
-                //"complete", 
-                GLOBALCONST.SPRITE_ICON_EXPLORE,
-                UIWidget.Pivot.Center, 522, 148);
+            _exploreProgressBackground = UIImageManager.CreateUISprite(_stageSubUIObj, SpriteName.EXPLORE_PROGRESS_BG);
+            _exploreProgressBackground.Init(UISprite.Type.Simple, depth + 2, _exploreProgressBackground.pivot, EXPLORE_PROGRESS_BG_WIDTH, EXPLORE_PROGRESS_BG_HEIGHT);
+            _exploreProgressBackground.name = "ExploreProgress";
             _exploreProgressBackground.transform.localPosition = new Vector3(430, 0, 0);
+
             // 探索度的文字
             _exploreProgressText = GUIStation.CreateUILabel(_exploreProgressBackground.gameObject, "ExploreProgressText", UIWidget.Pivot.Left,
                 new Vector3(-104, -10, 0), depth + 3,
                 GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
                 Color.white, string.Format(GLOBAL_STRING.STAGE_EXPLORE_PROGRESS_TEXT, 0, 1));
-
-            
         }
         #endregion
         #region Dispose -- 資源釋放
@@ -131,7 +125,7 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
 
         #endregion
 
-        Color pressedAndHoverColoer = new Color(212.0f / 255.0f, 212.0f / 255.0f, 212.0f / 255.0f, 1.0f);
+        Color pressedAndHoverColor = new Color(212.0f / 255.0f, 212.0f / 255.0f, 212.0f / 255.0f, 1.0f);
 
         /// <summary>
         /// 關卡是否開啟
@@ -145,7 +139,7 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
                 _stageOpen = value;
 
 
-                if (_stageOpen) { _stageBtn.SetColor(Color.white, Color.white, pressedAndHoverColoer, pressedAndHoverColoer); }
+                if (_stageOpen) { _stageBtn.SetColor(Color.white, Color.white, pressedAndHoverColor, pressedAndHoverColor); }
                 else { _stageBtn.SetColor(Color.gray, Color.gray, Color.gray, Color.gray); }
 
                 
@@ -206,6 +200,9 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
 
     }
 
+
+    const int STAGE_TITLE_BG_WIDTH = 1044;
+    const int STAGE_TITLE_BG_HEIGHT = 94;
  
     #region 每個主介面都會有的部分
     private UIButton _characterBtn; // 「人物」按鈕
@@ -232,88 +229,35 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
 
         #region 每個主介面都有的部分
         // 背景圖
-        // sh20131020 marked, 確認後移除
-        //UISprite backgroundPic = GUIStation.CreateUISprite(panel.gameObject, "Background", UISprite.Type.Simple, 0,
-        //   ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_BACKGROUNDS),
-        //   GLOBALCONST.SPRITE_NINDOU_BG
-        // UIWidget.Pivot.Center, 1920, 1080);
         UISprite backgroundPic = GUIComponents.MainBackground(panel.gameObject, 0);
-
+        // 建立基本的四個按鈕：「人物」、「背包」、「商店」、「好友」
         GUIComponents.MainMenuButtons(backgroundPic.gameObject, out _characterBtn, out _shopBtn, out _friendBtn, out _bagBtn);
-
-        // 「人物」按鈕
-        // sh20131020 marked, 確認後移除
-        //_characterBtn = GUIStation.CreateUIButton(backgroundPic.gameObject, "Character", new Vector3(-701, -449, 0), 1,
-        //    ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST),
-        //    GLOBALCONST.SPRITE_TEST_BUTTON_BACK,
-        //    300, 80,
-        //    GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle: FontStyle.Bold);
-        //    Color.red, GLOBAL_STRING.CHARACTER_BTN_TEXT);
-        //_characterBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
+        // 設定對應的EventDelegate
         _characterBtn.onClick.Add(new EventDelegate(this, "CharacterBtnClick"));
-
-        // 「背包」按鈕
-        // sh20131020 marked, 確認後移除
-        //_bagBtn = GUIStation.CreateUIButton(backgroundPic.gameObject, "Bag", new Vector3(-274.2f, -449, 0), 1,
-        //    ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST),
-        //    GLOBALCONST.SPRITE_TEST_BUTTON_BACK,
-        //    300, 80,
-        //    GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle: FontStyle.Bold)
-        //    Color.red, GLOBAL_STRING.BAG_BTN_TEXT);
-        //_bagBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _bagBtn.onClick.Add(new EventDelegate(this, "BagBtnClick"));
-
-        // 「商店」按鈕
-        // sh20131020 marked, 確認後移除
-        //_shopBtn = GUIStation.CreateUIButton(backgroundPic.gameObject, "Shop", new Vector3(191.78f, -449, 0), 1,
-        //    ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST),
-        //    GLOBALCONST.SPRITE_TEST_BUTTON_BACK,
-        //    300, 80,
-        //    GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
-        //    Color.red, GLOBAL_STRING.SHOP_BTN_TEXT);
-        //_shopBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _shopBtn.onClick.Add(new EventDelegate(this, "ShopBtnClick"));
-
-        // 「好友」按鈕
-        //_friendBtn = GUIStation.CreateUIButton(backgroundPic.gameObject, "Friend", new Vector3(653.42f, -449, 0), 1,
-        //    ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_TEST),
-        //    GLOBALCONST.SPRITE_TEST_BUTTON_BACK,
-        //    300, 80,
-        //    GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
-        //    Color.red, GLOBAL_STRING.FRIEND_BTN_TEXT);
-        //_friendBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _friendBtn.onClick.Add(new EventDelegate(this, "FriendBtnClick"));
         #endregion
 
         // 關卡選擇背景圖
-        // sh20131020 marked, 確認後移除
-        //_stageSelectBackground = GUIStation.CreateUISprite(backgroundPic.gameObject, "StageSelectBackGround", UISprite.Type.Simple, 1,
-        //     ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_SLICES), 
-        //    GLOBALCONST.SPRITE_PARCHMENT,        
-        //     UIWidget.Pivot.Center, 1760, 838);
-        //_stageSelectBackground.transform.localPosition = new Vector3(10, 35, 0);
         _stageSelectBackground = GUIComponents.StageFrame(backgroundPic.gameObject);
 
         // 場景名稱、進度的背景圖
-        UISprite stageName = GUIStation.CreateUISprite(_stageSelectBackground.gameObject, "StageName", UISprite.Type.Simple, 2,
-            ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_MAIN),
-            //"title", 
-            GLOBALCONST.SPRITE_STAGE_TITLE,
-            UIWidget.Pivot.Center, 1044, 94);
+        UISprite stageName = UIImageManager.CreateUISprite(_stageSelectBackground.gameObject, SpriteName.STAGE_TITLE_BG);
+        stageName.Init(stageName.type, 2, stageName.pivot, STAGE_TITLE_BG_WIDTH, STAGE_TITLE_BG_HEIGHT);
+        stageName.name = "StageTitle";
         stageName.transform.localPosition = new Vector3(-249, 342, 0);
         // 場景名稱
-        _stageNameText = GUIStation.CreateUILabel(stageName.gameObject, "StageNameText", UIWidget.Pivot.Left, new Vector3(-246, -26, 0), 3,
-            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
+        _stageNameText = GUIStation.CreateUILabel(stageName.gameObject, "StageNameText", UIWidget.Pivot.Left, new Vector3(-258, -26, 0), 3,
+            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
             Color.white, "場景名稱：靈山");
         // 場景進度
         _stageProgress = GUIStation.CreateUILabel(stageName.gameObject, "StageProgress", UIWidget.Pivot.Center, new Vector3(233, -26, 0), 3,
-            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
+            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
             Color.white, "探索度：80%");
         // 回到上一層的按鈕
         _returnPreviousUIBtn = GUIStation.CreateUIButton(_stageSelectBackground.gameObject, "X", new Vector3(783, 321, 0), 4,
-            ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_MAIN),
-            //"close", 
-            GLOBALCONST.SPRITE_ICON_CLOSE,
+            SpriteName.BTN_CLOSE,
             100, 100, null, Color.white, string.Empty);
         _returnPreviousUIBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _returnPreviousUIBtn.onClick.Add(new EventDelegate(this, "ReturnPreviousUI"));

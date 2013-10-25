@@ -8,8 +8,6 @@ public class UI_Battle : GUIFormBase
     const int BOSS_ICON_HEIGHT = 123;
     const int ROLE_ICON_PLATE_BG_WIDTH = GUIStation.MANUAL_SCREEN_WIDTH;
     const int ROLE_ICON_PLATE_BG_HEIGHT = 248;
-    const int ROLE_ICON_WIDTH = 408;
-    const int ROLE_ICON_HEIGHT = 331;
 
     UISprite _bossPic; // Boss示意圖
     UILabel _bossNameText; // Boss 名稱
@@ -49,7 +47,7 @@ public class UI_Battle : GUIFormBase
         _bossHPBar.fullSize = new Vector2(826, 28);
         // 加速鈕
         _fastForwardBtn = GUIStation.CreateUIButton(panel.gameObject, "FastForward", new Vector3(714, 428, 0), 6,
-            SpriteName.FAST_FORWARD_BTN, 150, 150, null, Color.white, string.Empty);
+            SpriteName.BTN_FAST_FORWARD, 150, 150, null, Color.white, string.Empty);
         _fastForwardBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _fastForwardBtn.onClick.Add(new EventDelegate(this, "FastForwardBtnClick"));
         // 暫停鈕
@@ -213,23 +211,25 @@ public class UI_Battle : GUIFormBase
     /// <param name="parentObj">父物件</param>
     void AddPlayerIcon(GameObject parentObj)
     {
+        float iconScale = 1.5f;
+        int leftPadding = 432;
         int playerIndex = _iconBtns.Count;
         // 角色按鈕兼底圖
-        UIButton tempIconBtn = GUIStation.CreateUIButton(parentObj, string.Format("Icon_{0}", playerIndex), new Vector3(-656 + 432 * playerIndex, 12, 0), 3,
-            SpriteName.ROLE_ICON,  ROLE_ICON_WIDTH, ROLE_ICON_HEIGHT, null, Color.white, string.Empty);
+        UIButton tempIconBtn = GUIStation.CreateUIButton(parentObj, string.Format("Icon_{0}", playerIndex), new Vector3(-656 + leftPadding * playerIndex, 12, 0), 1,
+            SpriteName.ROLE_ICON,  (int)(220 * iconScale), (int)(219*iconScale), null, Color.white, string.Empty);
         tempIconBtn.tweenTarget.name = "Role BG";
         tempIconBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         tempIconBtn.onClick.Add(new EventDelegate(this, "IconBtnClick"));
         _iconBtns.Add(tempIconBtn);
         // 角色血條
-        UISlider tempHPBar = GUIStation.CreateUIProgressBar(tempIconBtn.gameObject, "Role HP Bar", Vector3.zero, 2, 
-            SpriteName.HP_FG, SpriteName.NONE, 4, 4);
+        UISlider tempHPBar = GUIStation.CreateUIProgressBar(tempIconBtn.gameObject, "Role HP Bar", new Vector3(-104, -93, 0), 2,
+            SpriteName.HP_FG, SpriteName.ROLE_HP_BG, (int)(219 * iconScale), (int)(41 * iconScale));
         // 調整位置& Slider全滿時大小
-        tempHPBar.foreground.localPosition = new Vector3(-106, -104, 0);
+        tempHPBar.foreground.localPosition = new Vector3(21, 4, 0);
         tempHPBar.fullSize = new Vector2(205, 28);
         _hpBars.Add(tempHPBar);
         // 角色名字
-        UILabel tempRoleName = GUIStation.CreateUILabel(tempIconBtn.gameObject, "Role Name", UIWidget.Pivot.Center, new Vector3(74, -63, 0), 4,
+        UILabel tempRoleName = GUIStation.CreateUILabel(tempIconBtn.gameObject, "Role Name", UIWidget.Pivot.Center, new Vector3(107, -57, 0), 4,
             GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.UI_BATTLE_ROLE_NAME, FontStyle.Bold),
             Color.red, "玩家一二三四");
         _roleNames.Add(tempRoleName);

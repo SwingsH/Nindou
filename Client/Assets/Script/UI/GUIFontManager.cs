@@ -21,20 +21,18 @@ public enum UIFontSize
     LARGE = 50,
     HUD = 30,
     UI_BATTLE_BOSS_NAME = 40, // 戰鬥UI中，boss名字的文字大小
-    UI_BATTLE_ROLE_NAME = 40, // 戰鬥UI中，我方角色名字的文字大小
+    UI_BATTLE_ROLE_NAME = 38, // 戰鬥UI中，我方角色名字的文字大小
 }
 
 /// <summary>
 /// NGUI使用到的UIFont管理器
 /// </summary>
-public class GUIFontManager
+public static class GUIFontManager
 {
     private static GameObject _fontContainer = null; // 將動態字型掛在其上的GameObject
     private static Dictionary<string, UIFont> _uiDynamicFonts = new Dictionary<string, UIFont>();
 
-
-    private GUIFontManager(){;}
-    /// <summary>
+/// <summary>
     /// 創建存放UIFont用的GameObject
     /// </summary>
     private static void CreateFontContainerObject()
