@@ -22,7 +22,7 @@ public class UI_Start_CreatePlayer : GUIFormBase
         _background = GUIComponents.MainBackground(panel.gameObject, 1);
 
         _accountNameInput = GUIComponents.NameInputField(panel.gameObject, GLOBAL_STRING.UI_INPUT_HINT_1, 2);
-        _accountNameInput.transform.localPosition = new Vector3(0, -GUIStation.MANUAL_SCREEN_HEIGHT * 0.2f, 0);
+        _accountNameInput.transform.localPosition = new Vector3(-82, -GUIStation.MANUAL_SCREEN_HEIGHT * 0.2f, 0);
 
         _submitButton = GUIComponents.DialogButton(panel.gameObject, GLOBAL_STRING.UI_BUTTON_3, 3);
         _submitButton.transform.localPosition = new Vector3(135, -GUIStation.MANUAL_SCREEN_HEIGHT * 0.2f, 0);

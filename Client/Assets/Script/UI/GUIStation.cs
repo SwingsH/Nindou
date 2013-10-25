@@ -427,24 +427,25 @@ public class GUIStation
     /// 建立一個輸入用 input 元件
     /// todo: UIInput 只是"輸入框"相關元件*3 的其中一個, 回傳的 UIInput 提供使用者能做的操作 有限 & 不便, 有時間可建新input類別 + 封裝
     /// </summary>
-    public static UIInput CreateUIInput(GameObject parentObject, string inputName, Color inputColor, string inputInitText, Vector3 relativePos, 
-                                int depth, UIAtlas atlas, UIFont font, string imageNameBG, int width, int height)
+    public static UIInput CreateUIInput(GameObject parentObject, string inputName, Vector3 relativePos, Color inputColor, string inputInitText,
+        int depth, SpriteName background, UIFont font, int width, int height)
     {
         GameObject inputRootObject = NGUITools.AddChild(parentObject);
         inputRootObject.name = inputName;
         inputRootObject.transform.localPosition = relativePos;
 
-        UISprite bg = CreateUISprite(inputRootObject, "Background", UISprite.Type.Sliced, depth + 1, atlas,imageNameBG,
-                        UIWidget.Pivot.Center, width, height);
+        UISprite bg = UIImageManager.CreateUISprite(inputRootObject, background);
+        bg.Init(UISprite.Type.Sliced, depth + 1, UIWidget.Pivot.Center, width, height);
+        bg.name = "Background";
+
         UILabel targetLabel = CreateUILabel(inputRootObject, inputName + typeof(UIInput).ToString(), UIWidget.Pivot.Center,
-                                    Vector3.zero, depth + 2, font, inputColor, inputInitText);
+                                            Vector3.zero, depth + 2, font, inputColor, inputInitText);
         NGUITools.AddWidgetCollider(inputRootObject);
         UIInput input = inputRootObject.AddComponent<UIInput>();
-        input.label = targetLabel; //point to the label
+        input.label = targetLabel; // point to the label
 
         return input;
     }
-
     #endregion
 }
 
@@ -522,7 +523,7 @@ public static class GUIComponents
         // todo: 不應該讓 UI 實作者處理 depth 這個參數
         UIButton button = GUIStation.CreateUIButton(parent, "DialogButton", Vector3.zero, depth,
             SpriteName.BTN_GENERIC_BG,
-            81, 32,
+            116, 94,
             GUIFontManager.GetUIDynamicFont(UIFontName.DragonWord),
             Color.white, showWord);
 
@@ -536,11 +537,10 @@ public static class GUIComponents
     public static UIInput NameInputField(GameObject parent, string showWord, int depth)
     {
         // todo: 不應該讓 UI 實作者處理 depth 這個參數
-        UIInput input = GUIStation.CreateUIInput(parent, "NormalInput", Color.white, showWord, Vector3.zero, depth,
-                    ResourceStation.GetUIAtlas(GLOBALCONST.ATLAS_SLICES),
-                    GUIFontManager.GetUIDynamicFont(UIFontName.DragonWord),
-                    GLOBALCONST.SPRITE_FRAME_DARKBROWN,
-                    210, 60);
+        UIInput input = GUIStation.CreateUIInput(parent, "NormalInput", Vector3.zero, Color.white, showWord, depth,
+            SpriteName.INPUT_NAME_BG,
+            GUIFontManager.GetUIDynamicFont(UIFontName.DragonWord),
+            341, 75);
 
         return input;
     }

@@ -144,23 +144,14 @@ public class ResourceStation {
     }
 
     #region NGUI
-    static Dictionary<string, UIAtlas> _uiAtlases = new Dictionary<string, UIAtlas>();
-    public static UIAtlas GetUIAtlas(string uiAtlasName)
+    /// <summary>
+    /// 從Resource取得指定的UIAtlas，除了UIImageManager之外請別呼叫此函式，基本上也不應有需要取UIAtlas來直接修改的時候
+    /// 若有取圖需求，請在設定好Enum SpriteName的資料後，呼叫UIImageManager.CreateUISprite()
+    /// </summary>
+    /// <param name="uiAtlasName"></param>
+    public static UIAtlas LoadUIAtlasFromResource(string uiAtlasName)
     {
-        if (string.IsNullOrEmpty(uiAtlasName)) { return null; }
-        UIAtlas retUIAtlas;
-        if (!_uiAtlases.TryGetValue(uiAtlasName, out retUIAtlas))
-        {
-            UIAtlas_LoadFromResource(uiAtlasName);
-            _uiAtlases.TryGetValue(uiAtlasName, out retUIAtlas);
-        }
-        return retUIAtlas;
-    }
-    static void UIAtlas_LoadFromResource(string uiAtlasName)
-    {
-        UIAtlas uiAtlas = Resources.Load(GLOBALCONST.DIR_RESOURCES_NGUI_ATLAS + uiAtlasName, typeof(UIAtlas)) as UIAtlas;
-        if (uiAtlas == null) { return; }
-        _uiAtlases.Add(uiAtlasName, uiAtlas);
+        return Resources.Load(GLOBALCONST.DIR_RESOURCES_NGUI_ATLAS + uiAtlasName, typeof(UIAtlas)) as UIAtlas;
     }
 
     static Dictionary<string, UIFont> _uiFonts = new Dictionary<string, UIFont>();

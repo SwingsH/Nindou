@@ -12,6 +12,8 @@ public enum SpriteName
     [EnumUISpriteConfig("", "")]                                    NONE, // 空圖
     [EnumUISpriteConfig("Atlas_Slices", "slice_parchment")]         DIALOG_FRAME, // 對話提示框    
 
+    [EnumUISpriteConfig("Atlas_Slices", "slice_frame_darkbrown")]   INPUT_NAME_BG, // 輸入名字的背景圖
+
     [EnumUISpriteConfig("Atlas_Slices", "slice_parchment")]         STAGE_FRAME, // 關卡選擇外層框
 
     [EnumUISpriteConfig("Atlas_Icons", "bosspic")]                  BOSS_PIC, // BOSS 圖
@@ -57,6 +59,24 @@ public enum SpriteName
 /// </summary>
 public static class UIImageManager
 {
+    private static Dictionary<string, UIAtlas> _uiAtlases = new Dictionary<string, UIAtlas>();
+    /// <summary>
+    /// 取得指定的UIAtlas，若_uiAtlas中沒有會嘗試從Resource取
+    /// </summary>
+    /// <param name="uiAtlasName">要取的UIAtlas名稱</param>
+    /// <returns>取得的UIAtlas</returns>
+    private static UIAtlas GetUIAtlas(string uiAtlasName)
+    {
+        if (string.IsNullOrEmpty(uiAtlasName)) { return null; }
+        UIAtlas retUIAtlas;
+        if (!_uiAtlases.TryGetValue(uiAtlasName, out retUIAtlas))
+        {
+            retUIAtlas = ResourceStation.LoadUIAtlasFromResource(uiAtlasName);
+            if (retUIAtlas != null) { _uiAtlases.Add(uiAtlasName, retUIAtlas); }
+        }
+        return retUIAtlas;
+    }
+
     /// <summary>
     /// 確認傳入的Enum資料是否沒問題，此為Debug模式才使用，正式版的Enum資料必定通過此檢查
     /// </summary>
@@ -103,7 +123,7 @@ public static class UIImageManager
         EnumUISpriteConfig uiSpriteConfig;
         CommonFunction.GetAttribute<EnumUISpriteConfig>(sn, out uiSpriteConfig);
 
-        UISprite retUISprite = NGUITools.AddSprite(parentObj, ResourceStation.GetUIAtlas(uiSpriteConfig.AtlasName), uiSpriteConfig.SpriteName);
+        UISprite retUISprite = NGUITools.AddSprite(parentObj, GetUIAtlas(uiSpriteConfig.AtlasName), uiSpriteConfig.SpriteName);
         retUISprite.MakePixelPerfect();
         return retUISprite;
     }
