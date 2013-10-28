@@ -117,6 +117,10 @@ public class BattleManager : BattleState
 			EnemyInfos.Add(en);
 		}
 	}
+
+    /// <summary>
+    /// 加入一個玩家角色
+    /// </summary>
 	void AddPlayer(GridPos pos, int index)
 	{
 		if (g.CheckEmpty(pos))
@@ -128,33 +132,44 @@ public class BattleManager : BattleState
 			su.Pos = pos;
 			su.WorldPos = Get_GridWorldPos(pos);
 			if (su.Entity != null)
-				su.Entity.name += index;
+                su.Entity.name = string.Format(GLOBALCONST.UNIT_NAME_PLAYER, index);
 			if (Players.Length <= index)
 				System.Array.Resize<Unit>(ref Players, index + 1);
 			Players[index] = su;
 			AppearUnit(su, su.Pos);
 		}
 	}
+
+    /// <summary>
+    /// 加入一個 敵方
+    /// </summary>
 	void AddEnemy(GridPos pos, int index)
 	{
 		if (index < EnemyInfos.Count)
 		{
-			AddEnemy(pos, EnemyInfos[index].npcData.Info);
+            //AddEnemy(pos, EnemyInfos[index].npcData.Info); // sh20131027 makred, remove shortly
+            AddEnemy(pos, EnemyInfos[index].npcData); 
 			EnemyInfos[index].Numbers--;
 			if (EnemyInfos[index].Numbers == 0)
 				EnemyInfos.RemoveAt(index);
 		}
 	}
-	void AddEnemy(GridPos pos, UnitInfo info)
-	{
 
+    /// <summary>
+    /// 加入一個 敵方
+    /// </summary>
+	//void AddEnemy(GridPos pos, UnitInfo info)
+    void AddEnemy(GridPos pos, NPCData data)
+	{
 		if (g.CheckEmpty(pos))
 		{
-			Unit su = Generater.GenerateUnit(info);
+			Unit su = Generater.GenerateUnit(data.Info);
 			su.Group = eGroup.Enemy;
 			su.Pos = pos;
 			su.WorldPos = Get_GridWorldPos(pos);
-			
+            if (su.Entity != null)
+                su.Entity.name = string.Format(GLOBALCONST.UNIT_NAME_ENEMY, Enemys.Count, data.NPCID);
+
 			Enemys.Add(su);
 			AppearUnit(su, su.Pos);
 		}
@@ -508,7 +523,7 @@ public class BattleManager : BattleState
 		UnitCamera.cullingMask = ~(1 << GLOBALCONST.GameSetting.LAYER_BACKGROUND);
 		UnitCamera.clearFlags = CameraClearFlags.Depth;
 		UnitCamera.orthographicSize = GLOBALCONST.GameSetting.UNIT_CAMERA_SIZE;
-
+            
 		postEffectManager = UnitCamera.gameObject.AddComponent<PostEffectManager>();
 		postEffectManager.TargetCamera = UnitCamera;
 		//
@@ -538,9 +553,31 @@ public class BattleManager : BattleState
         }
     }
 
+    /// <summary>
+    /// 刷新所有 Unit 類別
+    /// </summary>
+    public void UpdateUnits()
+    {
+        foreach (Unit player in Players)
+        {
+            if (player == null)
+                continue;
+
+            player.Update();
+        }
+
+        foreach (Unit enemy in Enemys)
+        {
+            if (enemy == null)
+                continue;
+            enemy.Update();
+        }
+    }
+
 	public override void Update(GameControl control)
 	{
 		UnitRun();
+        UpdateUnits();
 	}
 
 	public override void OnChangeOut(GameControl control)
@@ -552,6 +589,7 @@ public class BattleManager : BattleState
 			postEffectManager.SetDefaultEffect_1(BattleState.instance);
 	}
 }
+
 public struct GridPos
 {
 	public static readonly GridPos Null = new GridPos(-100000, -100000); //本來是用int.MaxValue不過再拿去加減在abs會有意想不到的結果，先-100000就好

@@ -4,70 +4,87 @@ using SmoothMoves;
 using System.Collections.Generic;
 
 public class UnitGenerater{
+
+    //已經被回收的場景單位, 下次有同 外觀 unit 時重複使用
 	Dictionary<string, List<SmoothMoves.BoneAnimation>> UnitGrave = new Dictionary<string, List<SmoothMoves.BoneAnimation>>();
 
 	Dictionary<BoneAnimation, Sprite[]> BoneSprites = new Dictionary<BoneAnimation, Sprite[]>();
-	public Unit GenerateUnit(UnitInfo info)
+
+    /// <summary>
+    /// 產生一個場景單位 (unit)
+    /// </summary>
+    public Unit GenerateUnit(UnitInfo info)
 	{
 		return GenerateUnit(info, false);
 	}
+
+    /// <summary>
+    /// 產生一個場景單位 (unit)
+    /// </summary>
 	public Unit GenerateUnit(UnitInfo info, bool isPreview)
 	{
 		if (info == null)
 			return null;
-		ActionUnit au = new ActionUnit(isPreview);
+		ActionUnit actUnit = new ActionUnit(isPreview);
 		List<MainSkill> activeSkill = new List<MainSkill>();
-		au.NormalAttack = new MainSkill(InformalDataBase.Instance.GetSkillData(info.AttackID));
+		actUnit.NormalAttack = new MainSkill(InformalDataBase.Instance.GetSkillData(info.AttackID));
 		foreach (ushort skillID in info.SkillID)
 		{
 			activeSkill.Add(new MainSkill(InformalDataBase.Instance.GetSkillData(skillID)));
 		}
-		au.ActiveSkills = activeSkill;
-		au.MaxLife = info.MaxLife;
-		au.Life = info.MaxLife;
-		au.MoveSpeed = info.MoveSpeed;
+		actUnit.ActiveSkills = activeSkill;
+		actUnit.MaxLife = info.MaxLife;
+		actUnit.Life = info.MaxLife;
+		actUnit.MoveSpeed = info.MoveSpeed;
 		if (info.MoveMode == 1)
-			au.MoveAction = new TeleportInRangeComponent();
+			actUnit.MoveAction = new TeleportInRangeComponent();
 		else
-			au.MoveAction = new MoveInRangeComponent();
+			actUnit.MoveAction = new MoveInRangeComponent();
 		Sprite[] sprites;
-		au.Entity = GenerateEntity(info.BoneName, info.spriteNames, out sprites);
-		au.Sprites = sprites;
-		if(au.Entity != null)
-			au.SpriteBounds = GetSpriteBounds(au.Entity.transform, sprites);
-		return au;
+		actUnit.Entity = GenerateEntity(info.BoneName, info.spriteNames, out sprites);
+		actUnit.Sprites = sprites;
+		if(actUnit.Entity != null)
+			actUnit.SpriteBounds = GetSpriteBounds(actUnit.Entity.transform, sprites);
+		return actUnit;
 	}
+
+    /// <summary>
+    /// 產生一個場景單位所需元件, bone, sprite
+    /// </summary>
 	public GameObject GenerateEntity(string BoneAnimName, string[] spriteInfo ,out Sprite[] sprites)
 	{
-		SmoothMoves.BoneAnimation ba;
-		//= ResourceStation.GetBone(BoneAnimName);
+		SmoothMoves.BoneAnimation boneAnim;
+        GameObject unitContainer = new GameObject(BoneAnimName);
+
 		List<SmoothMoves.BoneAnimation> tempList;
-		if (UnitGrave.TryGetValue(BoneAnimName, out tempList) && tempList.Count > 0)
-		{
-			ba = tempList[0];
-			ba.gameObject.SetActive(true);
-			tempList.RemoveAt(0);
-			ba.gameObject.name = BoneAnimName;
-		}
-		else
-			ba = ResourceStation.GetBone(BoneAnimName);
-		if (ba == null)
+        if (UnitGrave.TryGetValue(BoneAnimName, out tempList) && tempList.Count > 0)
+        {
+            boneAnim = tempList[0];
+            boneAnim.gameObject.SetActive(true);
+            boneAnim.transform.parent = unitContainer.transform;
+            tempList.RemoveAt(0);
+            boneAnim.gameObject.name = BoneAnimName;
+        }
+        else
+        {
+            boneAnim = ResourceStation.GetBone(unitContainer, BoneAnimName);
+        }
+        boneAnim.gameObject.transform.localRotation = Quaternion.identity;
+
+		if (boneAnim == null)
 		{
 			Debug.LogError("Cant Find Bone Data");
 			sprites = null;
 			return null;
 		}
-		if (!BoneSprites.TryGetValue(ba, out sprites))
+		if (!BoneSprites.TryGetValue(boneAnim, out sprites))
 		{
-			sprites = GenerateModelSprite(ba);
-			BoneSprites.Add(ba, sprites);
+			sprites = GenerateModelSprite(boneAnim);
+			BoneSprites.Add(boneAnim, sprites);
 		}
 		SetModelSprite(sprites, spriteInfo);
-		
-		ba.transform.localRotation = Quaternion.identity;
-		ba.transform.localPosition = new Vector3(0, 125, 0);
-		ba.transform.localScale = Vector3.one;
-		return ba.gameObject;
+
+        return unitContainer;
 	}
 	/// <summary>
 	/// 設定角色每個部位的圖片，陣列資料的部位順序跟長度要跟GLOBALCONST.BONE_NAME裡的一樣
@@ -125,6 +142,7 @@ public class UnitGenerater{
 			return new Bounds();
 		Vector3 MaxV3 = new Vector3(float.NegativeInfinity,float.NegativeInfinity,float.NegativeInfinity);
 		Vector3 MinV3 = new Vector3(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity);
+
 		//0 ~ 5 為頭手身體腳，不包含武器
 		for (int i = 0; i < sprites.Length && i < 6; i++)
 		{
@@ -141,26 +159,33 @@ public class UnitGenerater{
 
 	public void Recycle(Unit unit)
 	{
-		AnimUnit au = unit as AnimUnit;
-		if (au == null || au.Anim == null)
+		AnimUnit actUnit = unit as AnimUnit;
+		if (actUnit == null || actUnit.Anim == null)
 			return;
-		au.Anim.transform.parent = null;
-		foreach (SmoothMoves.Sprite s in au.Anim.GetComponentsInChildren<SmoothMoves.Sprite>())
+
+        GameObject container = actUnit.Anim.transform.parent.gameObject;
+        actUnit.Anim.transform.parent = null;
+        GameObject.Destroy(container);
+
+        foreach (SmoothMoves.Sprite sprite in actUnit.Anim.GetComponentsInChildren<SmoothMoves.Sprite>())
 		{
-			s.SetTextureName(string.Empty);
-			s.SetAtlas(null);
+			sprite.SetTextureName(string.Empty);
+			sprite.SetAtlas(null);
 		}
 		List<SmoothMoves.BoneAnimation> tempList;
-		if (!UnitGrave.TryGetValue(au.Anim.name, out tempList))
+		if (!UnitGrave.TryGetValue(actUnit.Anim.name, out tempList))
 		{
 			tempList = new List<SmoothMoves.BoneAnimation>();
-			UnitGrave.Add(au.Anim.name, tempList);
+			UnitGrave.Add(actUnit.Anim.name, tempList);
+
+            CommonFunction.DebugMsg(" UnitGrave : " + actUnit.Anim.name);
 		}
-		if(!tempList.Contains(au.Anim))
-			tempList.Add(au.Anim);
+		if(!tempList.Contains(actUnit.Anim))
+			tempList.Add(actUnit.Anim);
 		//au.Anim.name = au.Anim.GetInstanceID().ToString();
-		au.Anim.transform.localScale = Vector3.one;
-		au.Anim.gameObject.SetActive(false);
+		actUnit.Anim.transform.localScale = Vector3.one;
+		actUnit.Anim.gameObject.SetActive(false);
+
 		unit.ClearReference();
 	}
 

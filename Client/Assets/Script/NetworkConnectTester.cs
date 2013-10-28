@@ -45,6 +45,10 @@ public static class NetworkConnectTester
         get
         {
             //return false;
+            #if SKIP_TEST_NETWORK
+            return true;
+            #endif
+
             return _serverConnectCapability;
         }
     }
@@ -56,6 +60,10 @@ public static class NetworkConnectTester
     {
         get
         {
+            #if SKIP_TEST_NETWORK
+            return TestStatus.Done ;
+            #endif
+
             return _connTestStatus;
         }
     }

@@ -20,12 +20,19 @@ public class GLOBALCONST
 		public const int GRID_COUNT_W = 9;
 		public const int GRID_COUNT_L = 5;
 	}
-	public class BattleSettingValue
+	public static class BattleSettingValue
 	{
 		public const ushort DEFAULT_NORMAL_ATTACK = 0;
 		public const float CRITICAL_BONUS =0.5f;
 		public const int AllInRangeModeGroup = 10;
-	}
+
+        public const float AVATAR_DAMAGE_COLOR_TIME = 0.2f; //受擊後變色效果持續時間(秒)
+        public const float AVATAR_DAMAGE_SHAKE_RANGE = 10.0f; //受擊後震動效果偏移值 X 
+        public static readonly Color FONT_DAMAGE_COLOR = Color.white;
+        public static readonly Color AVATAR_DAMAGE_COLOR = CommonFunction.Color256Bit(200, 100, 100, 255); //受擊後變色效果
+        public static readonly Color AVATAR_NORMAL_COLOR = CommonFunction.Color256Bit(255, 255, 255, 255); 
+    }
+
 	public const string HAND_LEFT = "HandL";
 	public const string HAND_RIGHT = "HandR";
 	public const string HEAD = "Head";
@@ -34,6 +41,11 @@ public class GLOBALCONST
 	public const string BODY = "Body";
 	public const string WEAPON_LEFT = "WeaponL";
 	public const string WEAPON_RIGHT = "WeaponR";
+
+    public const string BONE_ROOT_NAME = "Root"; // Bone 資訊的主節點 GameObject name
+    public const string UNIT_NAME_ENEMY = "Enemy_{0}_{1}";
+    public const string UNIT_NAME_PLAYER = "Player_{0}";
+
 	public static readonly string[] BONE_NAME = new string[]
 	{
 		HEAD,
@@ -51,6 +63,10 @@ public class GLOBALCONST
     // 戰鬥UI
     public const int UI_BATTLE_ROLE_ICON_COUNT = 4; // 戰鬥UI會顯示的角色ICON數量
 
+    public const string DIR_RESOURCES_DATA = "Data/";
+    public const string DIR_RESOURCES_PARTICLE = "Particle/";
+    public const string DIR_RESOURCES_ATLAS = "Atlas/";
+    public const string DIR_RESOURCES_AVATAR_BONE = "BasicBone/";
 
     // 使用的Atlas名，先集中在此
     public const string ATLAS_SLICES = "Atlas_Slices"; // 有切九宮格的圖片存在的Atlas

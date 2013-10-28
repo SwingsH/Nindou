@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
+using System;
 using System.IO;
 using System.Text;
 using System.Xml.Serialization;
@@ -15,42 +16,50 @@ using System.Reflection;
 /// </summary>
 public static class EditorTools {
 
+    //重新命名設定組
+    public enum RenameConfig
+    {
+        // 字串與其他設定重複, 希望優先被搜索到, 並更名的的請擺前面. EX : 右手手掌 > 右手
+        [DoubleStringValue("右手手掌", "PalmR")]		    PALM_RIGHT,
+        [DoubleStringValue("左手手掌", "PalmL")]			PALM_LEFT,
+        [DoubleStringValue("右手掌", "PalmR")]		    PALM_RIGHT_2,
+        [DoubleStringValue("左手掌", "PalmL")]			PALM_LEFT_2,
+        [DoubleStringValue("左手", "HandL")]				HAND_LEFT ,
+        [DoubleStringValue("右手", "HandR")]			    HAND_RIGHT ,
+        [DoubleStringValue("頭", "Head")]				HEAD ,
+        [DoubleStringValue("左腳", "LegL")]				LEG_LEFT ,
+        [DoubleStringValue("右腳", "LegR")]				LEG_RIGHT ,
+        [DoubleStringValue("身體", "Body")]				BODY ,
+        [DoubleStringValue("武器", "WEAPON")]			WEAPON,
 
-	const string HAND_LEFT = "HandL";
-	const string HAND_RIGHT = "HandR";
-	const string HEAD = "Head";
-	const string LEG_LEFT = "LegL";
-	const string LEG_RIGHT = "LegR";
-	const string BODY = "Body";
-	const string WEAPON = "WEAPON";
+    }
+
 	[MenuItem("Tools/RenameModelTexture")]
 	public static void RenameModelTexture()
 	{
-		Object[] objs = Selection.GetFiltered(typeof(Texture), SelectionMode.DeepAssets);
+		UnityEngine.Object[] objs = Selection.GetFiltered(typeof(Texture), SelectionMode.DeepAssets);
 
-		foreach (Texture t in objs)
-		{
-			if (t)
-			{
-				string newName = t.name;
-				if (t.name.Contains("右手"))
-					newName = HAND_RIGHT;
-				else if (t.name.Contains("左手"))
-					newName = HAND_LEFT;
-				else if (t.name.Contains("頭"))
-					newName = HEAD;
-				else if (t.name.Contains("左腳"))
-					newName = LEG_LEFT;
-				else if (t.name.Contains("右腳"))
-					newName = LEG_RIGHT;
-				else if (t.name.Contains("身體"))
-					newName = BODY;
-				else if (t.name.Contains("武器"))
-					newName = WEAPON;
-				AssetDatabase.RenameAsset(AssetDatabase.GetAssetPath(t),newName);
-			}
-		}
+        foreach (Texture t in objs)
+        {
+            if (t)
+            {
+                string newName = t.name;
+
+                foreach (RenameConfig set in Enum.GetValues(typeof(RenameConfig)))
+                {
+                    DoubleStringValue twoString = CommonFunction.RetrieveEnum<DoubleStringValue>(set);
+                    if (t.name.Contains(twoString.Kind))
+                    {
+                        newName = twoString.Content;
+                        break;
+                    }
+                }
+
+                AssetDatabase.RenameAsset(AssetDatabase.GetAssetPath(t), newName);
+            }
+        }
 	}
+
     [MenuItem("Tools/RemoveWhite")]
     public static void RemoveWhite()
     {
@@ -197,7 +206,7 @@ public static class EditorTools {
 	public static void QuickTest1()
 	{
 		object obj = new List<SkillData>();
-		TextAsset ta = Resources.Load("Data/skilldata", typeof(TextAsset)) as TextAsset;
+        TextAsset ta = Resources.Load(GLOBALCONST.DIR_RESOURCES_DATA + GLOBALCONST.FILENAME_SKILL, typeof(TextAsset)) as TextAsset;
 		
 		DataUtility.DeserializeObject(ta.text,ref obj);
 		Debug.Log((obj as List<SkillData>).Count);

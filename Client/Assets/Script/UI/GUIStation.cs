@@ -263,7 +263,7 @@ public class GUIStation
     {
         try
         {
-            Texture uiImage = Resources.Load("NGUI/" + textureName, typeof(Texture)) as Texture;
+            Texture uiImage = Resources.Load(GLOBALCONST.DIR_RESOURCES_NGUI + textureName, typeof(Texture)) as Texture;
 
             CommonFunction.DebugMsg(" textureName : " + textureName);
             CommonFunction.DebugMsg(string.Format("   uiImage {0} : {1}", textureName, uiImage.width.ToString()));

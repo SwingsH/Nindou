@@ -29,7 +29,7 @@ public class InformalDataBase{
 		NpcDataBase = LoadData<uint, NPCData>(GLOBALCONST.FILENAME_NPC, "NPCID");
 		SPEffectDatas = LoadData<uint, SpecialEffect>(GLOBALCONST.FILENAME_SKILLEFFECT, "ID");
 		BattleDatas = new Dictionary<uint,List<Battle>>();
-		TextAsset ta = Resources.Load("Data/" + GLOBALCONST.FILENAME_BATTLE, typeof(TextAsset)) as TextAsset;
+        TextAsset ta = Resources.Load(GLOBALCONST.DIR_RESOURCES_DATA + GLOBALCONST.FILENAME_BATTLE, typeof(TextAsset)) as TextAsset;
 		object obj = new List<Battle>();
 		if (ta)
 		{
@@ -120,7 +120,7 @@ public class InformalDataBase{
 	{
 		Dictionary<KeyType, DataType> result = new Dictionary<KeyType, DataType>();
 		object obj = new List<DataType>();
-		TextAsset ta = Resources.Load("Data/" + dataName, typeof(TextAsset)) as TextAsset;
+        TextAsset ta = Resources.Load(GLOBALCONST.DIR_RESOURCES_DATA + dataName, typeof(TextAsset)) as TextAsset;
 		FieldInfo fi = typeof(DataType).GetField(KeyFieldName);
 		if(fi == null)
 		{

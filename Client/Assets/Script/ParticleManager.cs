@@ -9,7 +9,8 @@ public class ParticleManager : MonoBehaviour {
 
 	public const int RESERVE_AMOUNT = 5;
 	private static ParticleManager Instance;
-
+	
+	//以 particle 名稱當 key , 儲存一所有在場景中運作中的 particle
 	static Dictionary<string, List<ParticleSystem>> AvailableParticles = new Dictionary<string, List<ParticleSystem>>();
 	/*
 	 * 存放掛載型particle的資料，方便刪除用
@@ -181,6 +182,7 @@ public class ParticleManager : MonoBehaviour {
 	{
 		List<ParticleSystem> tempList;
 		ParticleSystem tempps;
+
 		if (!AvailableParticles.TryGetValue(name, out tempList) || tempList == null || tempList.Count ==0)
 		{
 			tempps = ResourceStation.GetParticle(name);
@@ -205,6 +207,10 @@ public class ParticleManager : MonoBehaviour {
 		}
 		return tempps;
 	}
+	
+	/// <summary>
+	/// 回收一個 particle , 如果未超過上限 RESERVE_AMOUNT, 則把該 particle  隱藏, 下次使用
+	/// </summary>
 	public static void Recycle(ParticleSystem ps)
 	{
 		if (ps == null)

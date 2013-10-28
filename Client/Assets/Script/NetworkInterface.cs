@@ -444,6 +444,10 @@ public class NetworkInterface
         int kind = responsePack.PopInteger();
         CommonFunction.DebugMsg(string.Format("註冊結果 : {0} ", kind) );
 
+        AccountData accountData = new AccountData();
+        accountData.PlayerName = _control.GUIStation.Form<UI_Start_CreatePlayer>().CurrentInputAccountName;
+        _control.SetAccountData(AccountValidStatus.Valid, accountData);
+
         switch (kind)
         {
             case 1:

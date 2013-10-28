@@ -3,17 +3,89 @@ using System;
 using System.IO;
 using System.Text;
 using System.Collections;
+using System.Collections.Generic;
+using System.Reflection;
 
 /// <summary>
 /// 共用method的class
 /// </summary>
 public static class CommonFunction
 {
+    /// <summary>
+    /// Returns all GameObjects attached to the GameObject or any of its children.
+    /// </summary>
+    public static GameObject[] GetGameObjectsInChildren(GameObject iSource)
+    {
+        try
+        {
+            Dictionary<int, GameObject> object_list = new Dictionary<int, GameObject>();
+            GameObject insert_object = null;
+            Component[] components;
+            components = (iSource.GetComponentsInChildren<Component>());
+            int id = 1;
+            foreach (Component com in components)
+            {
+                if (insert_object == com.gameObject)
+                    continue;
+                insert_object = com.gameObject;
+                object_list.Add(id++, insert_object);
+            }
+
+            GameObject[] result = new GameObject[object_list.Count];
+            int i = 0;
+            foreach (GameObject item in object_list.Values)
+                result[i++] = item;
+
+            return result;
+        }
+        catch
+        {
+            return (new GameObject[0]);
+        }
+    }
+
+    /// <summary>
+    /// use "deep search first" method with "name" for searching specific GameObject 
+    /// </summary>
+    /// <returns></returns>
+    public static GameObject FindInChildren(GameObject parent, string searchName)
+    {
+        GameObject result = null;
+        if (parent == null)
+            return result;
+        GameObject[] objects = GetGameObjectsInChildren(parent);
+        foreach (GameObject childObj in objects)
+        {
+            if (childObj.name == searchName)
+            {
+                result = childObj;
+                break;
+            }
+        }
+        return result;
+    }
+
+    // 使用 256 bit 的值取得 color
+    public static Color Color256Bit(float r, float g, float b, float a)
+    {
+        return  new Color(r/255.0F,g/255.0F,b/255.0F,a/255.0F);
+    }
+
+    // Retrieve EnumValue, Enum 值 復原 成 class類型
+    public static T RetrieveEnum<T>(Enum value)
+    {
+        Type type = value.GetType();
+        FieldInfo fi = type.GetField(value.ToString());
+        T[] attrs = fi.GetCustomAttributes(typeof(T), false) as T[];
+        if (attrs.Length > 0)
+            return attrs[0];
+        return default(T);
+    }
+
     #region Debug相關
     /// <summary>
     /// 輸出Debug訊息
     /// </summary>
-    /// <param name="msg">待輸出的訊息</param>
     public static void DebugMsg(string msg)
     {
         Debug.Log(msg);
@@ -29,7 +101,6 @@ public static class CommonFunction
     /// <summary>
     /// 輸出Error訊息
     /// </summary>
-    /// <param name="errorMsg">待輸出的訊息</param>
     public static void DebugError(string errorMsg)
     {
         Debug.LogError(errorMsg);

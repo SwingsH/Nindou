@@ -57,7 +57,7 @@ public class HUDManager : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 
-        UIFont uifont = GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.HUD, FontStyle.Bold);
+        UIFont uifont = GUIFontManager.GetUIDynamicFont(UIFontName.BigAppleNF, UIFontSize.HUD, FontStyle.Bold);
 		if(uifont!=null) 
 			font = uifont.dynamicFont;
 		else
@@ -154,7 +154,7 @@ public class HUDManager : MonoBehaviour {
 		info.PosYCurve = new AnimationCurve(new Keyframe(0f, 0f, -2f, -2f), new Keyframe(1f, 1f, 6f, 6f));
 		info.Duration = 1;
 
-		info.ColorStart = info.ColorEnd = Color.red;
+        info.ColorStart = info.ColorEnd = GLOBALCONST.BattleSettingValue.FONT_DAMAGE_COLOR;
 		info.ColorEnd.a = 0;
 		info.ColorCurve = new AnimationCurve(new Keyframe(0.5f, 0f, 0f, 0f), new Keyframe(1f, 1f, 3f, 3f));
 

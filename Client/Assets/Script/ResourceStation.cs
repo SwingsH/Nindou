@@ -5,12 +5,16 @@ using System.Linq;
 using System.Text;
 using SmoothMoves;
 using Resources = UnityEngine.Resources;
+
 /// <summary>
 /// 資料存取統一介面, 
 /// 統一使用此介面, 索取者可以不用得知資源來源 : Resources/ , unity caching, file system
 /// </summary>
 public class ResourceStation {
     private ResourceUpdater _updater;
+    static Dictionary<string, BoneAnimation> boneAnimations = new Dictionary<string, BoneAnimation>();
+    static Dictionary<string, ParticleSystem> particles = new Dictionary<string, ParticleSystem>();
+    static Dictionary<string, TextureAtlas> Atlases = new Dictionary<string, TextureAtlas>();
 
     //constructor
     public ResourceStation()
@@ -36,7 +40,7 @@ public class ResourceStation {
     }
 
 	#region ParticleSystem
-	static Dictionary<string, ParticleSystem> particles = new Dictionary<string, ParticleSystem>();
+	
 	public static ParticleSystem GetParticle(string prefabName)
 	{
 		ParticleSystem ps;
@@ -51,12 +55,15 @@ public class ResourceStation {
 		result.name = prefabName;
 		return result;
 	}
+
 	static void Particle_Load(string particleName)
 	{
-		GameObject prefab = Resources.Load("Particle/" + particleName) as GameObject;
+		GameObject prefab = Resources.Load(GLOBALCONST.DIR_RESOURCES_PARTICLE + particleName) as GameObject;
 		if (prefab == null || !prefab.particleSystem)
+		{
+			CommonFunction.DebugError( " Particle_Load : " + particleName + "  Failed.");
 			return;
-
+		}
 		//ParticleSystem ps = (GameObject.Instantiate(prefab) as GameObject).GetComponent<ParticleSystem>();
 		ParticleSystem ps = prefab.GetComponent<ParticleSystem>(); //存原始物件，不實體化
 		ps.name = particleName; //名字統一，方便找到同一個particle
@@ -66,7 +73,7 @@ public class ResourceStation {
 	#endregion
 
 	#region Atlas
-	static Dictionary<string, TextureAtlas> Atlases = new Dictionary<string, TextureAtlas>();
+	
 	public static TextureAtlas GetAtlas(string prefabName)
 	{
 		TextureAtlas atlas;
@@ -80,9 +87,10 @@ public class ResourceStation {
 
 		return atlas;
 	}
+
 	static void Atlas_LoadFromeResource(string atlasName)
 	{
-		TextureAtlas prefab = Resources.Load("Atlas/" + atlasName, typeof(TextureAtlas)) as TextureAtlas;
+		TextureAtlas prefab = Resources.Load(GLOBALCONST.DIR_RESOURCES_ATLAS + atlasName, typeof(TextureAtlas)) as TextureAtlas;
 		if (prefab == null)
 			return;
 		Atlases.Add(atlasName, prefab);
@@ -91,8 +99,11 @@ public class ResourceStation {
 	#endregion
 
 	#region BoneAnimation
-	static Dictionary<string, BoneAnimation> boneAnimations = new Dictionary<string, BoneAnimation>();
-	public static BoneAnimation GetBone(string prefabName)
+    /// <summary>
+    /// 取得 smoothMoves 的 BoneAnimation
+    /// </summary>
+    /// <param name="parent"> 讓 BoneAnimation 可以知道該 attach 到哪個 gameObject </param>
+	public static BoneAnimation GetBone(GameObject parent, string prefabName)
 	{
 		BoneAnimation bone;
 
@@ -103,13 +114,18 @@ public class ResourceStation {
 				return null;
 		}
 		BoneAnimation result = GameObject.Instantiate(bone) as BoneAnimation;
-		result.name = prefabName;
+		result.name = prefabName ;
+        result.transform.parent = parent.transform;
+        result.transform.localPosition = Vector3.zero; // 強制歸 0, 防止 prefab 存檔時沒有歸 0
+
 		return result;
 	}
+
 	static void Bone_LoadFromResource(string prefabName)
 	{
-		GameObject prefab = Resources.Load("BasicBone/" + prefabName) as GameObject;
-		if (prefab == null)
+		GameObject prefab = Resources.Load(GLOBALCONST.DIR_RESOURCES_AVATAR_BONE + prefabName) as GameObject;
+
+        if (prefab == null)
 			return;
 
 		//ParticleSystem ps = (GameObject.Instantiate(prefab) as GameObject).GetComponent<ParticleSystem>();
@@ -121,6 +137,7 @@ public class ResourceStation {
 		boneAnimations.Add(prefabName, bone);
 	}
 	#endregion
+
 	public static void GenerateModelSprite(SmoothMoves.BoneAnimation boneData,string[] atlasInfo)
 	{
 		if (boneData == null || atlasInfo == null)

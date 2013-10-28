@@ -10,6 +10,7 @@ public enum UIFontName
 {
     [StringValue("MSJH")]             MSJH,
     [StringValue("dragonword")]       DragonWord,
+    [StringValue("BigAppleNF")]       BigAppleNF,
 }
 /// <summary>
 /// 字型大小

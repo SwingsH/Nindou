@@ -74,10 +74,23 @@ public abstract class Unit
 	public virtual void ClearReference()
 	{
 	}
+
+    public virtual void Update()
+    {
+    }
 }
 
 public class AnimUnit : Unit
 {
+    public Vector3 LWeaponTip;
+    public Vector3 RWeaponTip;
+    //角色圖片的範圍
+    public Bounds SpriteBounds;
+    //角色圖片元件
+    public Sprite[] Sprites = new Sprite[0];
+    public float _lastDamageTime = 0.0f; // 最後一次收到傷害的 time
+    private GameObject _boneContainer = null;
+
 	public override GameObject Entity
 	{
 		get
@@ -87,10 +100,18 @@ public class AnimUnit : Unit
 		set
 		{
 			base.Entity = value;
-			if (Entity != null)
-				Anim = Entity.GetComponent<BoneAnimation>();
-			else
-				Anim = null;
+            if (Entity != null)
+            {
+                //Anim = Entity.GetComponent<BoneAnimation>();
+                Anim = Entity.GetComponentInChildren<BoneAnimation>();
+                GameObject go = CommonFunction.FindInChildren(Entity, GLOBALCONST.BONE_ROOT_NAME);
+                BoneContainer = go.transform.parent.gameObject;
+            }
+            else
+            {
+                Anim = null;
+                BoneContainer = null;
+            }
 		}
 	}
 	public Vector3 WorldUpperCenter
@@ -125,12 +146,22 @@ public class AnimUnit : Unit
 		get;
 		protected set;
 	}
-	public Vector3 LWeaponTip;
-	public Vector3 RWeaponTip;
-	//角色圖片的範圍
-	public Bounds SpriteBounds;
-	//角色圖片元件
-	public Sprite[] Sprites = new Sprite[0];
+
+    /// <summary>
+    /// 包含完整的 smooth moves Bone 的 GameObject
+    /// </summary>
+    public virtual GameObject BoneContainer
+    {
+        get{return _boneContainer;}
+        set{ _boneContainer = value; }
+    }
+
+    public virtual GameObject Container
+    {
+        get;
+        set;
+    }
+
 	public override uint MaxLife
 	{
 		get
@@ -205,8 +236,6 @@ public class AnimUnit : Unit
 			}
 			float value = Mathf.Ceil(rate * info.Power);
 
-
-
 			//跳血跟受擊效果
 			if (Entity)
 			{
@@ -221,6 +250,8 @@ public class AnimUnit : Unit
 							BattleManager.ShowDamageGroupText(info, this, Mathf.RoundToInt(value), WorldUpperCenter);
 						else
 							BattleManager.ShowDamageText(SkillDamageType.Damage, Mathf.RoundToInt(value), WorldUpperCenter);
+
+                        StartDamageEffect();
 						break;
 				}
 			}
@@ -241,6 +272,78 @@ public class AnimUnit : Unit
 				BattleManager.Unit_Dead(this);
 		}
 	}
+
+    /// <summary>
+    /// 開始處理受擊效果
+    /// </summary>
+    private void StartDamageEffect()
+    {
+        // 受擊後變色效果   todo: 考慮是否需要配合 hit 點
+        _lastDamageTime = Time.time;
+        ChangeColor(GLOBALCONST.BattleSettingValue.AVATAR_DAMAGE_COLOR);
+    }
+
+    /// <summary>
+    /// 結束受擊效果
+    /// </summary>
+    private void EndDamageEffect()
+    {
+        ChangeColor(GLOBALCONST.BattleSettingValue.AVATAR_NORMAL_COLOR);
+
+        if (BoneContainer != null) // 震動效果歸位
+            BoneContainer.transform.localPosition = Vector3.zero;
+    }
+
+    /// <summary>
+    /// 更改所有 sprite 的顏色
+    /// </summary>
+    public void ChangeColor(Color newColor)
+    {
+        if(Sprites == null)
+            return;
+        if(Sprites.Length <= 0)
+            return;
+
+        for (int i = 0; i < Sprites.Length; i++)
+        {
+            Sprites[i].SetColor(newColor);
+        }
+    }
+
+    // 震動效果
+    public void Shake(float percent)
+    {
+        if (Entity == null)
+        {
+            CommonFunction.DebugMsg("Entity is null");
+            return;
+        }
+        if (BoneContainer == null)
+        {
+            CommonFunction.DebugMsg("BoneContainer is null");
+        }
+
+        float range = GLOBALCONST.BattleSettingValue.AVATAR_DAMAGE_SHAKE_RANGE * percent;
+        float x = Random.Range(range, -range);
+        BoneContainer.transform.localPosition = new Vector3(x,BoneContainer.transform.localPosition.y,BoneContainer.transform.localPosition.z);
+    }
+
+    /// <summary>
+    /// Every frame-rate 更新一次
+    /// </summary>
+    public override void Update()
+    {
+        float interval = Time.time - _lastDamageTime;
+        float shakePercent = interval / GLOBALCONST.BattleSettingValue.AVATAR_DAMAGE_COLOR_TIME; //晃動程度, 隨受擊時間點遞減
+
+        if (interval > GLOBALCONST.BattleSettingValue.AVATAR_DAMAGE_COLOR_TIME)
+        {
+            EndDamageEffect();
+            return;
+        }
+
+        Shake(shakePercent);
+    }
 }
 
 public class ActionUnit : AnimUnit
@@ -482,7 +585,7 @@ public class ActionUnit : AnimUnit
 		
 		Damaged(this.State.DoT);
 
-		TargetUnit = FindTarget(eTargetMode.Closest);
+		TargetUnit = FindAttackTarget(eTargetMode.Closest);
 		if (TargetUnit != null)
 			MoveAction.Target = TargetUnit.Pos;
 		else
@@ -518,7 +621,10 @@ public class ActionUnit : AnimUnit
 		this.State.Reflash();
 	}
 
-	protected virtual Unit FindTarget(eTargetMode mode)
+    /// <summary>
+    /// 搜索攻擊目標
+    /// </summary>
+	protected virtual Unit FindAttackTarget(eTargetMode mode)
 	{
 		switch (mode)
 		{
