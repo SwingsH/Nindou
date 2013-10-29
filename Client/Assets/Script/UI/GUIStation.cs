@@ -538,7 +538,7 @@ public static class GUIComponents
         int height = CalculateStageWideButtonHeight();
 
         UIButton button = GUIStation.CreateUIButton(parent, "StageBtn", Vector3.zero, depth,
-            SpriteName.STAGE_BG,
+            SpriteName.STAGE_BG_OPEN,
             (int)(GUIStation.MANUAL_SCREEN_WIDTH * 0.9f), height, null, Color.white, string.Empty);
 
         button.SetColor(Color.white, Color.white, new Color(184.0f / 255.0f, 184.0f / 255.0f, 184.0f / 255.0f, 1.0f), new Color(184.0f / 255.0f, 184.0f / 255.0f, 184.0f / 255.0f, 1.0f));

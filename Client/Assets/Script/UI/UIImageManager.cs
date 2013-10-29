@@ -33,8 +33,8 @@ public enum SpriteName
     [EnumUISpriteConfig("Atlas_Backgrounds", "nindou_3_bg")]        WORLDMAP, // 世界地圖
     [EnumUISpriteConfig("Atlas_Backgrounds", "shape1170")]          WORLDMAP_BG, // 主介面世界底圖
     [EnumUISpriteConfig("Atlas_Backgrounds", "temp_nindou_bg")]     MAIN_BG, // 遊戲主要底圖
-    [EnumUISpriteConfig("Atlas_Slices", "slice_frame_lightbrown")]  STAGE_BG, // 選關卡的底圖
-
+    [EnumUISpriteConfig("Atlas_Slices", "slice_frame_lightbrown")]  STAGE_BG_OPEN, // 選關卡的底圖(關卡開啟)
+    [EnumUISpriteConfig("Atlas_Slices", "slice_frame_darkbrown")]   STAGE_BG_CLOSE, // 選關卡的底圖(關卡關閉)
 
     [EnumUISpriteConfig("UI_Main_Atlas", "title")]                  STAGE_TITLE_BG, // 關卡標題背景圖
     [EnumUISpriteConfig("Atlas_Icons", "complete")]                 EXPLORE_PROGRESS_BG, // 選擇子關卡的探索度

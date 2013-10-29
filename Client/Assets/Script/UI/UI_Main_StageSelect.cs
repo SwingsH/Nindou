@@ -10,12 +10,11 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
     /// <summary>
     /// 一個關卡的子介面
     /// </summary>
-    private class StageSubUI : System.IDisposable
+    private class StageSubUI : GUISubFormBase
     {
         const int EXPLORE_PROGRESS_BG_WIDTH = 522;
         const int EXPLORE_PROGRESS_BG_HEIGHT = 148;
 
-        private GameObject _stageSubUIObj; // 最上層物件
         private UIButton _stageBtn; // 關卡按鈕
         private UISprite _stageBtnBG; // 關卡按鈕的背景圖
         private UILabel _stageNameText; // 關卡名稱(&消耗體力說明)
@@ -36,18 +35,16 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         /// <param name="clickEventDelegate">按下按鈕的反應函式</param>
         /// <param name="parentDraggablePanel">上層的可拖曳panel</param>
         public StageSubUI(GameObject parent, string stageUIName, Vector3 relativePos, int depth, EventDelegate clickEventDelegate, UIDraggablePanel parentDraggablePanel)
+            : base(parent, stageUIName, relativePos)
         {
-            // 最上層物件
-            _stageSubUIObj = NGUITools.AddChild(parent);
-            _stageSubUIObj.name = stageUIName;
-            _stageSubUIObj.transform.localPosition = relativePos;
+            // 最上層物件已經在base class中處理，此處處理拖拉的Panel
             if (parentDraggablePanel != null)
             {
-                UIDragPanelContents tempDPC = _stageSubUIObj.gameObject.AddComponent<UIDragPanelContents>();
+                UIDragPanelContents tempDPC = _subUIRoot.gameObject.AddComponent<UIDragPanelContents>();
                 tempDPC.draggablePanel = parentDraggablePanel;
             }
             // 底圖＆按鈕
-            _stageBtn = GUIComponents.StageWideButton(_stageSubUIObj, depth);
+            _stageBtn = GUIComponents.StageWideButton(_subUIRoot, depth);
 			_stageBtnBG = _stageBtn.tweenTarget.GetComponent<UISprite>();
             _stageBtn.onClick.Add(clickEventDelegate);
 
@@ -57,19 +54,19 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
                 tempDPC.draggablePanel = parentDraggablePanel;
             }
             // 關卡名稱＆消耗體力說明
-            _stageNameText = GUIStation.CreateUILabel(_stageSubUIObj, "StageName", UIWidget.Pivot.Left, new Vector3(-653, 0, 0), depth + 1,
+            _stageNameText = GUIStation.CreateUILabel(_subUIRoot, "StageName", UIWidget.Pivot.Left, new Vector3(-653, 0, 0), depth + 1,
                 GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
                 Color.white, string.Empty);
             // 「點擊觀看開啟條件」的提示文字
-            _hintText = GUIStation.CreateUILabel(_stageSubUIObj, "HintText", UIWidget.Pivot.Left, new Vector3(-120, 0, 0), depth + 1,
+            _hintText = GUIStation.CreateUILabel(_subUIRoot, "HintText", UIWidget.Pivot.Left, new Vector3(-120, 0, 0), depth + 1,
                 GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
                 Color.white, GLOBAL_STRING.STAGE_OPEN_HINT_TEXT);
             // 「未開啟」的提示文字
-            _nonOpenText = GUIStation.CreateUILabel(_stageSubUIObj, "NonOpenText", UIWidget.Pivot.Center, new Vector3(430, 0, 0), depth + 1,
+            _nonOpenText = GUIStation.CreateUILabel(_subUIRoot, "NonOpenText", UIWidget.Pivot.Center, new Vector3(430, 0, 0), depth + 1,
                 GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
                 Color.red, GLOBAL_STRING.STAGE_NOT_OPEN_TEXT);
             // 探索度的背景圖
-            _exploreProgressBackground = UIImageManager.CreateUISprite(_stageSubUIObj, SpriteName.EXPLORE_PROGRESS_BG);
+            _exploreProgressBackground = UIImageManager.CreateUISprite(_subUIRoot, SpriteName.EXPLORE_PROGRESS_BG);
             _exploreProgressBackground.Init(UISprite.Type.Simple, depth + 2, _exploreProgressBackground.pivot, EXPLORE_PROGRESS_BG_WIDTH, EXPLORE_PROGRESS_BG_HEIGHT);
             _exploreProgressBackground.name = "ExploreProgress";
             _exploreProgressBackground.transform.localPosition = new Vector3(430, 0, 0);
@@ -79,54 +76,44 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
                 new Vector3(-104, -10, 0), depth + 3,
                 GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
                 Color.white, string.Format(GLOBAL_STRING.STAGE_EXPLORE_PROGRESS_TEXT, 0, 1));
+
+            // 取得關卡開啟/關閉時底圖SpriteName，方便之後動態切換
+            EnumUISpriteConfig tempUISpriteConfig;
+            if (CommonFunction.GetAttribute<EnumUISpriteConfig>(SpriteName.STAGE_BG_OPEN, out tempUISpriteConfig)) { _stageOpenSpriteName = tempUISpriteConfig.SpriteName; }
+            else { _stageOpenSpriteName = string.Empty; }
+            if (CommonFunction.GetAttribute<EnumUISpriteConfig>(SpriteName.STAGE_BG_CLOSE, out tempUISpriteConfig)) { _stageCloseSpriteName = tempUISpriteConfig.SpriteName; }
+            else { _stageCloseSpriteName = string.Empty; }
         }
         #endregion
         #region Dispose -- 資源釋放
-        /* 直接將物件設為null，使其呼叫解構式來釋放資源會有「CompareBaseObjectsInternal can only be called from the main thread.」問題
-         * 為了解決「CompareBaseObjectsInternal can only be called from the main thread.」問題，必須在main thread執行釋放資源，
-         * 所以需要繼承IDisposable並實作Disposec函式。
-         * http://msdn.microsoft.com/zh-tw/library/fs2xkftw(v=vs.90).aspx 有提供撰寫範例。
-         * 但是呼叫端在刪除此物件時，需記得呼叫 Dispose()函式。
-         */
-        private bool _disposed = false;
-        public void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            Dispose(true);
-
-            System.GC.SuppressFinalize(this);
-        }
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposed)
+            if (disposing)
             {
-                if (disposing)
-                {
-                    if (_exploreProgressText != null) { NGUITools.Destroy(_exploreProgressText.gameObject); }
-                    if (_exploreProgressBackground != null) { NGUITools.Destroy(_exploreProgressBackground.gameObject); }
-                    if (_nonOpenText != null) { NGUITools.Destroy(_nonOpenText.gameObject); }
-                    if (_hintText != null) { NGUITools.Destroy(_hintText.gameObject); }
-                    if (_stageNameText != null) { NGUITools.Destroy(_stageNameText.gameObject); }
-                    if (_stageBtnBG != null) { NGUITools.Destroy(_stageBtnBG.gameObject); }
-                    if (_stageBtn != null) { NGUITools.Destroy(_stageBtn.gameObject); }                    
-                    if (_stageSubUIObj != null) { NGUITools.Destroy(_stageSubUIObj); }
-                }
-                _exploreProgressText = null;
-                _exploreProgressBackground = null;
-                _nonOpenText = null;
-                _hintText = null;
-                _stageNameText = null;
-                _stageBtnBG = null;
-                _stageBtn = null;
-                _stageSubUIObj = null;
-
-                _disposed = true;
+                NGUITools.Destroy(_exploreProgressText);
+                NGUITools.Destroy(_exploreProgressBackground);
+                NGUITools.Destroy(_nonOpenText);
+                NGUITools.Destroy(_hintText);
+                NGUITools.Destroy(_stageNameText);
+                NGUITools.Destroy(_stageBtnBG);
+                NGUITools.Destroy(_stageBtn);
             }
+            _exploreProgressText = null;
+            _exploreProgressBackground = null;
+            _nonOpenText = null;
+            _hintText = null;
+            _stageNameText = null;
+            _stageBtnBG = null;
+            _stageBtn = null;
+
+            base.Dispose(disposing);
         }
 
         #endregion
 
-        Color pressedAndHoverColor = new Color(212.0f / 255.0f, 212.0f / 255.0f, 212.0f / 255.0f, 1.0f);
-
+        Color pressedAndHoverColor = CommonFunction.Color256Bit(212, 212, 212, 255);
+        string _stageOpenSpriteName = null;
+        string _stageCloseSpriteName = null;
         /// <summary>
         /// 關卡是否開啟
         /// </summary>
@@ -138,14 +125,13 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
             {
                 _stageOpen = value;
 
-
                 if (_stageOpen) { _stageBtn.SetColor(Color.white, Color.white, pressedAndHoverColor, pressedAndHoverColor); }
                 else { _stageBtn.SetColor(Color.gray, Color.gray, Color.gray, Color.gray); }
 
                 
                 if (_stageBtnBG != null)
                 {
-                    _stageBtnBG.spriteName = _stageOpen ? GLOBALCONST.SPRITE_FRAME_LIGHTBROWN : GLOBALCONST.SPRITE_FRAME_DARKBROWN;
+                    _stageBtnBG.spriteName = _stageOpen ? _stageOpenSpriteName : _stageCloseSpriteName;
                 }
                 NGUITools.SetActive(_hintText.gameObject, !_stageOpen);
                 NGUITools.SetActive(_nonOpenText.gameObject, !_stageOpen);
