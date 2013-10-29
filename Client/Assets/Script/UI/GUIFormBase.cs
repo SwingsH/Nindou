@@ -12,6 +12,23 @@ public abstract class GUIFormBase : MonoBehaviour
     public delegate void BtnClick();
 
     protected GUIStation _guistation; // 介面管理者
+    protected UIPlayTween _uiPlayTween; // 用來播放Tween的元件
+    // 是否有顯示/消失的Tween
+    protected virtual bool _hasShowOrHideTween
+    {
+        get
+        {
+            UITweener[] allUITweener = GetComponentsInChildren<UITweener>();
+
+            foreach (UITweener oneUITweener in allUITweener)
+            {
+                if (oneUITweener.tweenGroup == GLOBALCONST.UI_ShowOrHide_TweenGroup) {return true;}
+            }
+            return false;
+        }
+    }
+
+
 
     #region 固定method
     // Use this for initialization
@@ -31,8 +48,14 @@ public abstract class GUIFormBase : MonoBehaviour
 	/// </summary>
     protected virtual void OnDestroy()
     {
-        onShowDelegate = null;
-        onHideDelegate = null;
+        onBeforeShowDelegate = null;
+        onAfterShowDelegate = null;
+        onBeforeHideDelegate = null;
+        onAfterHideDelegate = null;
+
+        NGUITools.Destroy(_uiPlayTween);
+        _uiPlayTween = null;
+        _guistation = null;
     }
     #endregion
 
@@ -50,6 +73,9 @@ public abstract class GUIFormBase : MonoBehaviour
     public void CreateUI(GUIStation guistation)
     {
         _guistation = guistation;
+        // 建立播放Tween的元件
+        _uiPlayTween = GUIComponents.AddPlayShowTweenComponent(gameObject);
+
         CreateAllComponent();
     }
 
@@ -58,8 +84,10 @@ public abstract class GUIFormBase : MonoBehaviour
     public delegate void FormNotifyDelegate(GUIFormBase sender);
 
     //開啟或關閉介面時呼叫
-    private FormNotifyDelegate onShowDelegate = null;
-    private FormNotifyDelegate onHideDelegate = null;
+    private FormNotifyDelegate onBeforeShowDelegate = null;
+    private FormNotifyDelegate onAfterShowDelegate = null;
+    private FormNotifyDelegate onBeforeHideDelegate = null;
+    private FormNotifyDelegate onAfterHideDelegate = null;
 
 
     public bool Visible
@@ -69,31 +97,55 @@ public abstract class GUIFormBase : MonoBehaviour
 
     public void Show()
     {
-        NGUITools.SetActive(gameObject, true);
-        if (onShowDelegate != null) { onShowDelegate(this); }
+        if (onBeforeShowDelegate != null) { onBeforeShowDelegate(this); }
+        // 如果有設定顯示/隱藏的tween時，使用該tween做顯示/隱藏，否則直接設定active
+        if (_hasShowOrHideTween)
+        {
+            _uiPlayTween.tweenGroup = GLOBALCONST.UI_ShowOrHide_TweenGroup; // 避免有人中途拿去播其他tween
+            _uiPlayTween.Play(true);
+        }
+        else
+        {
+            NGUITools.SetActive(gameObject, true);
+        }
+        if (onAfterShowDelegate != null) { onAfterShowDelegate(this); }
     }
 
     public void Hide()
     {
-        NGUITools.SetActive(gameObject, false);
-        if (onHideDelegate != null) { onHideDelegate(this); }
+        if (onBeforeHideDelegate != null) { onBeforeHideDelegate(this); }
+        // 如果有設定顯示/隱藏的tween時，使用該tween做顯示/隱藏，否則直接設定active
+        if (_hasShowOrHideTween)
+        {
+            _uiPlayTween.tweenGroup = GLOBALCONST.UI_ShowOrHide_TweenGroup; // 避免有人中途拿去播其他tween
+            _uiPlayTween.Play(false);
+        }
+        else
+        {
+            NGUITools.SetActive(gameObject, false);
+        }
+        if (onAfterHideDelegate != null) { onAfterHideDelegate(this); }
     }
 
-    public void AddFormShowDelegate(FormNotifyDelegate del)
+    public void AddFormShowDelegate(bool isBefore, FormNotifyDelegate del)
     {
-        onShowDelegate += del;
+        if (isBefore) { onBeforeShowDelegate += del; }
+        else { onAfterShowDelegate += del; }
     }
-    public void RemoveFormShowDelegate(FormNotifyDelegate del)
+    public void RemoveFormShowDelegate(bool isBefore, FormNotifyDelegate del)
     {
-        onShowDelegate -= del;
+        if (isBefore) { onBeforeShowDelegate -= del; }
+        else { onAfterShowDelegate -= del; }
     }
-    public void AddFormHideDelegate(FormNotifyDelegate del)
+    public void AddFormHideDelegate(bool isBefore, FormNotifyDelegate del)
     {
-        onHideDelegate += del;
+        if (isBefore) { onBeforeHideDelegate += del; }
+        else { onAfterHideDelegate += del; }
     }
-    public void RemoveFormHideDelegate(FormNotifyDelegate del)
+    public void RemoveFormHideDelegate(bool isBefore, FormNotifyDelegate del)
     {
-        onHideDelegate -= del;
+        if (isBefore) { onBeforeHideDelegate -= del; }
+        else { onAfterHideDelegate -= del; }
     }
     #endregion
 }

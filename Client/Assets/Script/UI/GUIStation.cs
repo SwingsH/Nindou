@@ -456,6 +456,57 @@ public class GUIStation
 public static class GUIComponents
 {
     /// <summary>
+    /// 在wantAttachedObj上附加一個負責播放顯示/消失的UIPlayTween
+    /// p.s. 如果需要用此UIPlayTween播放其他Tween，請記得修改對應參數。
+    /// </summary>
+    /// <param name="wantAttachedObj">想要被附加的物件</param>
+    /// <returns>對應的UIPlayTween</returns>
+    public static UIPlayTween AddPlayShowTweenComponent(GameObject wantAttachedObj)
+    {
+        UIPlayTween retUIPlayTween = wantAttachedObj.AddComponent<UIPlayTween>();
+        retUIPlayTween.tweenTarget = wantAttachedObj;
+        retUIPlayTween.includeChildren = true;
+        retUIPlayTween.tweenGroup = GLOBALCONST.UI_ShowOrHide_TweenGroup; // 預設播放 顯示/隱藏 用的Tween Group
+        retUIPlayTween.ifDisabledOnPlay = AnimationOrTween.EnableCondition.EnableThenPlay;  // 在disable時播放的話，將tweenTarget先enable再播放
+        retUIPlayTween.disableWhenFinished = AnimationOrTween.DisableCondition.DisableAfterReverse; // 如果反向播放（預設顯示時為正向播放，隱藏時則為相同Tween反向播放），則播放完畢隱藏
+
+        return retUIPlayTween;
+    }
+
+    /// <summary>
+    /// 在parentObj底下新增一顯示/隱藏用的移動效果
+    /// </summary>
+    /// <param name="parentObj">移動效果物件的父物件</param>
+    /// <param name="moveFrom">移動起點</param>
+    /// <param name="moveTo">移動終點</param>
+    /// <returns>對應的TweenPosition</returns>
+    public static TweenPosition AddShowMoveEffect(GameObject parentObj, Vector3 moveFrom, Vector3 moveTo)
+    {
+        TweenPosition tp = NGUITools.AddChild<TweenPosition>(parentObj);
+        tp.from = moveFrom;
+        tp.to = moveTo;
+        tp.tweenGroup = GLOBALCONST.UI_ShowOrHide_TweenGroup;
+        return tp;
+    }
+
+    /// <summary>
+    /// 新增一顯示/隱藏用的縮放效果
+    /// </summary>
+    /// <param name="parentObj">縮放效果物件的父物件</param>
+    /// <param name="scaleFrom">起始的縮放大小</param>
+    /// <param name="scaleTo">最後的縮放大小</param>
+    /// <returns>對應的TweenScale</returns>
+    public static TweenScale AddShowZoomEffect(GameObject parentObj, Vector3 scaleFrom, Vector3 scaleTo)
+    {
+        TweenScale ts = NGUITools.AddChild<TweenScale>(parentObj);
+        ts.from = scaleFrom;
+        ts.to = scaleTo;
+        ts.tweenGroup = GLOBALCONST.UI_ShowOrHide_TweenGroup;
+        return ts;
+    }
+
+
+    /// <summary>
     /// 建立忍豆豆用之提示框
     /// </summary>
     public static UIButton DialogFrame(GameObject parent)

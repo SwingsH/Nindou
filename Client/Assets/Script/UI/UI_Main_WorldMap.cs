@@ -48,8 +48,12 @@ public class UI_Main_WorldMap : GUIFormBase
         #region 每個主介面都有的部分
         // 背景圖
         UISprite backgroundPic = GUIComponents.WorldMapBackground(panel.gameObject, 0);
+        // 下方物件的parent & 對應的出現/隱藏Tween
+        TweenPosition tweenPos = GUIComponents.AddShowMoveEffect(backgroundPic.gameObject, new Vector3(0, -206, 0), Vector3.zero);
+        tweenPos.name = "bottomObjects";
+
         // 建立基本的四個按鈕：「人物」、「背包」、「商店」、「好友」
-        GUIComponents.MainMenuButtons(backgroundPic.gameObject, out _characterBtn, out _shopBtn, out _friendBtn, out _bagBtn);
+        GUIComponents.MainMenuButtons(tweenPos.gameObject, out _characterBtn, out _shopBtn, out _friendBtn, out _bagBtn);
         // 設定對應的EventDelegate
         _characterBtn.onClick.Add(new EventDelegate(this, "CharacterBtnClick"));
         _bagBtn.onClick.Add(new EventDelegate(this, "BagBtnClick"));
@@ -121,29 +125,32 @@ public class UI_Main_WorldMap : GUIFormBase
     // Use this for initialization
     //void Start()
     //{
-    //    CreateAllComponent();
+    //    //CreateAllComponent();
     //    foreach (UIButton btn in GetComponentsInChildren<UIButton>())
     //    {
-    //      //  if (btn.name.Equals("Character")) { _characterBtn = btn; }
-    //        //if (btn.name.Equals("Bag")) { _bagBtn = btn; }
-    //        //if (btn.name.Equals("Shop")) { _shopBtn = btn; }
-    //        //if (btn.name.Equals("Friend")) { _friendBtn = btn; }
-    //        //if (btn.name.Equals("HeadPicture")) { _headPictureBtn = btn; }
-    //        //if (btn.name.Equals("Menu")) { _menuBtn = btn; }
-    //        //if (btn.name.Equals("Stage")) { _stageBtn = btn; }
+    //        if (btn.name.Equals("Character")) { _characterBtn = btn; }
+    //        if (btn.name.Equals("Bag")) { _bagBtn = btn; }
+    //        if (btn.name.Equals("Shop")) { _shopBtn = btn; }
+    //        if (btn.name.Equals("Friend")) { _friendBtn = btn; }
+    //        if (btn.name.Equals("HeadPicture")) { _headPictureBtn = btn; }
+    //        if (btn.name.Equals("Menu")) { _menuBtn = btn; }
+    //        if (btn.name.Equals("Stage")) { _stageBtn = btn; }
     //    }
 
     //    foreach (UILabel label in GetComponentsInChildren<UILabel>())
     //    {
-    //        //if (label.name.Equals("StaminaText")) { _staminaText = label; }
-    //        //if (label.name.Equals("PointText")) { _pointText = label; }
-    //        //if (label.name.Equals("Warning")) { _warningText = label; }
+    //        if (label.name.Equals("StaminaText")) { _staminaText = label; }
+    //        if (label.name.Equals("PointText")) { _pointText = label; }
+    //        if (label.name.Equals("Warning")) { _warningText = label; }
     //    }
     //    foreach (UISlider slider in GetComponentsInChildren<UISlider>())
     //    {
-    //        //if (slider.name.Equals("Stamina")) { _stamina = slider; }
+    //        if (slider.name.Equals("Stamina")) { _stamina = slider; }
     //    }
-        
+    //    foreach (UIPlayTween playTween in GetComponentsInChildren<UIPlayTween>())
+    //    {
+    //        if (playTween.name.Equals("UI_Main_WorldMap")) { _uiPlayTween = playTween; }
+    //    }
     //}
 	
 	// Update is called once per frame
@@ -244,10 +251,10 @@ public class UI_Main_WorldMap : GUIFormBase
     {
         CommonFunction.DebugMsg("按下「選單」按鈕");
         // test : 增加遊戲點數
-        ++_gamePoint;
-        _pointText.text = string.Format("目前點數：{0}", _gamePoint);
-        CommonFunction.DebugMsg("增加遊戲點數");
-
+        //++_gamePoint;
+        //_pointText.text = string.Format("目前點數：{0}", _gamePoint);
+        //CommonFunction.DebugMsg("增加遊戲點數");
+        _uiPlayTween.Play(false);
     }
 
     /// <summary>

@@ -45,7 +45,7 @@ public static class CommonFunction
     }
 
     /// <summary>
-    /// use "deep search first" method with "name" for searching specific GameObject 
+    /// use "deep first search" method with "name" for searching specific GameObject 
     /// </summary>
     /// <returns></returns>
     public static GameObject FindInChildren(GameObject parent, string searchName)
