@@ -2,7 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-
+using System.Linq;
 
 ///// <summary>
 ///// 介面Type定義
@@ -26,6 +26,10 @@ public class GUIStation
     private GameControl _gameControl = null;
     private UIRoot _uiRoot = null;
 
+    // 正準備隱藏/顯示的UI，如果UI/顯示/隱藏後的delegate有需要知道該UI，由此處取得
+    public static GUIFormBase currentHideUI;
+    public static GUIFormBase currentShowUI;
+
     #region UI攝影機相關
     private Camera _camera = null;  // 顯示UI用的Camera
     private UICamera _uiCamera = null; // 為了事件處理使用
@@ -48,6 +52,12 @@ public class GUIStation
     {
         set { if (_camera != null) { _camera.depth = value; } }
     }
+
+    public LayerMask UICameraEventReceiverMask
+    {
+        set { if (_uiCamera != null) { _uiCamera.eventReceiverMask = value; } }
+    }
+    
     #endregion
 
     private Dictionary<Type, GUIFormBase> _guiReference; // GUIForm參照儲存
@@ -101,6 +111,8 @@ public class GUIStation
         _camera.nearClipPlane = -2f;
         _camera.farClipPlane = 2f;
         _camera.clearFlags = CameraClearFlags.Depth;
+
+        _uiCamera.eventReceiverMask = 1 << GLOBALCONST.LAYER_UI_BASE; // 只接收uiBase layer的事件
         #endregion
 
         _guiReference = new Dictionary<Type, GUIFormBase>();
@@ -196,6 +208,7 @@ public class GUIStation
     }
     #endregion
 
+
     /// <summary>
     /// 顯示uiType表示的ui，並且關閉其他UI
     /// </summary>
@@ -205,11 +218,8 @@ public class GUIStation
         if (!typeof(GUIFormBase).IsAssignableFrom(uiType)) {return;} // 並非繼承自GUIFormBase的uiType，不做事
 
         if (_guiReference == null) { _guiReference = new Dictionary<Type, GUIFormBase>(); }
-        // 隱藏所有UI，若確定一次只開一個，就只需關前一個
-        foreach (GUIFormBase ui in _guiReference.Values)
-        {
-            if (ui.Visible) { ui.Hide(); }
-        }
+
+        List<GUIFormBase> allVisibleUI =  _guiReference.Values.Where(ui => ui.Visible).ToList();
 
         GUIFormBase showUI;
         if (!_guiReference.TryGetValue(uiType, out showUI))
@@ -217,7 +227,28 @@ public class GUIStation
             showUI = InstantiateContainer(uiType);
             showUI.CreateUI(this);
         }
-        showUI.Show();
+
+        GUIFormBase preUI = null;
+        GUIFormBase curUI = null;
+
+        if (allVisibleUI.Count > 0)
+        {
+            foreach (GUIFormBase ui in allVisibleUI)
+            {
+                preUI = curUI;
+                curUI = ui;
+                if (preUI != null && curUI != null)
+                {
+                    preUI.AddShowOrHideFinishedDelegate(false, new EventDelegate(curUI, "Hide"));
+                }
+            }
+            curUI.AddShowOrHideFinishedDelegate(false, new EventDelegate(showUI, "Show"));
+            allVisibleUI.First().Hide();
+        }
+        else
+        {
+            showUI.Show();
+        }
     }
 
     ///// <summary>
@@ -466,10 +497,7 @@ public static class GUIComponents
         UIPlayTween retUIPlayTween = wantAttachedObj.AddComponent<UIPlayTween>();
         retUIPlayTween.tweenTarget = wantAttachedObj;
         retUIPlayTween.includeChildren = true;
-        retUIPlayTween.tweenGroup = GLOBALCONST.UI_ShowOrHide_TweenGroup; // 預設播放 顯示/隱藏 用的Tween Group
-        retUIPlayTween.ifDisabledOnPlay = AnimationOrTween.EnableCondition.EnableThenPlay;  // 在disable時播放的話，將tweenTarget先enable再播放
-        retUIPlayTween.disableWhenFinished = AnimationOrTween.DisableCondition.DisableAfterReverse; // 如果反向播放（預設顯示時為正向播放，隱藏時則為相同Tween反向播放），則播放完畢隱藏
-
+        retUIPlayTween.SetForShowOrHideTween();
         return retUIPlayTween;
     }
 

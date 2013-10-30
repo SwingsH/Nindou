@@ -216,8 +216,13 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         #region 每個主介面都有的部分
         // 背景圖
         UISprite backgroundPic = GUIComponents.MainBackground(panel.gameObject, 0);
+
+        TweenPosition bottomObjectsTween = GUIComponents.AddShowMoveEffect(backgroundPic.gameObject, new Vector3(0, -206, 0), Vector3.zero);
+        bottomObjectsTween.name = "BottomObjects";
+
         // 建立基本的四個按鈕：「人物」、「背包」、「商店」、「好友」
-        GUIComponents.MainMenuButtons(backgroundPic.gameObject, out _characterBtn, out _shopBtn, out _friendBtn, out _bagBtn);
+        //GUIComponents.MainMenuButtons(backgroundPic.gameObject, out _characterBtn, out _shopBtn, out _friendBtn, out _bagBtn);
+        GUIComponents.MainMenuButtons(bottomObjectsTween.gameObject, out _characterBtn, out _shopBtn, out _friendBtn, out _bagBtn);
         // 設定對應的EventDelegate
         _characterBtn.onClick.Add(new EventDelegate(this, "CharacterBtnClick"));
         _bagBtn.onClick.Add(new EventDelegate(this, "BagBtnClick"));
@@ -225,8 +230,11 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         _friendBtn.onClick.Add(new EventDelegate(this, "FriendBtnClick"));
         #endregion
 
+        TweenPosition stageSelectObjectsTween = GUIComponents.AddShowMoveEffect(backgroundPic.gameObject, new Vector3(0, 1061, 0), Vector3.zero);
+        stageSelectObjectsTween.name = "StageSelectObjects";
         // 關卡選擇背景圖
-        _stageSelectBackground = GUIComponents.StageFrame(backgroundPic.gameObject);
+        //_stageSelectBackground = GUIComponents.StageFrame(backgroundPic.gameObject);
+        _stageSelectBackground = GUIComponents.StageFrame(stageSelectObjectsTween.gameObject);
 
         // 場景名稱、進度的背景圖
         UISprite stageName = UIImageManager.CreateUISprite(_stageSelectBackground.gameObject, SpriteName.STAGE_TITLE_BG);
@@ -262,7 +270,7 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         _stageSelectGrid.cellHeight = 210;
         _stageSelectGrid.sorted = true;
         _stageSelectGrid.hideInactive = true;
-        _stageSelectGrid.transform.localPosition = new Vector3(0.0f, 200.0f, 0.0f);
+        _stageSelectGrid.transform.localPosition = new Vector3(0, 200, 0);
 
         UICenterOnChild tempCOC = _stageSelectGrid.gameObject.AddComponent<UICenterOnChild>();
 

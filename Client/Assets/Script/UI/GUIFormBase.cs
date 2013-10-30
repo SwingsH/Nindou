@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 /// <summary>
 /// GUI Form的基礎類別，每個UI都繼承自此
@@ -49,9 +50,9 @@ public abstract class GUIFormBase : MonoBehaviour
     protected virtual void OnDestroy()
     {
         onBeforeShowDelegate = null;
-        onAfterShowDelegate = null;
+        _onShowFinished = null;
         onBeforeHideDelegate = null;
-        onAfterHideDelegate = null;
+        _onHideFinished = null;
 
         NGUITools.Destroy(_uiPlayTween);
         _uiPlayTween = null;
@@ -77,18 +78,37 @@ public abstract class GUIFormBase : MonoBehaviour
         _uiPlayTween = GUIComponents.AddPlayShowTweenComponent(gameObject);
 
         CreateAllComponent();
+        // 剛建立好時先隱藏
+        NGUITools.SetActive(gameObject, false);
     }
 
     #endregion
+
+    void EnableEventReceiver(bool enable)
+    {
+        CommonFunction.DebugMsgFormat("{1} EnableEventReceiver ({0})", enable, name);
+        // 關閉UICamera的事件接收
+        _guistation.UICameraEventReceiverMask = (enable) ? 1 << GLOBALCONST.LAYER_UI_BASE : 0;
+        //Collider[] allCollider = GetComponentsInChildren<Collider>(true);
+        //foreach (Collider oneCollider in allCollider)
+        //{
+        //    oneCollider.enabled = enable;
+        //}
+    }
+    void EnableEventReceiver()
+    {
+        EnableEventReceiver(true);
+    }
+
     #region 顯示/隱藏UI相關
     public delegate void FormNotifyDelegate(GUIFormBase sender);
 
     //開啟或關閉介面時呼叫
     private FormNotifyDelegate onBeforeShowDelegate = null;
-    private FormNotifyDelegate onAfterShowDelegate = null;
     private FormNotifyDelegate onBeforeHideDelegate = null;
-    private FormNotifyDelegate onAfterHideDelegate = null;
 
+    List<EventDelegate> _onShowFinished = new List<EventDelegate>();
+    List<EventDelegate> _onHideFinished = new List<EventDelegate>();
 
     public bool Visible
     {
@@ -99,56 +119,90 @@ public abstract class GUIFormBase : MonoBehaviour
     {
         if (onBeforeShowDelegate != null) { onBeforeShowDelegate(this); }
         // 如果有設定顯示/隱藏的tween時，使用該tween做顯示/隱藏，否則直接設定active
+        GUIStation.currentShowUI = this; // 讓delegate可取得正在顯示的UI為此UI
+        EnableEventReceiver(false); // 關閉事件接收
+        AddShowOrHideFinishedDelegate(true, new EventDelegate(this, "EnableEventReceiver"), true); //  加入「開啟事件接收」的delegate
         if (_hasShowOrHideTween)
         {
             _uiPlayTween.tweenGroup = GLOBALCONST.UI_ShowOrHide_TweenGroup; // 避免有人中途拿去播其他tween
+            // 讓播完Tween之後，只呼叫對應的delegate
+            _uiPlayTween.onFinished.Clear();
+            _uiPlayTween.onFinished.AddRange(_onShowFinished);            
             _uiPlayTween.Play(true);
         }
         else
         {
             NGUITools.SetActive(gameObject, true);
+            EventDelegate.Execute(_onShowFinished);
         }
-        // TODO: 讓onAfterShowDelegate()在上面事情確定完成後執行
-        if (onAfterShowDelegate != null) { onAfterShowDelegate(this); }
+        ClearOneShotDelegate(_onShowFinished);
+        GUIStation.currentShowUI = null;
     }
 
     public void Hide()
     {
         if (onBeforeHideDelegate != null) { onBeforeHideDelegate(this); }
         // 如果有設定顯示/隱藏的tween時，使用該tween做顯示/隱藏，否則直接設定active
+        GUIStation.currentHideUI = this; // 讓delegate可取得正在隱藏的UI為此UI
+        EnableEventReceiver(false); // 關閉所有碰撞盒，避免在顯示動畫中就偵測到Click等動作
+        AddShowOrHideFinishedDelegate(false, new EventDelegate(this, "EnableEventReceiver"), true); //  加入「開啟事件接收」的delegate
         if (_hasShowOrHideTween)
         {
             _uiPlayTween.tweenGroup = GLOBALCONST.UI_ShowOrHide_TweenGroup; // 避免有人中途拿去播其他tween
+            // 讓播完Tween之後，只呼叫對應的delegate
+            _uiPlayTween.onFinished.Clear();
+            _uiPlayTween.onFinished.AddRange(_onHideFinished);
             _uiPlayTween.Play(false);
         }
         else
         {
             NGUITools.SetActive(gameObject, false);
+            EventDelegate.Execute(_onHideFinished);
         }
-        // TODO: 讓onAfterHideDelegate()在上面事情確定完成後執行
-        if (onAfterHideDelegate != null) { onAfterHideDelegate(this); }
+        ClearOneShotDelegate(_onHideFinished);
+        GUIStation.currentHideUI = null;
     }
 
-    public void AddFormShowDelegate(bool isBefore, FormNotifyDelegate del)
+    public void AddBeforeShowOrHideDelegate(bool isShow, FormNotifyDelegate del)
     {
-        if (isBefore) { onBeforeShowDelegate += del; }
-        else { onAfterShowDelegate += del; }
+        if (isShow) { onBeforeShowDelegate += del; }
+        else { onBeforeHideDelegate += del; }
     }
-    public void RemoveFormShowDelegate(bool isBefore, FormNotifyDelegate del)
+
+    public void RemoveBeforeShowOrHideDelegate(bool isShow, FormNotifyDelegate del)
     {
-        if (isBefore) { onBeforeShowDelegate -= del; }
-        else { onAfterShowDelegate -= del; }
+        if (isShow) { onBeforeShowDelegate -= del; }
+        else { onBeforeHideDelegate -= del; }
     }
-    public void AddFormHideDelegate(bool isBefore, FormNotifyDelegate del)
+
+    /// <summary>
+    /// 加入顯示/隱藏Tween結束後，要執行的EventDelegate
+    /// </summary>
+    /// <param name="isShow">是顯示還是隱藏Tween之後的動作</param>
+    /// <param name="finishedDelegate">要執行的EventDelegate</param>
+    /// <param name="fromFirst">是否從開頭插入</param>
+    public void AddShowOrHideFinishedDelegate(bool isShow, EventDelegate finishedDelegate, bool fromFirst = false)
     {
-        if (isBefore) { onBeforeHideDelegate += del; }
-        else { onAfterHideDelegate += del; }
+        // 每個顯示/隱藏結束的delegate必須是OneShot，否則會重複添加
+        finishedDelegate.oneShot = true;
+        List<EventDelegate> temp = (isShow) ? _onShowFinished : _onHideFinished;
+        if (fromFirst) { temp.Insert(0, finishedDelegate); }
+        else { temp.Add(finishedDelegate); }
     }
-    public void RemoveFormHideDelegate(bool isBefore, FormNotifyDelegate del)
+
+    public void RemoveShowOrFinishedDelegate(bool isShow, EventDelegate finishedDelegate)
     {
-        if (isBefore) { onBeforeHideDelegate -= del; }
-        else { onAfterHideDelegate -= del; }
+        // EventDelegate比對不考慮OneShot，故不需要特地傳入
+        if (isShow) { _onShowFinished.Remove(finishedDelegate); }
+        else { _onHideFinished.Remove(finishedDelegate); }
     }
+
+
+    void ClearOneShotDelegate(List<EventDelegate> list)
+    {
+        list.RemoveAll(ed => ed.oneShot == true);
+    }
+
     #endregion
 }
 

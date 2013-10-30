@@ -49,4 +49,16 @@ public static class NGUIExtension
         btn.hover = hoverColor;
     }
     #endregion
+    #region UIPlayTween
+    /// <summary>
+    /// 將UIPlayTween參數設定成播放ShowOrHideTween的狀態
+    /// </summary>
+    public static void SetForShowOrHideTween(this UIPlayTween pt)
+    {
+        pt.tweenGroup = GLOBALCONST.UI_ShowOrHide_TweenGroup; // 預設播放 顯示/隱藏 用的Tween Group
+        pt.ifDisabledOnPlay = AnimationOrTween.EnableCondition.EnableThenPlay;  // 在disable時播放的話，將tweenTarget先enable再播放
+        pt.disableWhenFinished = AnimationOrTween.DisableCondition.DisableAfterReverse; // 如果反向播放（預設顯示時為正向播放，隱藏時則為相同Tween反向播放），則播放完畢隱藏 
+    }
+
+    #endregion
 }
