@@ -43,9 +43,12 @@ public class UI_Start : GUIFormBase
         _inheritBtn.onClick.Add(new EventDelegate(this, "InheritClick"));
 
         // 進度條
-        _progress = GUIStation.CreateUIProgressBar(panel.gameObject, "Progress Bar_Build", new Vector3(-346, -167, 0), 2,
-                                                    SpriteName.PROGRESS_FG, SpriteName.PROGRESS_BG,
-                                                    690, 30);
+        _progress = GUIStation.CreateUIProgressBar(panel.gameObject, "Progress Bar_Build", new Vector3(-685, -167, 0), 2,
+                                                    SpriteName.SLICE_LOADING_BAR_FG, //PROGRESS_FG,
+                                                    SpriteName.SLICE_LOADING_BAR_BG, //PROGRESS_BG,
+                                                    1535, 91);
+        _progress.foreground.localPosition = new Vector3(27, 0, 0);
+        _progress.fullSize = new Vector2(1385, 28);
 
         NGUITools.SetActive(_progress.gameObject, false);
         // 進度數值

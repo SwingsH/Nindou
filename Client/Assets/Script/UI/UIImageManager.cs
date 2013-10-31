@@ -10,6 +10,14 @@ public enum SpriteName
 {
     //  UIAtlas名稱, Sprite名稱
     [EnumUISpriteConfig("", "")]                                    NONE, // 空圖
+
+    // 背景圖
+    [EnumUISpriteConfig("Atlas_Backgrounds", "BG_MainWorldMap")]    BG_MainWorldMap, // 主介面 - 世界地圖背景圖
+    [EnumUISpriteConfig("Atlas_Backgrounds", "BG_Generic")]         BG_Generic,      // 常用背景圖
+
+    [EnumUISpriteConfig("Atlas_Slices", "slice_LoadingBarBG")]      SLICE_LOADING_BAR_BG, // 讀取條的背景圖
+    [EnumUISpriteConfig("Atlas_Slices", "slice_LoadingBarFG")]      SLICE_LOADING_BAR_FG, // 讀取條的前景圖
+
     [EnumUISpriteConfig("Atlas_Slices", "slice_parchment")]         DIALOG_FRAME, // 對話提示框    
 
     [EnumUISpriteConfig("Atlas_Slices", "slice_frame_darkbrown")]   INPUT_NAME_BG, // 輸入名字的背景圖
@@ -28,7 +36,7 @@ public enum SpriteName
     [EnumUISpriteConfig("Atlas_Icons", "icon_person")]              ICON_PERSON, // 主介面的人物圖
     [EnumUISpriteConfig("Atlas_Icons", "icon_backpape")]            ICON_BAG, // 主介面的背包圖
     [EnumUISpriteConfig("Atlas_Icons", "icon_store")]               ICON_STORE, // 主介面的商店圖
-
+    [EnumUISpriteConfig("Atlas_Icons", "icon_menu")]                ICON_MENU,  // 主介面的選單圖
 
     [EnumUISpriteConfig("Atlas_Backgrounds", "nindou_3_bg")]        WORLDMAP, // 世界地圖
     [EnumUISpriteConfig("Atlas_Backgrounds", "shape1170")]          WORLDMAP_BG, // 主介面世界底圖
@@ -48,8 +56,6 @@ public enum SpriteName
     [EnumUISpriteConfig("TestAtlas", "gold")]                       POINT_PIC, // 點數指示圖
     [EnumUISpriteConfig("TestAtlas", "fb_300_main")]                BTN_INHERIT, // 繼承按鈕圖
     [EnumUISpriteConfig("TestAtlas", "Fast-forward")]               BTN_FAST_FORWARD, // 加速鈕圖
-    [EnumUISpriteConfig("SciFi Atlas", "Dark")]                     PROGRESS_BG, // 進度條底圖
-    [EnumUISpriteConfig("SciFi Atlas", "Light")]                    PROGRESS_FG, // 進度條前景圖
 }
 
 

@@ -10,8 +10,8 @@ public class UI_Main_WorldMap : GUIFormBase
     const int POINT_BG_HEIGHT = 84; // 點數底圖高
     const int POINT_PIC_WIDTH = 50; // 點數指示圖寬
     const int POINT_PIC_HEIGHT = 50; // 點數指示圖高
-    const int MENU_BG_WIDTH = 100; // 「選單」背景圖寬
-    const int MENU_BG_HEIGHT = 100; // 「選單」背景圖高
+    const int MENU_BG_WIDTH = 134; // 「選單」背景圖寬
+    const int MENU_BG_HEIGHT = 120; // 「選單」背景圖高
     const int STAGE_BG_WIDTH = 300; // 進入關卡的背景圖寬
     const int STAGE_BG_HEIGHT = 375; // 進入關卡的背景圖高
 
@@ -99,7 +99,7 @@ public class UI_Main_WorldMap : GUIFormBase
             Color.red, string.Format("目前點數：{0}", _gamePoint));
         // 「選單」按鈕
         _menuBtn = GUIStation.CreateUIButton(topObjectsTween.gameObject, "Menu", new Vector3(669, 330, 0), 2,
-            SpriteName.BTN_GENERIC_BG,
+            SpriteName.ICON_MENU,
             MENU_BG_WIDTH, MENU_BG_HEIGHT,
             GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
             Color.red, GLOBAL_STRING.MENU_BTN_TEXT);
