@@ -162,7 +162,7 @@ public class ResourceStation {
 
     #region NGUI
     /// <summary>
-    /// 從Resource取得指定的UIAtlas，除了UIImageManager之外請別呼叫此函式，基本上也不應有需要取UIAtlas來直接修改的時候
+    /// 從Resource取得指定的UIAtlas，除了UIImageManager Or Editor功能需要之外請別呼叫此函式，基本上也不應有需要取UIAtlas來直接修改的時候
     /// 若有取圖需求，請在設定好Enum SpriteName的資料後，呼叫UIImageManager.CreateUISprite()
     /// </summary>
     /// <param name="uiAtlasName"></param>

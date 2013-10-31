@@ -93,6 +93,7 @@ public class GLOBALCONST
     #endregion
     #region 路徑相關常數
     public static readonly string DIR_ASSETS = "Assets/";
+    public static readonly string DIR_RESOURCES = "Resources" + Path.AltDirectorySeparatorChar;
     // AssetBundle路徑
     public static readonly string DIR_ASSETBUNDLE = "assetbundles" + Path.AltDirectorySeparatorChar;
     public static readonly string DIR_ASSETBUNDLE_JSON = DIR_ASSETBUNDLE + "JSON" + Path.AltDirectorySeparatorChar;
