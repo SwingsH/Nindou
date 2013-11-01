@@ -10,7 +10,7 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
     /// <summary>
     /// 一個關卡的子介面
     /// </summary>
-    private class StageSubUI : GUISubFormBase
+    private class SubUI_Stage : GUISubFormBase
     {
         const int EXPLORE_PROGRESS_BG_WIDTH = 522;
         const int EXPLORE_PROGRESS_BG_HEIGHT = 148;
@@ -34,7 +34,7 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         /// <param name="stageName">要顯示的關卡名稱</param>
         /// <param name="clickEventDelegate">按下按鈕的反應函式</param>
         /// <param name="parentDraggablePanel">上層的可拖曳panel</param>
-        public StageSubUI(GameObject parent, string stageUIName, Vector3 relativePos, int depth, EventDelegate clickEventDelegate, UIDraggablePanel parentDraggablePanel)
+        public SubUI_Stage(GameObject parent, string stageUIName, Vector3 relativePos, int depth, EventDelegate clickEventDelegate, UIDraggablePanel parentDraggablePanel)
             : base(parent, stageUIName, relativePos)
         {
             // 最上層物件已經在base class中處理，此處處理拖拉的Panel
@@ -55,15 +55,15 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
             }
             // 關卡名稱＆消耗體力說明
             _stageNameText = GUIStation.CreateUILabel(_subUIRoot, "StageName", UIWidget.Pivot.Left, new Vector3(-653, 0, 0), depth + 1,
-                GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
+                UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
                 Color.white, string.Empty);
             // 「點擊觀看開啟條件」的提示文字
             _hintText = GUIStation.CreateUILabel(_subUIRoot, "HintText", UIWidget.Pivot.Left, new Vector3(-120, 0, 0), depth + 1,
-                GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
+                UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
                 Color.white, GLOBAL_STRING.STAGE_OPEN_HINT_TEXT);
             // 「未開啟」的提示文字
             _nonOpenText = GUIStation.CreateUILabel(_subUIRoot, "NonOpenText", UIWidget.Pivot.Center, new Vector3(430, 0, 0), depth + 1,
-                GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
+                UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
                 Color.red, GLOBAL_STRING.STAGE_NOT_OPEN_TEXT);
             // 探索度的背景圖
             _exploreProgressBackground = UIImageManager.CreateUISprite(_subUIRoot, SpriteName.EXPLORE_PROGRESS_BG);
@@ -74,7 +74,7 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
             // 探索度的文字
             _exploreProgressText = GUIStation.CreateUILabel(_exploreProgressBackground.gameObject, "ExploreProgressText", UIWidget.Pivot.Left,
                 new Vector3(-104, -10, 0), depth + 3,
-                GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
+                UIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
                 Color.white, string.Format(GLOBAL_STRING.STAGE_EXPLORE_PROGRESS_TEXT, 0, 1));
 
             // 取得關卡開啟/關閉時底圖SpriteName，方便之後動態切換
@@ -203,7 +203,7 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
     private UIButton _returnPreviousUIBtn; // 回到上一層的按鈕
     private UIDraggablePanel _stageSelectDraggablePanel; // 關卡選擇所在的DraggablePanel
     private UIGrid _stageSelectGrid; // 關卡選擇所在的Grid
-    private List<StageSubUI> _allSubStage = new List<StageSubUI>();
+    private List<SubUI_Stage> _allSubStage = new List<SubUI_Stage>();
     #endregion
     #region 繼承自GUIFormBase的method
     protected override void CreateAllComponent()
@@ -243,11 +243,11 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         stageName.transform.localPosition = new Vector3(-249, 342, 0);
         // 場景名稱
         _stageNameText = GUIStation.CreateUILabel(stageName.gameObject, "StageNameText", UIWidget.Pivot.Left, new Vector3(-258, -26, 0), 3,
-            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
+            UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
             Color.white, "場景名稱：靈山");
         // 場景進度
         _stageProgress = GUIStation.CreateUILabel(stageName.gameObject, "StageProgress", UIWidget.Pivot.Center, new Vector3(233, -26, 0), 3,
-            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
+            UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
             Color.white, "探索度：80%");
         // 回到上一層的按鈕
         _returnPreviousUIBtn = GUIStation.CreateUIButton(_stageSelectBackground.gameObject, "X", new Vector3(783, 321, 0), 4,
@@ -411,7 +411,7 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
     /// </summary>
     public void ClearAllStageInfo()
     {
-        foreach (StageSubUI stage in _allSubStage)
+        foreach (SubUI_Stage stage in _allSubStage)
         {
             stage.Dispose();
         }
@@ -430,7 +430,7 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
     public int AddStageInfo(bool isOpen, string stageName, int cost, int currentExploreProgress, int maxExploreProgress)
     {
         int curStageCount = _allSubStage.Count;
-        _allSubStage.Add(new StageSubUI(_stageSelectGrid.gameObject, string.Format("Stage_{0}", curStageCount), 
+        _allSubStage.Add(new SubUI_Stage(_stageSelectGrid.gameObject, string.Format("Stage_{0}", curStageCount), 
               new Vector3(-76, 150 - curStageCount * 25, 0), 5,
                 new EventDelegate(this, "SelectStage"), _stageSelectDraggablePanel));
         

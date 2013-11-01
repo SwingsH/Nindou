@@ -9,11 +9,12 @@ public class UI_Start : GUIFormBase
     public BtnClick InheritBtnClick;
     public BtnClick LoginBtnClick;
     
-    UISlider _progress;
     UIButton _inheritBtn;
     UIButton _loginBtn;
     UILabel _loginHint; // 登入說明文字
-    UILabel _progressShow;
+
+    SubUI_LoadingBar _loadingBar; // 讀取進度條
+
 
     #region 繼承自GUIFormBase的method
     protected override void CreateAllComponent()
@@ -30,7 +31,7 @@ public class UI_Start : GUIFormBase
         _loginBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         // 登入文字
         _loginHint = GUIStation.CreateUILabel(panel.gameObject, "LoginHint", UIWidget.Pivot.Center, new Vector3(0, -106, 0), 7,
-            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH,fontStyle:FontStyle.Bold),
+            UIFontManager.GetUIDynamicFont(UIFontName.MSJH,fontStyle:FontStyle.Bold),
             new Color(1.0f, 0.2f, 0.3f), GLOBAL_STRING.UI_START_HINT_1);
         // 加上event
         _loginBtn.onClick.Add(new EventDelegate(this, "LoginClick"));
@@ -43,19 +44,8 @@ public class UI_Start : GUIFormBase
         _inheritBtn.onClick.Add(new EventDelegate(this, "InheritClick"));
 
         // 進度條
-        _progress = GUIStation.CreateUIProgressBar(panel.gameObject, "Progress Bar_Build", new Vector3(-685, -167, 0), 2,
-                                                    SpriteName.SLICE_LOADING_BAR_FG, //PROGRESS_FG,
-                                                    SpriteName.SLICE_LOADING_BAR_BG, //PROGRESS_BG,
-                                                    1535, 91);
-        _progress.foreground.localPosition = new Vector3(27, 0, 0);
-        _progress.fullSize = new Vector2(1385, 28);
-
-        NGUITools.SetActive(_progress.gameObject, false);
-        // 進度數值
-        _progressShow = GUIStation.CreateUILabel(_progress.gameObject, "Progress", UIWidget.Pivot.Right, new Vector3(652.67f, -4.0f, 0), 6,
-            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle:FontStyle.Bold),
-            new Color(1.0f, 0.2f, 0.3f), "0.00");
-        _progressShow.overflowMethod = UILabel.Overflow.ResizeFreely; // fs: 讓文字佔的空間自由地重新配置
+        _loadingBar = new SubUI_LoadingBar(panel.gameObject, "LoadingBar", new Vector3(-685, -167, 0), 3);
+        _loadingBar.SetVisible(false);
     }
     #endregion
 
@@ -75,10 +65,10 @@ public class UI_Start : GUIFormBase
         _loginBtn = null;
         if (_loginHint != null) { NGUITools.Destroy(_loginHint.gameObject); }
         _loginHint = null;
-        if (_progressShow != null) { NGUITools.Destroy(_progressShow.gameObject); }
-        _progressShow = null;
-        if (_progress != null) { NGUITools.Destroy(_progress.gameObject); }
-        _progress = null;
+
+        _loadingBar.Dispose();
+        _loadingBar = null;
+        
         if (_inheritBtn != null) { NGUITools.Destroy(_inheritBtn.gameObject); }
         _inheritBtn = null;
 
@@ -92,23 +82,16 @@ public class UI_Start : GUIFormBase
     /// </summary>
     public bool IsShowLoading
     {
-        get { return NGUITools.GetActive(_progress.gameObject); }
+        get { return _loadingBar.Visible; }
     }
 
     /// <summary>
     /// 設定讀取條的進度百分比
     /// </summary>
-    public float progressPercent
+    public float ProgressPercent
     {
-        set
-        {
-            _progress.value = value / 100.0f;
-            _progressShow.text = string.Format("{0:0.00}%", value);
-        }
-        get
-        {
-            return _progress.value * 100.0f;
-        }
+        set { _loadingBar.ProgressPercent = value; }
+        get { return _loadingBar.ProgressPercent; }
     }
 
     /// <summary>
@@ -119,7 +102,7 @@ public class UI_Start : GUIFormBase
     public void SetProgressVisible(bool isVisible)
     {
         NGUITools.SetActive(_inheritBtn.gameObject, !isVisible);
-        NGUITools.SetActive(_progress.gameObject, isVisible);
+        _loadingBar.SetVisible(isVisible);
         _loginBtn.isEnabled = !isVisible;
     }
     /// <summary>
@@ -136,18 +119,6 @@ public class UI_Start : GUIFormBase
     {
         CommonFunction.DebugMsg("Click Inherit Button");
         if (InheritBtnClick != null) { InheritBtnClick(); }
-        //if (progress_test != null)
-        //{
-        //    NGUITools.Destroy(progress_test.gameObject);
-        //    //Destroy(progress_test.gameObject);
-        //    progress_test = null;
-        //}
-        //else
-        //{
-        //    progress_test = CommonFunction.CreateProgressBar(gameObject, "Progress Bar", new Vector3(-346, -167, 0), 2,
-        //    (Resources.Load("TestUI/SciFi Atlas", typeof(UIAtlas)) as UIAtlas),
-        //    "Dark", "Light", 690, 30);
-        //}
     }
 
     public void ShowNeedUpdateMode()
@@ -158,10 +129,9 @@ public class UI_Start : GUIFormBase
     public void ShowUpdatingMode()
     {
         _loginHint.text = GLOBAL_STRING.UI_START_HINT_3;
-        if (!IsShowLoading && progressPercent <= 0)
+        if (!IsShowLoading && ProgressPercent <= 0)
         {
-            CommonFunction.DebugMsg("test----");
-            progressPercent = 0.0f;
+            ProgressPercent = 0.0f;
             SetProgressVisible(true);
         }
     }

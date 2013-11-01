@@ -110,6 +110,9 @@ public abstract class GUIFormBase : MonoBehaviour
     List<EventDelegate> _onShowFinished = new List<EventDelegate>();
     List<EventDelegate> _onHideFinished = new List<EventDelegate>();
 
+    /// <summary>
+    /// 現在是否有顯示（不管看不看的到）
+    /// </summary>
     public bool Visible
     {
         get { return NGUITools.GetActive(gameObject); }
@@ -197,7 +200,6 @@ public abstract class GUIFormBase : MonoBehaviour
         else { _onHideFinished.Remove(finishedDelegate); }
     }
 
-
     void ClearOneShotDelegate(List<EventDelegate> list)
     {
         list.RemoveAll(ed => ed.oneShot == true);
@@ -209,7 +211,7 @@ public abstract class GUIFormBase : MonoBehaviour
 /// <summary>
 /// 子UI的基礎類別，為一些基本UI的集合，不能獨立產生，必須在繼承GUIFormBase的類別中產生
 /// 刪除此類型物件時，記得呼叫 Dispose()函式
-/// By Feles
+/// <para>By Feles</para>
 /// </summary>
 public class GUISubFormBase : System.IDisposable
 {
@@ -254,4 +256,16 @@ public class GUISubFormBase : System.IDisposable
 
     #endregion
 
+    /// <summary>
+    /// 現在是否有顯示（不管看不看的到）
+    /// </summary>
+    public bool Visible
+    {
+        get { return NGUITools.GetActive(_subUIRoot); }
+    }
+
+    public virtual void SetVisible(bool isVisible)
+    {
+        NGUITools.SetActive(_subUIRoot, isVisible);
+    }
 }

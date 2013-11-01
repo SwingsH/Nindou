@@ -57,7 +57,7 @@ public class HUDManager : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 
-        UIFont uifont = GUIFontManager.GetUIDynamicFont(UIFontName.BigAppleNF, UIFontSize.HUD, FontStyle.Bold);
+        UIFont uifont = UIFontManager.GetUIDynamicFont(UIFontName.BigAppleNF, UIFontSize.HUD, FontStyle.Bold);
 		if(uifont!=null) 
 			font = uifont.dynamicFont;
 		else

@@ -377,13 +377,13 @@ public class GUIStation
             UISprite back = UIImageManager.CreateUISprite(progressBarObject, background);
             back.Init(back.type, depth, UIWidget.Pivot.Left, width, height);
             back.name = "Background";
-            back.transform.localPosition = Vector3.zero;
+            back.transform.localPosition = Vector3.zero; // 因為調整pivot會影響localPosition，所以需要再次重設
         }
         // Foreground sprite
         UISprite front = UIImageManager.CreateUISprite(progressBarObject, foreground);
         front.Init(front.type, depth + 1, UIWidget.Pivot.Left, width, height);
         front.name = "Foreground";
-        front.transform.localPosition = Vector3.zero;
+        front.transform.localPosition = Vector3.zero; // 因為調整pivot會影響localPosition，所以需要再次重設
         
         // Add the slider script
         UISlider retSilder = progressBarObject.AddComponent<UISlider>();
@@ -406,7 +406,7 @@ public class GUIStation
     /// <param name="labelText">文字內容</param>
     /// <returns>建出的Label</returns>
     public static UILabel CreateUILabel(GameObject parentObj, string labelName, UIWidget.Pivot pivot, Vector3 relativePos, int depth,
-        UIFont font, Color labelColor, string labelText)
+        UIFont font, Color labelColor, string labelText, bool outline = true)
     {
         UILabel retLabel = NGUITools.AddWidget<UILabel>(parentObj);
         retLabel.pivot = pivot;
@@ -416,6 +416,7 @@ public class GUIStation
         retLabel.font = font;
         retLabel.text = labelText;
         retLabel.color = labelColor;
+        retLabel.effectStyle = (outline) ? UILabel.Effect.Outline : UILabel.Effect.None;
         retLabel.MakePixelPerfect();
         return retLabel;
     }
@@ -554,6 +555,7 @@ public static class GUIComponents
         UISprite stageFrameSprite = UIImageManager.CreateUISprite(parent, SpriteName.STAGE_FRAME);
         stageFrameSprite.Init(UISprite.Type.Sliced, 1, UIWidget.Pivot.Center, (int)(GUIStation.MANUAL_SCREEN_WIDTH * 0.95f), (int)(GUIStation.MANUAL_SCREEN_HEIGHT * 0.95f));
         stageFrameSprite.name = "StageFrame";
+        stageFrameSprite.transform.localPosition = Vector3.zero; // 因為調整pivot會影響localPosition，所以需要再次重設
 
         return stageFrameSprite;
     }
@@ -587,7 +589,7 @@ public static class GUIComponents
     public static UILabel MessageLabel(GameObject parent, string message, Color color)
     {
         UILabel label = GUIStation.CreateUILabel(parent, "DialogMessage", UIWidget.Pivot.Center, new Vector3(0, 0, 0), 7,
-            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
+            UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
                 color, message);
 
         return label;
@@ -603,7 +605,7 @@ public static class GUIComponents
         UIButton button = GUIStation.CreateUIButton(parent, "DialogButton", Vector3.zero, depth,
             SpriteName.BTN_GENERIC_BG,
             116, 94,
-            GUIFontManager.GetUIDynamicFont(UIFontName.DragonWord),
+            UIFontManager.GetUIDynamicFont(UIFontName.DragonWord),
             Color.white, showWord);
 
         return button;
@@ -618,7 +620,7 @@ public static class GUIComponents
         // todo: 不應該讓 UI 實作者處理 depth 這個參數
         UIInput input = GUIStation.CreateUIInput(parent, "NormalInput", Vector3.zero, Color.white, showWord, depth,
             SpriteName.INPUT_NAME_BG,
-            GUIFontManager.GetUIDynamicFont(UIFontName.DragonWord),
+            UIFontManager.GetUIDynamicFont(UIFontName.DragonWord),
             341, 75);
 
         return input;
@@ -636,7 +638,7 @@ public static class GUIComponents
         character = GUIStation.CreateUIButton(parent, "Chatacter", new Vector3(x, y, 0), 10,
             SpriteName.ICON_PERSON,
             (int)(136 * iconScale), (int)(115 * iconScale),
-            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
+            UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
             Color.white, GLOBAL_STRING.CHARACTER_BTN_TEXT);
         //調整文字位置
         pos = character.gameObject.GetComponentInChildren<UILabel>().transform;
@@ -647,7 +649,7 @@ public static class GUIComponents
         bag = GUIStation.CreateUIButton(parent, "Bag", new Vector3(x, y, 0), 10, 
                                         SpriteName.ICON_BAG,
                                         (int)(135 * iconScale), (int)(122 * iconScale),
-                                        GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
+                                        UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
                                         Color.white, GLOBAL_STRING.BAG_BTN_TEXT);
         //調整文字位置
         pos = bag.gameObject.GetComponentInChildren<UILabel>().transform;
@@ -658,7 +660,7 @@ public static class GUIComponents
         shop = GUIStation.CreateUIButton(parent, "Shop", new Vector3(x, y, 0), 10,
                                         SpriteName.ICON_STORE,
                                         (int)(133 * iconScale), (int)(115 * iconScale),
-                                        GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
+                                        UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
                                         Color.white, GLOBAL_STRING.SHOP_BTN_TEXT);
         //調整文字位置
         pos = shop.gameObject.GetComponentInChildren<UILabel>().transform;
@@ -669,7 +671,7 @@ public static class GUIComponents
         friend = GUIStation.CreateUIButton(parent, "Friend", new Vector3(x, y, 0), 10,
                                             SpriteName.ICON_FRIEND,
                                             (int)(136 * iconScale), (int)(122 * iconScale),
-                                            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
+                                            UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
                                             Color.white, GLOBAL_STRING.FRIEND_BTN_TEXT);
         //調整文字位置
         pos = friend.gameObject.GetComponentInChildren<UILabel>().transform;
@@ -685,6 +687,7 @@ public static class GUIComponents
         UISprite background = UIImageManager.CreateUISprite(parent, SpriteName.MAIN_BG);
         background.Init(UISprite.Type.Simple, depth, UIWidget.Pivot.Center, GUIStation.MANUAL_SCREEN_WIDTH, GUIStation.MANUAL_SCREEN_HEIGHT);
         background.name = "Background";
+        background.transform.localPosition = Vector3.zero; // 因為調整pivot會影響localPosition，所以需要再次重設
         return background;
     }
 
@@ -696,6 +699,7 @@ public static class GUIComponents
         UISprite background = UIImageManager.CreateUISprite(parent, SpriteName.WORLDMAP_BG);
         background.Init(UISprite.Type.Simple, depth, UIWidget.Pivot.Center, GUIStation.MANUAL_SCREEN_WIDTH, GUIStation.MANUAL_SCREEN_HEIGHT);
         background.name = "Background";
+        background.transform.localPosition = Vector3.zero; // 因為調整pivot會影響localPosition，所以需要再次重設
         return background;
     }
 
@@ -704,7 +708,7 @@ public static class GUIComponents
         UISprite worldMap = UIImageManager.CreateUISprite(parent, SpriteName.WORLDMAP);
         worldMap.Init(UISprite.Type.Simple, 1, UIWidget.Pivot.Center, 1760, 838);
         worldMap.name = "WorldMap";
-        worldMap.transform.localPosition = new Vector3(10, 35, 0);
+        worldMap.transform.localPosition = new Vector3(10, 35, 0); // 因為調整pivot會影響localPosition，所以需要再次重設
 
         return worldMap;
     }

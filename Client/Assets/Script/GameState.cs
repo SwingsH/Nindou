@@ -141,7 +141,7 @@ public class GameReadyToUpdate : IGameState
         control.GUIStation.Form<UI_Start>().ShowNeedUpdateMode();
         control.GUIStation.Form<UI_Start>().LoginBtnClick = GameReadyToUpdate.Change;
         // fs: 設定進度為0
-        control.GUIStation.Form<UI_Start>().progressPercent = progressPercent;
+        control.GUIStation.Form<UI_Start>().ProgressPercent = progressPercent;
     }
 
     private static void Change()
@@ -189,7 +189,7 @@ public class GameResourceUpdating : IGameState
         control.GUIStation.Form<UI_Start>().ShowUpdatingMode();
         control.GUIStation.Form<UI_Start>().LoginBtnClick = null; //更新中不能亂點唷~
         // fs: 設定進度為0
-        control.GUIStation.Form<UI_Start>().progressPercent = progressPercent;
+        control.GUIStation.Form<UI_Start>().ProgressPercent = progressPercent;
     }
 
     public void Update(GameControl control)
@@ -200,7 +200,7 @@ public class GameResourceUpdating : IGameState
         {
             // fs: 將進度百分比送給介面設定
             progressPercent += 1;
-            control.GUIStation.Form<UI_Start>().progressPercent = progressPercent;
+            control.GUIStation.Form<UI_Start>().ProgressPercent = progressPercent;
             return;
         }
         // 更新 over, 切換至 尚未登入狀態

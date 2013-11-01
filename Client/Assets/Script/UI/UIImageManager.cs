@@ -18,6 +18,8 @@ public enum SpriteName
     [EnumUISpriteConfig("Atlas_Slices", "slice_LoadingBarBG")]      SLICE_LOADING_BAR_BG, // 讀取條的背景圖
     [EnumUISpriteConfig("Atlas_Slices", "slice_LoadingBarFG")]      SLICE_LOADING_BAR_FG, // 讀取條的前景圖
 
+    [EnumUISpriteConfig("Atlas_Icons", "icon_SandFilter")]          ICON_SANDFILTER, // 讀取條左邊的沙漏圖
+
     [EnumUISpriteConfig("Atlas_Slices", "slice_parchment")]         DIALOG_FRAME, // 對話提示框    
 
     [EnumUISpriteConfig("Atlas_Slices", "slice_frame_darkbrown")]   INPUT_NAME_BG, // 輸入名字的背景圖

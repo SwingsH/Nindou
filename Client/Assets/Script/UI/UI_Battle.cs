@@ -28,16 +28,18 @@ public class UI_Battle : GUIFormBase
         UIPanel panel = NGUITools.AddChild<UIPanel>(anchor.gameObject);
         // BOSS 圖片
         _bossPic = UIImageManager.CreateUISprite(panel.gameObject, SpriteName.BOSS_PIC);
+        _bossPic.Init(_bossPic.type, 3, _bossPic.pivot, BOSS_ICON_WIDTH, BOSS_ICON_HEIGHT);
+
         //// TODO:sprite設定，之後統整出去---
         _bossPic.name = "Boss Pic";
-        _bossPic.transform.localPosition = new Vector3(-400, 440, 0);
-        _bossPic.depth = 3;
-        _bossPic.width = BOSS_ICON_WIDTH;
-        _bossPic.height = BOSS_ICON_HEIGHT;
+        _bossPic.transform.localPosition = new Vector3(-400, 440, 0); // 因為調整pivot會影響localPosition，所以需要再次重設
+        //_bossPic.depth = 3;
+        //_bossPic.width = BOSS_ICON_WIDTH;
+        //_bossPic.height = BOSS_ICON_HEIGHT;
         ////---------------------------------
         // BOSS 名稱
         _bossNameText = GUIStation.CreateUILabel(_bossPic.gameObject, "Boss Name", UIWidget.Pivot.Left, new Vector3(73, -8, 0), 4,
-            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.UI_BATTLE_BOSS_NAME, FontStyle.Bold),
+            UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.UI_BATTLE_BOSS_NAME, FontStyle.Bold),
             Color.white, "Boss名稱哈哈琳");
         // Boss HP 血條
         _bossHPBar = GUIStation.CreateUIProgressBar(_bossPic.gameObject, "Boss HP Bar", new Vector3(0, -25, 0), 1,
@@ -230,7 +232,7 @@ public class UI_Battle : GUIFormBase
         _hpBars.Add(tempHPBar);
         // 角色名字
         UILabel tempRoleName = GUIStation.CreateUILabel(tempIconBtn.gameObject, "Role Name", UIWidget.Pivot.Center, new Vector3(107, -57, 0), 4,
-            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.UI_BATTLE_ROLE_NAME, FontStyle.Bold),
+            UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.UI_BATTLE_ROLE_NAME, FontStyle.Bold),
             Color.red, "玩家一二三四");
         _roleNames.Add(tempRoleName);
     }

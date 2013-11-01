@@ -1199,7 +1199,7 @@ public class BattleLeaving :BattleState
 			#region 臨時顯示結果文字
 			//產生顯示結果的TextMesh
 			TextMesh tm = new GameObject("HUDText").AddComponent<TextMesh>();
-            UIFont uifont = GUIFontManager.GetUIDynamicFont(UIFontName.MSJH);
+            UIFont uifont = UIFontManager.GetUIDynamicFont(UIFontName.MSJH);
 			if (uifont != null)
 				tm.font = uifont.dynamicFont;
 			else

@@ -50,6 +50,7 @@ public class UI_Main_WorldMap : GUIFormBase
         UISprite backgroundPic = GUIComponents.WorldMapBackground(panel.gameObject, 0);
         // 下方物件的parent & 對應的出現/隱藏Tween
         TweenPosition bottomObjectsTween = GUIComponents.AddShowMoveEffect(backgroundPic.gameObject, new Vector3(0, -206, 0), Vector3.zero);
+        bottomObjectsTween.duration = 0.8f;
         bottomObjectsTween.name = "bottomObjects";
 
         // 建立基本的四個按鈕：「人物」、「背包」、「商店」、「好友」
@@ -63,10 +64,11 @@ public class UI_Main_WorldMap : GUIFormBase
         #endregion
         // 上方物件的parent & 對應的出現/隱藏Tween
         TweenPosition topObjectsTween = GUIComponents.AddShowMoveEffect(backgroundPic.gameObject, new Vector3(0, 323, 0), Vector3.zero);
+        topObjectsTween.duration = 0.8f;
         topObjectsTween.name = "TopObjects";
         // 玩家名稱
         _playerNameText = GUIStation.CreateUILabel(topObjectsTween.gameObject, "PlayerNameText", UIWidget.Pivot.Left, new Vector3(-691, 422, 0), 10,
-            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
+            UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
             Color.black, string.Format(GLOBAL_STRING.UI_LABEL_PLAYER_NAME, _guistation.Account.PlayerName));
         // 體力條
         _stamina = GUIStation.CreateUIProgressBar(topObjectsTween.gameObject, "Stamina", new Vector3(-698, 329, 0), 8,
@@ -77,7 +79,7 @@ public class UI_Main_WorldMap : GUIFormBase
         _stamina.value = (float)_staPoint / (float)_staMaxPoint;
         // 體力條文字
         _staminaText = GUIStation.CreateUILabel(_stamina.gameObject, "StaminaText", UIWidget.Pivot.Left, new Vector3(32, 0, 0), 10,
-            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
+            UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
             Color.white, string.Format("目前體力：{0}/{1}", _staPoint, _staMaxPoint));
         // 「人物頭像」按鈕
         _headPictureBtn = GUIStation.CreateUIButton(topObjectsTween.gameObject, "HeadPicture", new Vector3(0, 318, 0), 5,
@@ -95,13 +97,13 @@ public class UI_Main_WorldMap : GUIFormBase
         pointGraphPic.name = "PointGraph";
         pointGraphPic.transform.localPosition = new Vector3(-155, 0, 0);
         _pointText = GUIStation.CreateUILabel(pointBasePic.gameObject, "PointText", UIWidget.Pivot.Left, new Vector3(-107, -6, 0), 10,
-            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
+            UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
             Color.red, string.Format("目前點數：{0}", _gamePoint));
         // 「選單」按鈕
         _menuBtn = GUIStation.CreateUIButton(topObjectsTween.gameObject, "Menu", new Vector3(669, 330, 0), 2,
             SpriteName.ICON_MENU,
             MENU_BG_WIDTH, MENU_BG_HEIGHT,
-            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
+            UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
             Color.red, GLOBAL_STRING.MENU_BTN_TEXT);
         _menuBtn.SetColor(Color.white, Color.white, Color.grey, Color.grey);
         _menuBtn.onClick.Add(new EventDelegate(this, "MenuBtnClick"));
@@ -109,55 +111,13 @@ public class UI_Main_WorldMap : GUIFormBase
         #region 世界地圖部分
 
         TweenScale worldMapObjectsTween = GUIComponents.AddShowZoomEffect(backgroundPic.gameObject, Vector3.forward, Vector3.one);
+        worldMapObjectsTween.duration = 0.8f;
         worldMapObjectsTween.name = "WorldMapBG";
         // 世界地圖的背景圖
-        //UISprite worldMap = GUIComponents.StageFrame(backgroundPic.gameObject);
         UISprite worldMap = GUIComponents.StageFrame(worldMapObjectsTween.gameObject);
-        //// 體力條
-        //_stamina = GUIStation.CreateUIProgressBar(worldMap.gameObject, "Stamina", new Vector3(-698, 329, 0), 8,
-        //    SpriteName.HP_FG, SpriteName.ROLE_HP_BG, 438, 82);
-        //// 調整FG位置&slider全滿時大小
-        //_stamina.foreground.localPosition = new Vector3(29, 5, 0);
-        //_stamina.fullSize = new Vector2(270, 38);
-        //_stamina.value = (float)_staPoint / (float)_staMaxPoint;
-        //// 體力條文字
-        //_staminaText = GUIStation.CreateUILabel(_stamina.gameObject, "StaminaText", UIWidget.Pivot.Left, new Vector3(32, 0, 0), 10,
-        //    GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
-        //    Color.white, string.Format("目前體力：{0}/{1}", _staPoint, _staMaxPoint));
-        //// 玩家名稱
-        //_playerNameText = GUIStation.CreateUILabel(worldMap.gameObject, "PlayerNameText", UIWidget.Pivot.Left, new Vector3(-691, 422, 0), 10,
-        //    GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
-        //    Color.black, string.Format(GLOBAL_STRING.UI_LABEL_PLAYER_NAME, _guistation.Account.PlayerName));
-
-        //// 「人物頭像」按鈕
-        //_headPictureBtn = GUIStation.CreateUIButton(worldMap.gameObject, "HeadPicture", new Vector3(0, 318, 0), 5,
-        //    SpriteName.ROLE_ICON, 
-        //    220, 219, null, Color.white, string.Empty);
-        //_headPictureBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
-        //_headPictureBtn.onClick.Add(new EventDelegate(this, "HeadPictureBtnClick"));
-        //// 「點數」
-        //UISprite pointBasePic = UIImageManager.CreateUISprite(worldMap.gameObject, SpriteName.BTN_GENERIC_BG);
-        //pointBasePic.Init(pointBasePic.type, 6, pointBasePic.pivot, POINT_BG_WIDTH, POINT_BG_HEIGHT);
-        //pointBasePic.name = "Point";
-        //pointBasePic.transform.localPosition = new Vector3(347, 328, 0);
-        //UISprite pointGraphPic = UIImageManager.CreateUISprite(pointBasePic.gameObject, SpriteName.POINT_PIC);
-        //pointGraphPic.Init(pointGraphPic.type, 7, pointGraphPic.pivot, POINT_PIC_WIDTH, POINT_PIC_HEIGHT);
-        //pointGraphPic.name = "PointGraph";
-        //pointGraphPic.transform.localPosition = new Vector3(-155, 0, 0);
-        //_pointText = GUIStation.CreateUILabel(pointBasePic.gameObject, "PointText", UIWidget.Pivot.Left, new Vector3(-107, -6, 0), 10,
-        //    GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
-        //    Color.red, string.Format("目前點數：{0}", _gamePoint));
-
-        //_menuBtn = GUIStation.CreateUIButton(worldMap.gameObject, "Menu", new Vector3(669, 330, 0), 2,
-        //    SpriteName.BTN_GENERIC_BG,
-        //    MENU_BG_WIDTH, MENU_BG_HEIGHT,
-        //    GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
-        //    Color.red, GLOBAL_STRING.MENU_BTN_TEXT);
-        //_menuBtn.SetColor(Color.white, Color.white, Color.grey, Color.grey);
-        //_menuBtn.onClick.Add(new EventDelegate(this, "MenuBtnClick"));
         // 「強敵發現！！」文字
         _warningText = GUIStation.CreateUILabel(worldMap.gameObject, "Warnging", UIWidget.Pivot.Center, new Vector3(-621, 195, 0), 11,
-            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle: FontStyle.Bold),
+            UIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle: FontStyle.Bold),
             Color.red, GLOBAL_STRING.WARNING_LABEL_TEXT);
         // 「關卡」按鈕
         _stageBtn = GUIStation.CreateUIButton(worldMap.gameObject, "Stage", new Vector3(-9, -97, 0), 4,

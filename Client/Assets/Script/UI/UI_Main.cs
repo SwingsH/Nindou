@@ -93,7 +93,7 @@ public class UI_Main : GUIFormBase
         character = GUIStation.CreateUIButton(parent, "Chatacter", new Vector3(x, y, 0), 10,
             SpriteName.ICON_PERSON,
             (int)(136 * iconScale), (int)(115 * iconScale),
-            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
+            UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
             Color.white, GLOBAL_STRING.CHARACTER_BTN_TEXT);
         //調整文字位置
         pos = character.gameObject.GetComponentInChildren<UILabel>().transform;
@@ -104,7 +104,7 @@ public class UI_Main : GUIFormBase
         bag = GUIStation.CreateUIButton(parent, "Bag", new Vector3(x, y, 0), 10,
                                         SpriteName.ICON_BAG,
                                         (int)(135 * iconScale), (int)(122 * iconScale),
-                                        GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
+                                        UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
                                         Color.white, GLOBAL_STRING.BAG_BTN_TEXT);
         //調整文字位置
         pos = bag.gameObject.GetComponentInChildren<UILabel>().transform;
@@ -115,7 +115,7 @@ public class UI_Main : GUIFormBase
         shop = GUIStation.CreateUIButton(parent, "Shop", new Vector3(x, y, 0), 10,
                                         SpriteName.ICON_STORE,
                                         (int)(133 * iconScale), (int)(115 * iconScale),
-                                        GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
+                                        UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
                                         Color.white, GLOBAL_STRING.SHOP_BTN_TEXT);
         //調整文字位置
         pos = shop.gameObject.GetComponentInChildren<UILabel>().transform;
@@ -126,7 +126,7 @@ public class UI_Main : GUIFormBase
         friend = GUIStation.CreateUIButton(parent, "Friend", new Vector3(x, y, 0), 10,
                                             SpriteName.ICON_FRIEND,
                                             (int)(136 * iconScale), (int)(122 * iconScale),
-                                            GUIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
+                                            UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
                                             Color.white, GLOBAL_STRING.FRIEND_BTN_TEXT);
         //調整文字位置
         pos = friend.gameObject.GetComponentInChildren<UILabel>().transform;

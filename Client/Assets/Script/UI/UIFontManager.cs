@@ -28,7 +28,7 @@ public enum UIFontSize
 /// <summary>
 /// NGUI使用到的UIFont管理器
 /// </summary>
-public static class GUIFontManager
+public static class UIFontManager
 {
     private static GameObject _fontContainer = null; // 將動態字型掛在其上的GameObject
     private static Dictionary<string, UIFont> _uiDynamicFonts = new Dictionary<string, UIFont>();
