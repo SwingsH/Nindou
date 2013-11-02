@@ -8,6 +8,7 @@ using System.Text;
 using System.Xml.Serialization;
 using SmoothMoves;
 using Resources = UnityEngine.Resources;
+using Object = UnityEngine.Object;
 using System.Reflection;
 
 
@@ -188,31 +189,111 @@ public static class EditorTools {
 	}
 	#endregion
 
+	[MenuItem("Tools/UnloadUnuseAsset")]
+	public static void UnloadUnuseAsset()
+	{
+		Resources.UnloadUnusedAssets();
+	}
+	[MenuItem("Tools/BoneNodeTexture")]
+	public static void BoneNodeTexture()
+	{
+		Texture2D circle = AssetDatabase.LoadAssetAtPath("Assets/Circle.Asset", typeof(Texture2D)) as Texture2D;
+		TextureAtlas ta = Selection.activeObject as TextureAtlas;
+		if (!AssetDatabase.LoadAssetAtPath("Assets/TempBoneTexture", typeof(Object)))
+			AssetDatabase.CreateFolder("Assets", "TempBoneTexture");
+
+		if (ta && circle)
+		{
+			for (int index = 0; index < ta.textureGUIDs.Count; index++)
+			{
+				Texture2D ot2d = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(ta.textureGUIDs[index]), typeof(Texture2D)) as Texture2D;
+				if (ot2d)
+				{
+					GameObject newGO = GameObject.CreatePrimitive(PrimitiveType.Quad);
+					newGO.name = ot2d.name;
+					newGO.renderer.sharedMaterial = new Material(Shader.Find("Particles/Alpha Blended"));
+
+					Texture2D t2d = new Texture2D(ot2d.width, ot2d.height);
+					Vector2 offset = ta.defaultPivotOffsets[index];
+					offset.x += 0.5f;
+					offset.y += 0.5f;
+
+					offset.x *= ta.textureSizes[index].x;
+					offset.y *= ta.textureSizes[index].y;
+
+					int circleSize = 16;
+					t2d.SetPixels(new Color[t2d.width * t2d.height]);
+					for (int i = 0; i < circleSize; i++)
+					{
+						for (int j = 0; j < circleSize; j++)
+						{
+							t2d.SetPixel((int)(offset.x - circleSize / 2 + i), (int)(offset.y - circleSize / 2 + j), circle.GetPixelBilinear((float)i / circleSize, (float)j / circleSize));
+						}
+					}
+					t2d.Apply();
+					newGO.renderer.sharedMaterial.mainTexture = t2d;
+
+
+					AssetDatabase.CreateAsset(t2d, "Assets/TempBoneTexture/" + ot2d.name + ".Asset");
+				}
+			}
+		}
+	}
+
 	[MenuItem("Tools/QuickTest")]
 	public static void QuickTest()
 	{
-		Camera c = Camera.main;
-		PostEffectManager pem = c.gameObject.AddComponent<PostEffectManager>();
-		pem.TargetCamera = c;
-		pem.SetDefaultEffect_1(c, 6);
-		pem.SetDefaultEffect_2(pem, 3);
+			BoneAnimationData baData = Selection.activeObject as BoneAnimationData;
+			baData.needsRebuilt = true;
+			if (baData)
+			{
+				foreach (string i in baData.boneTransformPaths)
+					Debug.Log(i);
+				foreach (BoneData bd in baData.boneDataList)
+				{
+					Debug.Log(bd.boneName);
+				}
+			}
 	}
 
-	static void paramstest(params KeyValuePair<string,object>[] objs)
-	{
-		Debug.Log(objs.Length);
-	}
 	[MenuItem("Tools/QuickTest1")]
 	public static void QuickTest1()
 	{
-		object obj = new List<SkillData>();
-        TextAsset ta = Resources.Load(GLOBALCONST.DIR_RESOURCES_DATA + GLOBALCONST.FILENAME_SKILL, typeof(TextAsset)) as TextAsset;
-		
-		DataUtility.DeserializeObject(ta.text,ref obj);
-		Debug.Log((obj as List<SkillData>).Count);
-		foreach (SkillData sd in obj as List<SkillData>)
+		Color[] png = null;
+		Texture2D temp = null;
+		foreach (Texture2D t2d in Selection.objects)
 		{
-			Debug.Log(sd.Name);
+			if (t2d)
+			{
+				if (png == null)
+				{
+					png = t2d.GetPixels();
+					temp = new Texture2D(t2d.width, t2d.height);
+					continue;
+				}
+				Color[] t2dColor = t2d.GetPixels();
+				if (t2dColor.Length != png.Length)
+					continue;
+				for (int i = 0; i < png.Length; i++)
+				{
+					png[i] = Color.Lerp(png[i], t2dColor[i], t2dColor[i].a);
+				}
+			}
+		}
+		if (!AssetDatabase.LoadAssetAtPath("Assets/TempBoneTexture", typeof(Object)))
+			AssetDatabase.CreateFolder("Assets", "TempBoneTexture");
+		if (png != null)
+		{
+			string path = Application.dataPath + "/TempBoneTexture/BoneCombine.png";
+			temp.SetPixels(png);
+			temp.Apply();
+
+			FileStream fs = File.Open(path, FileMode.Create);
+			byte[] pngs = temp.EncodeToPNG();
+			fs.Write(pngs, 0, pngs.Length);
+			fs.Close();
+
+			AssetDatabase.Refresh();
 		}
 	}
 	[MenuItem("Tools/QuickTest2")]
@@ -223,5 +304,18 @@ public static class EditorTools {
 			return;
 		BuildPipeline.BuildAssetBundle(Selection.activeObject, null, path, BuildAssetBundleOptions.CollectDependencies, BuildTarget.Android);
 		
+	}
+
+	[MenuItem("Tools/CopyLocalPosition")]
+	public static void CopyLocalPosition()
+	{
+		if(Selection.activeGameObject)
+		{
+			TextEditor te = new TextEditor();
+			Vector3 v3 = Selection.activeGameObject.transform.localPosition;
+			te.content = new GUIContent(string.Format("({0:0.00}f,{1:0.00}f,{2:0.00}f)", v3.x, v3.y, v3.z));
+			te.SelectAll();
+			te.Copy();
+		}
 	}
 }

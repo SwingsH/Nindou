@@ -1,0 +1,11 @@
+左手 HandL
+右手 HandR
+頭 Head
+眼睛/臉 Eyes
+頭髮 Hair
+頭飾 Headdress
+左腳 LegL
+右腳 LegR
+身體 Body
+武器左 WeaponL
+武器右 WeaponR

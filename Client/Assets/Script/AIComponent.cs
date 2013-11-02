@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-
+using System.Linq;
 // 目前動作的狀態
 public enum ActionState
 {
@@ -52,18 +52,18 @@ public class NinDoAttackComponent : ActionComponent
 		if (Target == null)
 			return;
 		//攻擊前先面對目標
-		if(Target.Pos.x == unit.Pos.x)
+		if (Target.BasePos.x == unit.BasePos.x)
 			//x相等面對哪邊都沒差了，用畫面上的位置看起來比較不會那麼奇怪
 			unit.Direction = Target.ScreenPos.x - unit.ScreenPos.x > 0 ? eDirection.Right : eDirection.Left;
 		else
-			unit.Direction = Target.Pos.x - unit.Pos.x > 0 ? eDirection.Right : eDirection.Left;
+			unit.Direction = Target.BasePos.x - unit.BasePos.x > 0 ? eDirection.Right : eDirection.Left;
 
 		//無法進行普通攻擊則跳出
 		if (unit.CurrentCast == null || !unit.CurrentCast.Castable)
 			return;
 		
 		//判斷攻擊範圍
-		if (BattleManager.CheckInRange(unit.AttackRangeMode, unit.Pos, unit.Direction, unit.AttackRange, Target.Pos))
+		if (BattleManager.CheckInRange(unit.AttackRangeMode, unit, unit.Direction, unit.AttackRange, Target))
 		{
 			unit.CastCurrentSkill();
 		}
@@ -77,7 +77,7 @@ public class NinDoAttackComponent : ActionComponent
 				return ActionState.Unavailable;
 			if (unit.IsCasting)
 				return ActionState.Busy;
-			if (unit.CurrentCast == null || !unit.CurrentCast.Castable || !BattleManager.CheckInRange(unit.AttackRangeMode, unit.Pos, (Target.Pos.x - unit.Pos.x) > 0 ? eDirection.Right : eDirection.Left, unit.AttackRange, Target.Pos))
+			if (unit.CurrentCast == null || !unit.CurrentCast.Castable || !BattleManager.CheckInRange(unit.AttackRangeMode, unit, eDirection.Both, unit.AttackRange, Target))
 				return ActionState.Unavailable;
 			return ActionState.Idle; 
 		}
@@ -109,9 +109,9 @@ public class SimpleMoveComponent : ActionComponent
 		{
 			if (Target != GridPos.Null)
 			{
-				if (unit.Pos != Target)
+				if (unit.BasePos != Target)
 				{
-					GridPos tempLast = unit.Pos;
+					GridPos tempLast = unit.BasePos;
 					GridPos tempNext = FindNext(Target);
 					if (BattleManager.MoveUnit(unit, tempNext))
 					{
@@ -127,9 +127,12 @@ public class SimpleMoveComponent : ActionComponent
 			}
 		}
 	}
+	/// <summary>
+	/// 移動實際座標
+	/// </summary>
 	protected virtual bool Moving()
 	{
-		Vector3 nextV3 = BattleManager.Get_GridWorldPos(unit.Pos);
+		Vector3 nextV3 = BattleManager.Get_GridWorldPos(unit.BasePos,unit.Size);
 		if (unit.WorldPos != nextV3)
 		{
 			unit.Direction = (nextV3.x - unit.WorldPos.x) > 0 ? eDirection.Right : ((nextV3.x - unit.WorldPos.x) < 0 ? eDirection.Left : unit.Direction);
@@ -149,15 +152,15 @@ public class SimpleMoveComponent : ActionComponent
 
 	protected GridPos FindNext(GridPos targetPos)
 	{
-		GridPos tempNext = unit.Pos;
+		GridPos tempNext = unit.BasePos;
 		List<GridPos> empty = Get_CanMoveGrid();
-		RandomizeOrderList(ref empty);
-		float Score = GetDistanceScore(unit.Pos, targetPos);
+		empty.RandomizeListOrder();
+		float Score = GetDistanceScore(unit.BasePos, targetPos);
 		foreach (GridPos gp in empty)
 		{
 			float tempScore = GetDistanceScore(gp, targetPos);
 			if (Last.Contains(gp))
-				tempScore -= 2;
+				tempScore -= 3;
 			if (tempScore > Score)
 			{
 				Score = tempScore;
@@ -168,7 +171,21 @@ public class SimpleMoveComponent : ActionComponent
 	}
 	protected virtual List<GridPos> Get_CanMoveGrid()
 	{
-		return BattleManager.Get_SurroundEmptyGrid(unit.Pos);
+		List<GridPos> result = new List<GridPos>();
+		foreach (GridPos selfPos in unit.Pos)
+		{
+			foreach (GridPos gp in BattleManager.Get_SurroundEmptyGrid(selfPos))
+			{
+				if (gp == unit.BasePos)
+					continue;
+				if (BattleManager.Movable(unit, gp))
+				{
+					if(!result.Contains(gp))
+						result.Add(gp);
+				}
+			}
+		}
+		return result;
 	}
 	public override ActionState State
 	{
@@ -176,9 +193,9 @@ public class SimpleMoveComponent : ActionComponent
 		{
 			if (Target == GridPos.Null)
 				return ActionState.Idle;
-			if (unit.Pos != Target)
+			if (unit.BasePos != Target)
 				return ActionState.Busy;
-			if (unit.WorldPos != BattleManager.Get_GridWorldPos(unit.Pos))
+			if (unit.WorldPos != BattleManager.Get_GridWorldPos(unit.BasePos,unit.Size))
 				return ActionState.Busy;
 			return ActionState.Idle;
 		}
@@ -189,16 +206,6 @@ public class SimpleMoveComponent : ActionComponent
 		return -GridPos.SimpleDistance(pos1,pos2);
 	}
 
-	protected void RandomizeOrderList<T>(ref List<T> list)
-	{
-		for (int i = 0; i < list.Count; i++)
-		{
-			T tempT = list[i];
-			int RandomI = Random.Range(0, list.Count);
-			list[i] = list[RandomI];
-			list[RandomI] = tempT;
-		}
-	}
 }
 
 //移動的模式
@@ -210,9 +217,8 @@ public enum eMoveState : int
 /// <summary>
 /// 移動到指定目標在範圍內
 /// </summary>
-public class MoveInRangeComponent : SimpleMoveComponent
+public class TracingComponent : SimpleMoveComponent
 {
-
 	//中繼目標，依移動模式決定移動到哪裡
 	protected GridPos SubTarget = GridPos.Null;
 
@@ -275,40 +281,41 @@ public class MoveInRangeComponent : SimpleMoveComponent
 	{
 		if (!Moving())
 		{
-			if (Target != GridPos.Null)
-			{	
+			if (unit !=  null && unit.TargetUnit != null)
+			{
+				bool alreadyInRange = BattleManager.CheckInRange(RangeMode, unit, eDirection.Both, Range, unit.TargetUnit);
+
 				//決定下一格的位置
-				//判斷SubTarget的格子是不是空的，不是的話重新找一個SubTarget
-				if (ResetMoveCount < 0 
-					|| SubTarget == GridPos.Null 
-					|| (!BattleManager.Get_IsGridEmpty(SubTarget) && SubTarget != unit.Pos)
-					|| !BattleManager.CheckInRange(RangeMode,Target,eDirection.Both,Range,SubTarget))
+				if (ResetMoveCount < 0 //移動多次不到定位重新取得SubTarget
+					|| SubTarget == GridPos.Null
+					|| (!BattleManager.Get_IsGridEmpty(SubTarget))
+					|| !alreadyInRange)
 				{
 					FindSubTarget();	
 				}
 
 				//找下一格要移到哪
-				if (SubTarget != GridPos.Null && SubTarget != unit.Pos)
+				if (SubTarget != GridPos.Null)
 				{
 					if (unit.MoveSpeed == 0)
 						return;
 					//如果已經移動到範圍內的話，計算一下現在的位置跟SubTarget的分數，較高就停止移動
-					if (BattleManager.Get_Grids(RangeMode, Target, eDirection.Both, Range).Contains(unit.Pos))
+					if (alreadyInRange)
 					{
-						float targetScore = GetDistanceScore(SubTarget, Target) * (int)MoveState + GetDistanceScore(SubTarget, unit.Pos) * 2;
-						float curScore = GetDistanceScore(unit.Pos, Target) * (int)MoveState;
+						float targetScore = GetDistanceScore(SubTarget, Target) * (int)MoveState + GetDistanceScore(SubTarget, unit.BasePos) * 2;
+						float curScore = GetDistanceScore(unit.BasePos, Target) * (int)MoveState;
 
 						if (curScore >= targetScore)
 						{
-							SubTarget = unit.Pos;
+							SubTarget = unit.BasePos;
 							return;
 						}
 					}
 
 					//找下一格
-					GridPos tempLast = unit.Pos;
+					GridPos tempLast = unit.BasePos;
 					GridPos tempNext = FindNext(SubTarget);
-					if (unit.Pos != tempNext)
+					if (unit.BasePos != tempNext)
 					{
 						if (BattleManager.MoveUnit(unit, tempNext))
 						{
@@ -327,40 +334,79 @@ public class MoveInRangeComponent : SimpleMoveComponent
 	}
 	protected void FindSubTarget()
 	{
-		//重設，找不到空格的話會停止移動
-		//SubTarget = GridPos.Null;
 		int MoveStateFix = 1;
 		int outRangeFix = 0;
 
-		//因為我可以打到他的話他也可以打到我，所以以目標為中心，找範圍內的空格
-		List<GridPos> emptyGrid = BattleManager.Get_EmptyGrid(unit.AttackRangeMode, Target, eDirection.Both, unit.AttackRange);
-		//沒空格就到預設的範圍內找分數最高的格子
-		if (emptyGrid.Count == 0)
+		//因為有多格，先取離對方最近的格子
+		GridPos closestPos = GridPos.Null;//離目標最近的自己的格子
+		GridPos closestTargetPos = GridPos.Null;//離自己最近的目標的格子
+
+		if(unit == null || unit.TargetUnit == null)
 		{
-			emptyGrid = BattleManager.Get_EmptyGrid(0, Target, eDirection.Both, unit.AttackRange + 1);
-			MoveStateFix = (int)Mathf.Sign((int)MoveState);
-			outRangeFix = -Range * 5;
+			SubTarget = GridPos.Null;
+			return;
 		}
-		//隨機list的順序，這樣同分的話不會每次都走同一個
-		RandomizeOrderList(ref emptyGrid);
+		bool cantApproch = true;
 		float Score = float.MinValue;
-		if (SubTarget == unit.Pos || BattleManager.Get_IsGridEmpty(SubTarget))
+
+		//計算目前的SubTarget的分數
+		if (SubTarget == unit.BasePos || BattleManager.Movable(unit, SubTarget))
 		{
-			Score = GetDistanceScore(SubTarget, Target) * (int)MoveState * MoveStateFix + GetDistanceScore(SubTarget, unit.Pos) * 2;
-			if (!BattleManager.CheckInRange(RangeMode, Target, eDirection.Both, Range, SubTarget))
+			BattleManager.GetClosestPos(SubTarget, unit.Size,unit.TargetUnit.BasePos,unit.TargetUnit.Size, out closestPos,out closestTargetPos);
+			Score = GetDistanceScore(closestPos, closestTargetPos) * (int)MoveState * MoveStateFix + GetDistanceScore(SubTarget, unit.BasePos) * 2;
+			//不在範圍中的減分
+			if (!BattleManager.CheckInRange(RangeMode, closestPos, eDirection.Both, Range, closestTargetPos))
 				Score -= Range * 5;
 		}
-		foreach (GridPos gp in emptyGrid)
+
+		//因為我可以打到他的話他也可以打到我，所以以目標為中心，找範圍內的空格
+		//計算所有可以打到目標的位置的分數
+
+		//取得可移動的位置，回傳值為basePos
+		List<GridPos> movableGrid = BattleManager.Get_MovablePos_AroundTarget_InAttackRange(unit, unit.TargetUnit, RangeMode, Range);
+		if (movableGrid.Count != 0)
+			cantApproch = false;
+		//隨機list的順序，這樣同分的話不會每次都走同一個
+		movableGrid.RandomizeListOrder();
+		foreach (GridPos gp in movableGrid)
 		{
+			//計算當basepos在gp跟target的最近距離的格子
+			BattleManager.GetClosestPos(SubTarget, unit.Size, unit.TargetUnit.BasePos, unit.TargetUnit.Size, out closestPos, out closestTargetPos);
 			//分數，簡單計算x差幾格y差幾格
-			float tempScore = GetDistanceScore(gp, Target) * (int)MoveState * MoveStateFix + GetDistanceScore(gp, unit.Pos) * 2;
-			tempScore += outRangeFix;
+			float tempScore = GetDistanceScore(closestPos, closestTargetPos) * (int)MoveState * MoveStateFix + GetDistanceScore(gp, unit.BasePos) * 2;
 			if (tempScore > Score)
 			{
 				Score = tempScore;
 				SubTarget = gp;
 			}
 		}
+
+		//目前無法靠近對方
+		//加大一格範圍，
+		if (cantApproch)
+		{
+			movableGrid = BattleManager.Get_MovablePos_AroundTarget_InAttackRange(unit, unit.TargetUnit, RangeMode, Range + unit.Size + 1);
+			//隨機list的順序，這樣同分的話不會每次都走同一個
+			movableGrid.RandomizeListOrder();
+			MoveStateFix = (int)Mathf.Sign((int)MoveState);
+			outRangeFix = -Range * 5; //不在範圍中的減分
+
+			foreach (GridPos gp in movableGrid)
+			{
+				//計算當basepos在gp跟target的最近距離的格子
+				BattleManager.GetClosestPos(gp, unit.Size, unit.TargetUnit.BasePos, unit.TargetUnit.Size, out closestPos, out closestTargetPos);
+				//分數，簡單計算x差幾格y差幾格
+				float tempScore = GetDistanceScore(closestPos, closestTargetPos) * (int)MoveState * MoveStateFix + GetDistanceScore(gp, unit.BasePos) * 2;
+				tempScore += outRangeFix;
+				if (tempScore > Score)
+				{
+					Score = tempScore;
+					SubTarget = gp;
+				}
+			}
+		}
+		
+		
 		//閒晃太多次移動不到目標的話就重新找一個
 		ResetMoveCount = 10;
 	}
@@ -374,13 +420,24 @@ public class MoveInRangeComponent : SimpleMoveComponent
 		}
 	}
 
+	protected List<GridPos> Get_MovablePos_AroundTargetPos(GridPos targetPos)
+	{
+		List<GridPos> result = new List<GridPos>();
+		foreach (GridPos gp in BattleManager.Get_Grids(RangeMode, targetPos,eDirection.Both,Range))
+		{
+			if (BattleManager.Movable(unit, gp))
+				result.Add(gp);
+		}
+		return result;
+	}
+
 	protected virtual float Get_UnavailableTime()
 	{
 		return 0;
 	}
 }
 
-public class TeleportInRangeComponent : MoveInRangeComponent
+public class TeleportInRangeComponent : TracingComponent
 {
 	const float DefaultAnimTime = 0.1f;
 	const float MaxWaitingTime = 1.5f;
@@ -389,7 +446,7 @@ public class TeleportInRangeComponent : MoveInRangeComponent
 	{
 		if (unit == null)
 			return false;
-		Vector3 nextV3 = BattleManager.Get_GridWorldPos(unit.Pos);
+		Vector3 nextV3 = BattleManager.Get_GridWorldPos(unit.BasePos,unit.Size);
 		if (unit.WorldPos != nextV3)
 		{
 			unit.Direction = (nextV3.x - unit.WorldPos.x) > 0 ? eDirection.Right : ((nextV3.x - unit.WorldPos.x) < 0 ? eDirection.Left : unit.Direction);
@@ -418,7 +475,15 @@ public class TeleportInRangeComponent : MoveInRangeComponent
 	{
 		if (unit == null)
 			return new List<GridPos>();
-		return BattleManager.Get_EmptyGrid(0, unit.Pos, eDirection.Both, unit.MoveSpeed);	
+		List<GridPos> result = new List<GridPos>();
+		foreach (GridPos gp in BattleManager.Get_EmptyGrid(0, unit.BasePos, eDirection.Both, unit.MoveSpeed))
+		{
+			if (gp == unit.BasePos)
+				continue;
+			if (BattleManager.Movable(unit, gp))
+				result.Add(gp);
+		}
+		return result;
 	}				
 
 	public override ActionState State
@@ -440,7 +505,7 @@ public class TeleportInRangeComponent : MoveInRangeComponent
 		if (Last.Count > 0)
 		{
 			if (unit.MoveSpeed != 0)
-				return Time.time + DefaultAnimTime + MaxWaitingTime * GridPos.SimpleDistance(Last[Last.Count - 1], unit.Pos) / unit.MoveSpeed;
+				return Time.time + DefaultAnimTime + MaxWaitingTime * GridPos.SimpleDistance(Last[Last.Count - 1], unit.BasePos) / unit.MoveSpeed;
 		}
 		return 0;
 	}

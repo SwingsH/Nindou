@@ -35,11 +35,12 @@ public class UnitGenerater{
 		actUnit.ActiveSkills = activeSkill;
 		actUnit.MaxLife = info.MaxLife;
 		actUnit.Life = info.MaxLife;
+		actUnit.Size = info.Size;
 		actUnit.MoveSpeed = info.MoveSpeed;
 		if (info.MoveMode == 1)
 			actUnit.MoveAction = new TeleportInRangeComponent();
 		else
-			actUnit.MoveAction = new MoveInRangeComponent();
+			actUnit.MoveAction = new TracingComponent();
 		Sprite[] sprites;
 		actUnit.Entity = GenerateEntity(info.BoneName, info.spriteNames, out sprites);
 		actUnit.Sprites = sprites;
@@ -93,12 +94,12 @@ public class UnitGenerater{
 	/// <param name="spriteInfo">圖片名稱</param>
 	public static void SetModelSprite(Sprite[] sprites, string[] spriteInfo)
 	{
-		if (sprites == null || spriteInfo == null || sprites.Length != spriteInfo.Length)
+		if (sprites == null || spriteInfo == null)
 		{
 			Debug.LogError("Set Sprite Data Error");
 			return;
 		}
-		for(int i = 0 ; i < sprites.Length ; i++)
+		for (int i = 0; i < sprites.Length && i < spriteInfo.Length; i++)
 		{
 			if(sprites[i] == null)
 				continue;

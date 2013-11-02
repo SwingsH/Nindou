@@ -6,6 +6,9 @@ using System.Collections.Generic;
 //目前只有跳血數字顯示
 public class HUDManager : MonoBehaviour {
 
+	const string FONT_SHADER = "GUI/3D Text Shader";
+	const string BORDER_SHADER = "Custom/Text Border(Only) Shader";
+
 	static int _displayLayer;
 	public static int DisplayLayer
 	{
@@ -48,7 +51,38 @@ public class HUDManager : MonoBehaviour {
 		return hud;
 	}
 
-	Font font;
+	Font _font;
+	Font font
+	{
+		get
+		{
+			return _font;
+		}
+		set
+		{
+			_font = value;
+			if (_font != null)
+			{
+				Shader textShader = Shader.Find(FONT_SHADER);
+				Shader borderShader = Shader.Find(BORDER_SHADER);
+				if (borderShader != null)
+				{
+					fontMaterials = new Material[2];
+					fontMaterials[1] = new Material(_font.material);
+					fontMaterials[1].shader = textShader;
+					fontMaterials[0] = new Material(_font.material);
+					fontMaterials[0].shader = borderShader;
+				}
+				else
+				{
+					fontMaterials = new Material[1];
+					fontMaterials[0] = _font.material;
+				}
+				
+			}
+		}
+	}
+	Material[] fontMaterials;
 	Dictionary<long, HUDTextInfo> GroupText = new Dictionary<long, HUDTextInfo>();
 	List<HUDTextInfo> DisplayText = new List<HUDTextInfo>();
 	//暫存不用的text
@@ -123,7 +157,10 @@ public class HUDManager : MonoBehaviour {
 		tm.fontSize = 30;
 		tm.characterSize = 20;
 		tm.anchor = TextAnchor.MiddleCenter;
-		tm.renderer.sharedMaterial = font.material;
+		if(fontMaterials != null)
+			tm.renderer.sharedMaterials = fontMaterials;
+		else
+			tm.renderer.sharedMaterial = font.material;
 		result.textComponent = tm;
 		tm.transform.parent = this.transform;
 		tm.transform.localRotation = Quaternion.identity;

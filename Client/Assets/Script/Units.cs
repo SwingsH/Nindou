@@ -12,7 +12,41 @@ public abstract class Unit
 	}
 
 	public abstract void Run();
-	public GridPos Pos;
+	/// <summary>
+	/// 最左下角的格子座標
+	/// </summary>
+	public GridPos BasePos
+	{
+		get
+		{
+			if (Pos.Length > 0)
+				return Pos[0, 0];
+			else
+				return GridPos.Null;
+		}
+	}
+	//格子座標←看情況，這個可能不需存在了 2013.10.28
+	public GridPos[,] Pos = new GridPos[1,1];
+
+	/// <summary>
+	/// 判斷是否為自己的一部份
+	/// </summary>
+	public bool IsSelf(GridPos gridPos)
+	{
+		int dx = gridPos.x - BasePos.x;
+		int dy = gridPos.y - BasePos.y;
+		return dx >= 0 && dy >= 0 && dx < Size && dy < Size;
+	}
+
+	protected byte _size;
+	//unit佔的格子大小
+	//暫時不做resize
+	public byte Size
+	{
+		get { return (byte)Mathf.Max(_size, 1); }
+		set { _size = value; }
+	}
+
 	public eDirection Direction;
 	public Vector3 WorldDirection
 	{
@@ -21,10 +55,15 @@ public abstract class Unit
 	public Vector3 WorldPos;
 	public Vector3 ScreenPos
 	{
-		get { return BattleManager.GetRealWorldPos(WorldPos); }
+		get { return BattleManager.Get_RealWorldPos(WorldPos); }
 	}
 	public Color c = Color.white;
 	public eGroup Group;
+
+	public bool IsAlive
+	{
+		get { return Life > 0; }
+	}
 
 	public virtual uint MaxLife
 	{
@@ -36,24 +75,15 @@ public abstract class Unit
 		get;
 		set;
 	}
-
+	
 	public abstract void Damaged(DamageInfo info);
 
 	public virtual void Draw(Color color)
 	{
-		if (Entity)
-			return;
-		Gizmos.color = color * c;
-		Gizmos.DrawSphere(WorldPos + Vector3.up *0.15f, 0.2f);
-		Gizmos.color = Color.blue;
-		switch (Direction)
+		foreach (GridPos gp in Pos)
 		{
-			case eDirection.Left:
-				Gizmos.DrawLine(WorldPos + Vector3.up * 0.4f, WorldPos + Vector3.up * 0.4f + Vector3.left * 0.2f);
-				break;
-			case eDirection.Right:
-				Gizmos.DrawLine(WorldPos + Vector3.up * 0.4f, WorldPos + Vector3.up * 0.4f + Vector3.right * 0.2f);
-				break;
+			if (gp != GridPos.Null)
+				BattleManager.Instance.DrawGrid(gp, color);
 		}
 	}
 
@@ -61,8 +91,8 @@ public abstract class Unit
 	{
 		string result = base.ToString();
 		result += string.Format("\nEntity:{0}", Entity == null ? "null":Entity.name);
-		result += string.Format("\nGridPos:{0}", Pos);
-		result += string.Format("\nGridWorldPos:{0}", BattleManager.Get_GridWorldPos(Pos));
+		result += string.Format("\nGridPos:{0}", BasePos);
+		result += string.Format("\nGridWorldPos:{0}", BattleManager.Get_GridWorldPos(BasePos,Size));
 		result += string.Format("\nWorldPos:{0}", WorldPos);
 		if(Entity != null)
 			result += string.Format("\nEntityPos:{0}", Entity.transform.position);
@@ -306,7 +336,8 @@ public class AnimUnit : Unit
 
         for (int i = 0; i < Sprites.Length; i++)
         {
-            Sprites[i].SetColor(newColor);
+			if(Sprites[i] != null)
+				Sprites[i].SetColor(newColor);
         }
     }
 
@@ -371,16 +402,16 @@ public class ActionUnit : AnimUnit
 	{
 		get
 		{
-			if (_moveAction is MoveInRangeComponent)
+			if (_moveAction is TracingComponent)
 			{
-				return (_moveAction as MoveInRangeComponent).MoveState;
+				return (_moveAction as TracingComponent).MoveState;
 			}
 			return eMoveState.Closer;
 		}
 		protected set
 		{
-			if (_moveAction is MoveInRangeComponent)
-				(_moveAction as MoveInRangeComponent).MoveState = value;
+			if (_moveAction is TracingComponent)
+				(_moveAction as TracingComponent).MoveState = value;
 		}
 	}
 
@@ -396,8 +427,12 @@ public class ActionUnit : AnimUnit
 			if (Anim != null)
 				Anim.UnregisterUserTriggerDelegate(AnimUserTriggerDelegate);
 			base.Anim = value;
-			if(value !=null)
+			if (value != null)
+			{
 				Anim.RegisterUserTriggerDelegate(AnimUserTriggerDelegate);
+				Anim.Play(AnimationSetting.WALK_ANIM);
+				Anim.Play(AnimationSetting.IDLE_ANIM);
+			}
 			StopWalk();
 		}
 	}
@@ -587,21 +622,21 @@ public class ActionUnit : AnimUnit
 
 		TargetUnit = FindAttackTarget(eTargetMode.Closest);
 		if (TargetUnit != null)
-			MoveAction.Target = TargetUnit.Pos;
+			MoveAction.Target = TargetUnit.BasePos;
 		else
 			MoveAction.Target = GridPos.Null;
 		
 		if (Entity)
 		{
-			Entity.transform.position =BattleManager.GetRealWorldPos(WorldPos);
+			Entity.transform.position =BattleManager.Get_RealWorldPos(WorldPos);
 			Entity.transform.rotation = Camera.main.transform.rotation;
 			switch (Direction)
 			{
 				case eDirection.Left:
-					Entity.transform.localScale =new Vector3(-1,1,1);
+					Entity.transform.localScale = Vector3.one * Size;
 					break;
 				default:
-					Entity.transform.localScale = Vector3.one;
+					Entity.transform.localScale =new Vector3(-1,1,1) * Size;
 					break;
 			}
 		}
@@ -632,22 +667,31 @@ public class ActionUnit : AnimUnit
 				{
 					Unit result = TargetUnit;
 					float rScore = float.MinValue;
-					if (TargetUnit != null)
+					if (TargetUnit != null && result.IsAlive)
 					{
-						rScore = -GridPos.SimpleDistance(Pos, TargetUnit.Pos);
-						if (BattleManager.CheckInRange(AttackRangeMode, Pos, eDirection.Both, AttackRange, TargetUnit.Pos))
+						GridPos closestPos = GridPos.Null;//離目標最近的自己的格子
+						GridPos closestTargetPos = GridPos.Null;//離自己最近的目標的格子
+						BattleManager.GetClosestPos(this, TargetUnit, out closestPos, out closestTargetPos);
+						rScore = -GridPos.SimpleDistance(closestPos, closestTargetPos);
+						if (BattleManager.CheckInRange(AttackRangeMode, this, eDirection.Both, AttackRange, TargetUnit))
 							rScore += 2;
-						else if(BattleManager.Get_EmptyGrid(AttackRangeMode,TargetUnit.Pos,eDirection.Both, AttackRange).Count == 0)
-							rScore -= 20 ;
+						else if (BattleManager.Get_MovablePos_AroundTarget_InAttackRange(this,TargetUnit,AttackRangeMode, AttackRange).Count == 0)
+							rScore -= 20;
 					}
+					else
+						result = null;
 					foreach (Unit u in BattleManager.Get_AllEnemyUnits(Group))
 					{
-						if (u == null)
+						if (u == null || !u.IsAlive)
 							continue;
-						float uScore = -GridPos.SimpleDistance(Pos, u.Pos);
-						if (BattleManager.CheckInRange(AttackRangeMode, Pos, eDirection.Both, AttackRange, u.Pos))
+						GridPos closestPos = GridPos.Null;//離目標最近的自己的格子
+						GridPos closestTargetPos = GridPos.Null;//離自己最近的目標的格子
+						BattleManager.GetClosestPos(this, u, out closestPos, out closestTargetPos);
+
+						float uScore = -GridPos.SimpleDistance(closestPos, closestTargetPos);
+						if (BattleManager.CheckInRange(AttackRangeMode, this, eDirection.Both, AttackRange, u))
 							uScore += 1;
-						else if(BattleManager.Get_EmptyGrid(AttackRangeMode, u.Pos, eDirection.Both, AttackRange).Count == 0)
+						else if (BattleManager.Get_MovablePos_AroundTarget_InAttackRange(this, u, AttackRangeMode, AttackRange).Count == 0) 
 							uScore -= 20;
 						if (uScore > rScore)
 						{
@@ -678,7 +722,7 @@ public class ActionUnit : AnimUnit
 	{
 		if (IsCasting)
 			return;
-		while (CastQueue.Count > 0 && !CastQueue.Peek().Castable)
+		while (CastQueue.Count > 0 && (!CastQueue.Peek().Castable || !TargetApprochable(CastQueue.Peek())))
 		{
 			CastQueue.Dequeue();
 		}
@@ -687,7 +731,7 @@ public class ActionUnit : AnimUnit
 			List<MainSkill> randomList = new List<MainSkill>();
 			foreach (MainSkill ms in _activeSkills)
 			{
-				if (ms.Castable)
+				if (ms.Castable && TargetApprochable(ms))
 					randomList.Add(ms);
 			}
 			MainSkill randomSkill = null;
@@ -730,14 +774,31 @@ public class ActionUnit : AnimUnit
 
 		if (skill == null || !skill.Castable)
 			return;
-		
-		CastInfo info = new CastInfo(skill);
-		info.DMGInfo = skill.GenerateDamageInfo(this);
-		CurrentCasting = info;
-		CurrentCasting.Target = GetTarget(skill);
-		skill.CastableTime = Time.time + skill.CoolDown;
-		PlayAnim(info.skill.GenerateAnimInfo());
+		List<Unit> target = GetTarget(skill);
+		if (target.Count > 0)
+		{
+			CastInfo info = new CastInfo(skill);
+			info.DMGInfo = skill.GenerateDamageInfo(this);
+			CurrentCasting = info;
+			CurrentCasting.Target = target;
+			skill.CastableTime = Time.time + skill.CoolDown;
+			PlayAnim(info.skill.GenerateAnimInfo());
+		}
 	}
+	
+	//判斷是否可以靠近現在的目標到skill的射程中
+	protected bool TargetApprochable(MainSkill skill)
+	{
+		if (TargetUnit == null)
+			return false;
+		//先判斷是不是已經在範圍中了
+		//不先判斷這個，接下來判斷是否有空格可以達到會有誤判的情況
+		if(BattleManager.CheckInRange(skill.rangeMode,BasePos,eDirection.Both,skill.range,TargetUnit.BasePos))
+			return true;
+		//判斷是否還有空格可以移動到目標可以進入攻擊範圍的位置
+		return BattleManager.Get_EmptyGrid(skill.rangeMode, TargetUnit.BasePos, eDirection.Both, skill.range).Count != 0;
+	}
+
 	public void CastCurrentSkill()
 	{
 		CastSkill(CastQueue.Dequeue());
@@ -787,9 +848,9 @@ public class ActionUnit : AnimUnit
 			return new List<Unit>();
 		List<Unit> units;
 		if (skill.DamageType == SkillDamageType.Damage)
-			units = BattleManager.Get_EnemyUnitsInRange(Group, skill.range, Pos, Direction, skill.range);
+			units = BattleManager.Get_EnemyUnitsInRange(this, skill.rangeMode, Direction, skill.range);
 		else
-			units = BattleManager.Get_FriendUnitsInRange(Group, skill.range, Pos, Direction, skill.range);
+			units = BattleManager.Get_FriendUnitsInRange(this, skill.rangeMode, Direction, skill.range);
 		if (units.Count == 0)
 			return units;
 		//單體目標技能，如現目標在範圍內用現在目標，不然用list裡第一個當目標
@@ -858,11 +919,27 @@ public class ActionUnit : AnimUnit
 
 	public override void Draw(Color color)
 	{
+		DrawSkillRange(color);
 		base.Draw(color);
-		if (currentAction != null)
-			currentAction.DrawInfo();
 	}
-
+	public void DrawSkillRange(Color color)
+	{
+		MainSkill sk = null;
+		if (CurrentCasting != null)
+			sk = CurrentCasting.skill;
+		else if (CurrentCast != null)
+			sk = CurrentCast;
+		if(sk != null)
+		{
+			Color temp = color;
+			temp *=0.5f;
+			foreach (GridPos upos in Pos)
+				foreach (GridPos gp in BattleManager.Get_Grids(sk.rangeMode, upos, eDirection.Both, sk.range))
+				{
+					BattleManager.Instance.DrawGrid(gp, temp);
+				}
+		}
+	}
 	~ActionUnit()
 	{
 		totalCount--;	

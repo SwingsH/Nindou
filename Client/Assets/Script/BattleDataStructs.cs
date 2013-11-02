@@ -48,25 +48,3 @@ public enum eTargetMode
 {
 	Closest,
 }
-
-[StructLayout(LayoutKind.Sequential)]
-public class UnitInfo
-{
-	public uint MaxLife;
-	public ushort AttackID;
-	public ushort[] SkillID = new ushort[2];
-	public ushort[] PassiveSkillID = new ushort[2];
-	public byte MoveMode;
-	public ushort MoveSpeed;
-
-	public string BoneName = "NindoTestBone";
-	public string[] spriteNames = new string[8];
-}
-
-[StructLayout(LayoutKind.Sequential)]
-public class NPCData
-{
-	public uint NPCID;
-	public string Name;
-	public UnitInfo Info;
-}

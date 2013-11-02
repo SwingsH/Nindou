@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 /*
  * 2013/8/16
@@ -31,12 +32,16 @@ public class BattleManager : BattleState
 	}
 
 	public static Camera UnitCamera;
-	GridInfo g;
+
+	/// <summary>
+	/// 格子資料，防止重疊跟算攻擊距離用
+	/// </summary>
+	GridInfo BattleGridInfo;
 	
 	List<UnitInfo> PlayerInfos = new List<UnitInfo>();
 	List<EnemyNumbers> EnemyInfos = new List<EnemyNumbers>();
 	public Unit[] Players = new Unit[0];
-	List<Unit> Enemys = new List<Unit>();
+	public List<Unit> Enemys = new List<Unit>();
 
 	static bool _isBattleStart;
 	public static bool IsBattleStart
@@ -60,7 +65,7 @@ public class BattleManager : BattleState
 	HUDManager hudManager;
 	//後製元件
 	PostEffectManager postEffectManager;
-	float EffectCountDown;
+	//float EffectCountDown;
 
 	void UnitRun()
 	{
@@ -90,7 +95,7 @@ public class BattleManager : BattleState
 		EnemyInfos.Clear();
 		PlayerInfos.Clear();
 
-		EffectCountDown = 3f;
+		//EffectCountDown = 3f;
 
 		PlayerInfos.AddRange(InformalDataBase.Instance.playerInfo);
 		
@@ -101,6 +106,84 @@ public class BattleManager : BattleState
 			IniEnemy();
 		}
 	}
+
+	void IniPlayers()
+	{
+		//因為是初始化，應該不太可能會不是空的，不過安全起見還是處理一下
+		if (Players != null)
+		{
+			foreach(Unit u in Players)
+				Generater.Recycle(u);
+		}
+		Players = new Unit[PlayerInfos.Count];
+		List<GridPos> emptyGrid = GetEmptyGrid(2,2);
+		emptyGrid.RandomizeListOrder();
+		for (int i = 0; i < PlayerInfos.Count; i++)
+		{
+			if (PlayerInfos[i] == null)
+				continue;
+			int egIndex = 0;
+			int iniGridRangeSize = 2;
+			while (true)
+			{
+				if (IsEmpty(emptyGrid[egIndex], PlayerInfos[i].Size))
+				{
+					AddPlayer(emptyGrid[egIndex], i);
+
+					emptyGrid = GetEmptyGrid(2, 2);
+					emptyGrid.RandomizeListOrder();
+					break;
+				}
+				egIndex++;
+				if (egIndex >= emptyGrid.Count)
+				{
+					iniGridRangeSize++;
+					if (iniGridRangeSize >= BattleGridInfo.Cols)
+					{
+						CommonFunction.DebugError("格子不夠產生Unit");
+						break;
+					}
+					egIndex = 0;
+					emptyGrid = GetEmptyGrid(2, iniGridRangeSize);
+					emptyGrid.RandomizeListOrder();
+				}
+			}			
+		}
+	}
+	void AddPlayer(GridPos pos, int index)
+	{
+		if (IsEmpty(pos,PlayerInfos[index].Size))
+		{
+			Unit su = Generater.GenerateUnit(PlayerInfos[index]);
+			if (su == null)
+				return;
+			su.Group = eGroup.Player;
+			UnitOccupy(su, pos);
+			su.WorldPos = Get_GridWorldPos(pos,su.Size);
+			if (su.Entity != null)
+				su.Entity.name += index;
+			if (Players.Length <= index)
+				System.Array.Resize<Unit>(ref Players, index + 1);
+			Players[index] = su;
+		}
+	}
+
+	void AddEnemy(GridPos pos, UnitInfo info)
+	{
+		if (IsEmpty(pos, info.Size))
+		{
+			Unit su = Generater.GenerateUnit(info);
+			su.Group = eGroup.Enemy;
+			UnitOccupy(su, pos);
+			su.WorldPos = Get_GridWorldPos(pos,su.Size);
+
+			Enemys.Add(su);
+			return;
+		}
+		else
+			return;
+	}
+
 	void IniEnemyData(uint battleID)
 	{
 		EnemyInfos.Clear();
@@ -117,138 +200,194 @@ public class BattleManager : BattleState
 			EnemyInfos.Add(en);
 		}
 	}
-
-    /// <summary>
-    /// 加入一個玩家角色
-    /// </summary>
-	void AddPlayer(GridPos pos, int index)
+	void IniEnemy()
 	{
-		if (g.CheckEmpty(pos))
-		{
-			Unit su = Generater.GenerateUnit(PlayerInfos[index]);
-			if (su == null)
-				return;
-			su.Group = eGroup.Player;
-			su.Pos = pos;
-			su.WorldPos = Get_GridWorldPos(pos);
-			if (su.Entity != null)
-                su.Entity.name = string.Format(GLOBALCONST.UNIT_NAME_PLAYER, index);
-			if (Players.Length <= index)
-				System.Array.Resize<Unit>(ref Players, index + 1);
-			Players[index] = su;
-			AppearUnit(su, su.Pos);
-		}
-	}
-
-    /// <summary>
-    /// 加入一個 敵方
-    /// </summary>
-	void AddEnemy(GridPos pos, int index)
-	{
-		if (index < EnemyInfos.Count)
-		{
-            //AddEnemy(pos, EnemyInfos[index].npcData.Info); // sh20131027 makred, remove shortly
-            AddEnemy(pos, EnemyInfos[index].npcData); 
-			EnemyInfos[index].Numbers--;
-			if (EnemyInfos[index].Numbers == 0)
-				EnemyInfos.RemoveAt(index);
-		}
-	}
-
-    /// <summary>
-    /// 加入一個 敵方
-    /// </summary>
-	//void AddEnemy(GridPos pos, UnitInfo info)
-    void AddEnemy(GridPos pos, NPCData data)
-	{
-		if (g.CheckEmpty(pos))
-		{
-			Unit su = Generater.GenerateUnit(data.Info);
-			su.Group = eGroup.Enemy;
-			su.Pos = pos;
-			su.WorldPos = Get_GridWorldPos(pos);
-            if (su.Entity != null)
-                su.Entity.name = string.Format(GLOBALCONST.UNIT_NAME_ENEMY, Enemys.Count, data.NPCID);
-
-			Enemys.Add(su);
-			AppearUnit(su, su.Pos);
-		}
-	}
-	void AddEnemy(GridPos pos)
-	{
-		AddEnemy(pos, Random.Range(0, EnemyInfos.Count));
+		RandomEnemy(GLOBALCONST.GameSetting.ENEMY_MAX_NUMBER, 1);
 	}
 
 	void RandomEnemy(int number, int mode)
 	{
-
-		switch (mode)
-		{
-			case 0:
-				break;
-			default:
-				break;
-		}
 		if (EnemyInfos.Count == 0)
 			return;
-		List<GridPos> eg= new List<GridPos>();
-		switch (mode)
+		List<GridPos> eg = GetEmptyGrid(mode, 2);
+		eg.RandomizeListOrder();
+
+		while (number > 0)
 		{
-			case 0:
-				eg = g.GetEmptyGrid_LeftColumn(2);
+			if (EnemyInfos.Count == 0)
 				break;
-			case 1:
-				eg = g.GetEmptyGrid();
+
+			number--;
+			EnemyNumbers eInfo = EnemyInfos[Random.Range(0, EnemyInfos.Count)];
+			UnitInfo uInfo = eInfo.npcData.Info;
+
+			int egIndex = 0;
+			int iniGridRangeSize = 2;
+			while (true)
+			{
+				//判斷有沒有足夠的空間
+				if (IsEmpty(eg[egIndex], uInfo.Size))
+				{
+					AddEnemy(eg[egIndex], uInfo);
+					eInfo.Numbers--;
+					if (eInfo.Numbers <= 0)
+						EnemyInfos.Remove(eInfo);
+					eg = GetEmptyGrid(mode, 2);
+					eg.RandomizeListOrder();
+					break;
+				}
+				egIndex++;
+
+				//目前的空格list中找不到足夠的空間，重新取更大的空間來判斷是否有空的格子
+				if (egIndex >= eg.Count)
+				{
+					iniGridRangeSize++;
+					
+					//不過 0 是取全場，等於就沒格子了，其他模式如過超過欄寬也是沒格子了
+					if (mode == 0 || iniGridRangeSize >= BattleGridInfo.Cols)
+					{
+						CommonFunction.DebugError("格子不夠產生Unit");
+						break;
+					}
+					egIndex = 0;
+					eg = GetEmptyGrid(mode, iniGridRangeSize);
+					eg.RandomizeListOrder();
+				}
+			}		
+		}
+	}
+
+	//取得空的格子，unit出現模式
+	List<GridPos> GetEmptyGrid(int iniMode,int size)
+	{
+		List<GridPos> eg = new List<GridPos>();
+		switch (iniMode)
+		{
+			
+			case 0:
+				eg = BattleGridInfo.GetEmptyGrid();
+				break;
+			case 1: //最左方n行
+				eg = BattleGridInfo.GetEmptyGrid_LeftColumn(size);
+				break;
+			case 2: //最右方n行
+				eg = BattleGridInfo.GetEmptyGrid_RightColumn(size);
 				break;
 			default:
 				break;
 		}
-		if (eg.Count > 0)
-		{
-			for (int i = 0; i < number; i++)
-			{
-				int rindex = Random.Range(0, eg.Count);
-				AddEnemy(eg[rindex]);
-				eg.RemoveAt(rindex);
-			}
-		}
-	}
-	void IniEnemy()
-	{
-		RandomEnemy(3, 0);
-	}
-	void IniPlayers()
-	{
-		if (Players != null)
-			System.Array.Resize<Unit>(ref Players, PlayerInfos.Count);
-		else
-			Players = new Unit[PlayerInfos.Count];
-		List<GridPos> emptyGrid = Get_EmptyGrid();
-		for (int i = 0; i < PlayerInfos.Count; i++)
-		{
-			if (Players[i] != null)
-				continue;
-			if (emptyGrid.Count == 0)
-				break;
-			int r = Random.Range(0, emptyGrid.Count);
-			
-			AddPlayer(emptyGrid[r], i);
-			emptyGrid.RemoveAt(r);
-		}
-	}
-	
-	void AppearUnit(Unit unit, GridPos pos)
-	{
-		if (g.CheckEmpty(pos))
-			g.Appear(pos, unit);
-			
+		return eg;
 	}
 
+	/// <summary>
+	/// 移動unit的pos跟變更GridInfo中的資訊
+	/// 移動的座標以Unit的BasePos為基準
+	/// </summary>
 	public static bool MoveUnit(Unit unit, GridPos targetPos)
 	{
 		if (Instance == null)
 			return false;
-		return Instance.g.Move(unit.Pos, targetPos);
+		if (Movable(unit,targetPos))
+		{
+			Instance.UnitLeft(unit);
+			Instance.UnitOccupy(unit, targetPos);
+			
+			unit.Pos[0, 0] = targetPos;
+			return true;
+		}
+		else
+			return false;
+	}
+
+	/// <summary>
+	/// 判斷是否可移動到該處
+	/// </summary>
+	public static bool Movable(Unit unit, GridPos targetpos)
+	{
+		if(Instance == null || Instance.BattleGridInfo == null)
+			return false;
+		if(unit == null)
+			return false;
+		GridInfo gInfo = Instance.BattleGridInfo;
+		for(int i = 0 ; i < unit.Size; i++)
+		{
+			for(int j = 0 ; j < unit.Size;j++)
+			{
+				if (gInfo.PosCheck(targetpos.x + i, targetpos.y + j))
+				{
+					Unit temp = gInfo.Get_GridUnit(targetpos.x + i, targetpos.y + j);
+					if (temp != null && temp != unit)
+						return false;
+				}
+				else
+					return false;
+			}
+		}
+		return true;
+	}
+
+	/// <summary>
+	/// 判斷是否為空
+	/// </summary>
+	public static bool IsEmpty(GridPos targetpos, int size)
+	{
+		if (Instance == null || Instance.BattleGridInfo == null)
+			return false;
+
+		size = Mathf.Max(1, size);
+
+		GridInfo gInfo = Instance.BattleGridInfo;
+		for (int i = 0; i < size; i++)
+		{
+			for (int j = 0; j < size; j++)
+			{
+				if (gInfo.PosCheck(targetpos.x + i, targetpos.y + j))
+				{
+					Unit temp = gInfo.Get_GridUnit(targetpos.x + i, targetpos.y + j);
+					if (temp != null)
+						return false;
+				}
+				else
+					return false;
+			}
+		}
+		return true;
+	}
+
+	//將單位從格子資料中移除
+	void UnitLeft(Unit unit)
+	{
+		if (BattleGridInfo != null)
+		{
+			foreach (GridPos pos in unit.Pos)
+				BattleGridInfo.Left(pos);
+		}
+	}
+
+	/// <summary>
+	/// 設定unit的gridpos並存放到gridinfo中
+	/// 是假設流程一切正常的情況下，故不做任何檢查跟防呆
+	/// </summary>
+	void UnitOccupy(Unit unit, GridPos basePos)
+	{
+		if (BattleGridInfo != null)
+		{
+			if (unit.Pos.Length < unit.Size * unit.Size)
+				unit.Pos = new GridPos[unit.Size, unit.Size];
+
+			for (int i = 0; i <= unit.Pos.GetUpperBound(0); i++)
+			{
+				for (int j = 0; j <= unit.Pos.GetUpperBound(1); j++)
+				{
+					unit.Pos[i, j] = new GridPos(basePos.x + i, basePos.y + j);
+					if (!BattleGridInfo.CheckEmpty(unit.Pos[i, j]))
+					{
+						Debug.LogError("重複使用到同一個格子");
+					}
+					BattleGridInfo.Occupy(unit.Pos[i, j], unit);
+				}
+			}
+		}
 	}
 
 	public static void Unit_Dead(Unit unit)
@@ -266,14 +405,16 @@ public class BattleManager : BattleState
 						if (Instance.Players[i] != null)
 							allNull = false;
 					}
-					Instance.g.Left(unit.Pos);
+					foreach(GridPos pos in unit.Pos)
+						Instance.BattleGridInfo.Left(pos);
 					if (allNull)
 						Instance.AllDeadEvent(eGroup.Player);
 					break;
 				case eGroup.Enemy:
 					if (Instance.Enemys.Remove(unit))
 					{
-						Instance.g.Left(unit.Pos);
+						foreach (GridPos pos in unit.Pos)
+							Instance.BattleGridInfo.Left(pos);
 						if (Instance.Enemys.Count == 0)
 							Instance.AllDeadEvent(eGroup.Enemy);
 					}
@@ -287,6 +428,31 @@ public class BattleManager : BattleState
 				GameObject.Destroy(unit.Entity);
 		}
 	}
+	void AllDeadEvent(eGroup group)
+	{
+		switch (group)
+		{
+			case eGroup.Enemy:
+				if (EnemyInfos.Count != 0)
+					RandomEnemy(GLOBALCONST.GameSetting.ENEMY_MAX_NUMBER, 0);
+				else
+				{
+					IsBattleStart = false;
+					BattleResult = eBattleResult.Win;
+				}
+				break;
+			case eGroup.Player:
+				{
+					IsBattleStart = false;
+					BattleResult = eBattleResult.Lose;
+				}
+				break;
+		}
+		if (!IsBattleStart)
+			GameControl.Instance.ChangeGameState(BattleLeaving.instance);
+
+	}
+
 	void Unit_Clear()
 	{
 		if(Generater != null)
@@ -294,46 +460,23 @@ public class BattleManager : BattleState
 			foreach (Unit u in Enemys)
 			{
 				Generater.Recycle(u);
-				g.Left(u.Pos);
+				foreach (GridPos pos in u.Pos)
+					BattleGridInfo.Left(pos);
 			}
 			foreach (Unit u in Players)
 			{
 				if (u == null)
 					continue;
 				Generater.Recycle(u);
-				g.Left(u.Pos);
+				foreach (GridPos pos in u.Pos)
+					BattleGridInfo.Left(pos);
 			}
 			Enemys.Clear();
 			Players = new Unit[Players.Length];
 		}
 	}
 	
-	void AllDeadEvent(eGroup group)
-	{
-		switch (group)
-		{
-			case eGroup.Enemy:
-				if (EnemyInfos.Count != 0)
-					RandomEnemy(3, 0);
-				else
-				{
-					IsBattleStart = false;
-					Result = BattleResult.Win;
-				}
-				break;
-			case eGroup.Player:
-				{
-					IsBattleStart = false;
-					Result = BattleResult.Lose;
-				}
-				break;
-		}
-		if(!IsBattleStart)
-			GameControl.Instance.ChangeGameState(BattleLeaving.instance);
-
-	}
-
-	public static Vector3 GetRealWorldPos(Vector3 worldPos)
+	public static Vector3 Get_RealWorldPos(Vector3 worldPos)
 	{
 		return TranslateCamera(UnitCamera, worldPos, Camera.main);
 	}
@@ -353,73 +496,89 @@ public class BattleManager : BattleState
 	{
 		if (Instance == null)
 			return false;
-		return Instance.g.CheckEmpty(pos);
+		return Instance.BattleGridInfo.CheckEmpty(pos);
 	}
 	public static Vector3 Get_GridWorldPos(GridPos pos)
 	{
 		if (Instance == null)
 			return Vector3.zero;
-		return (Instance.g.Get_GridWorldPos(pos));
+		return (Instance.BattleGridInfo.Get_GridWorldPos(pos));
+	}
+	public static Vector3 Get_GridWorldPos(GridPos pos,int GridGroupSize)
+	{
+		if (Instance == null)
+			return Vector3.zero;
+		return (Instance.BattleGridInfo.Get_GridWorldPos(pos, GridGroupSize));
 	}
 	public static List<GridPos> Get_EmptyGrid()
 	{
 		if (Instance == null)
 			return new List<GridPos>();
-		return Instance.g.GetEmptyGrid();
+		return Instance.BattleGridInfo.GetEmptyGrid();
 	}
 
 	public static List<GridPos> Get_EmptyGrid(int mode, GridPos pos, eDirection dir, int range)
 	{
 		if (Instance == null)
 			return new List<GridPos>();
-		List<GridPos> result = Instance.g.Get_AreaEmptyGrid(mode, pos, dir, range);
+		List<GridPos> result = Instance.BattleGridInfo.Get_AreaEmptyGrid(mode, pos, dir, range);
 		return result;
 	}
+
 	public static List<GridPos> Get_SurroundEmptyGrid(GridPos pos)
 	{
 		if (Instance == null)
 			return new List<GridPos>();
-		return Instance.g.Get_AreaEmptyGrid(1, pos, eDirection.Left, 1);
+		return Instance.BattleGridInfo.Get_AreaEmptyGrid(1, pos, eDirection.Left, 1);
+	}
+	public static List<GridPos> Get_SurroundGrid(GridPos pos)
+	{
+		if (Instance == null)
+			return new List<GridPos>();
+		return Instance.BattleGridInfo.Get_AreaGridPos(1, pos, eDirection.Left, 1);
 	}
 	public static List<GridPos> Get_Grids(int mode, GridPos pos, eDirection dir, int range)
 	{
 		if (Instance == null)
 			return new List<GridPos>();
-		return Instance.g.Get_AreaGridPos(mode, pos, dir, range);
+		return Instance.BattleGridInfo.Get_AreaGridPos(mode, pos, dir, range);
 	}
 
 	public static List<Unit> Get_UnitsInRange(int mode, GridPos pos, eDirection dir, int range)
 	{
 		if (Instance == null)
 			return new List<Unit>();
-		return Instance.g.Get_AreaUnit(mode, pos, dir, range);
+		return Instance.BattleGridInfo.Get_AreaUnit(mode, pos, dir, range);
 	}
-	public static List<Unit> Get_EnemyUnitsInRange(eGroup selfGroup, int mode, GridPos pos, eDirection dir, int range)
+
+	public static List<Unit> Get_EnemyUnitsInRange(Unit selfUnit, int mode, eDirection dir, int range)
 	{
 		if (Instance == null)
 			return new List<Unit>();
 
-		List<Unit> result = new List<Unit>();
-		foreach (Unit u in Instance.g.Get_AreaUnit(mode, pos, dir, range))
-		{
-			if (CheckIsEnemy(selfGroup, u.Group))
-				result.Add(u);
-		}
-		return result;
+		List<Unit> sourceList = Get_AllEnemyUnits(selfUnit.Group);
+		return Get_UnitsInRange(selfUnit,sourceList,mode,dir,range);
 	}
-	public static List<Unit> Get_FriendUnitsInRange(eGroup selfGroup, int mode, GridPos pos, eDirection dir, int range)
+	public static List<Unit> Get_FriendUnitsInRange(Unit selfUnit, int mode, eDirection dir, int range)
 	{
 		if (Instance == null)
 			return new List<Unit>();
-		
+
+		List<Unit> sourceList = Get_AllFriendUnits(selfUnit.Group);
+		return Get_UnitsInRange(selfUnit, sourceList, mode, dir, range);
+	}
+
+	static List<Unit> Get_UnitsInRange(Unit selfUnit ,List<Unit> targetList,int mode,eDirection dir,int range)
+	{
 		List<Unit> result = new List<Unit>();
-		foreach (Unit u in Instance.g.Get_AreaUnit(mode, pos, dir, range))
+		foreach (Unit u in targetList)
 		{
-			if (CheckIsFriend(selfGroup, u.Group))
+			if (CheckInRange(mode, selfUnit, dir, range, u))
 				result.Add(u);
 		}
 		return result;
 	}
+
 	static bool CheckIsEnemy(eGroup selfGroup, eGroup targetGroup)
 	{
 		return selfGroup != targetGroup;
@@ -460,8 +619,192 @@ public class BattleManager : BattleState
 	{
 		if (Instance == null)
 			return false;
-		bool r = Instance.g.CheckInRange(mode,pos,dir,range,targetPos);
+		bool r = Instance.BattleGridInfo.CheckInRange(mode,pos,dir,range,targetPos);
 		return r;
+	}
+	public static bool CheckInRange(int mode, Unit unit, eDirection dir, int range, Unit targetUnit)
+	{
+		if (unit == null || targetUnit == null)
+			return false;
+		GridPos closestPos = GridPos.Null;
+		GridPos closestTargetPos = GridPos.Null;
+		if (GetClosestPos(unit, targetUnit,out closestPos, out closestTargetPos))
+			return CheckInRange(mode, closestPos, dir, range, closestTargetPos);
+		else
+			return false;
+	}
+
+	/*
+	 * 多格單位可能會有一格以上有最近距離的格子，目前覺得還不需要這多格的資訊，先取一格就好 2013.10.28
+	 */
+	/// <summary>
+	/// 找出兩組格子中距離對方最近的一個格子
+	/// </summary>
+	/// <param name="basePos">基準格1(最左下)</param>
+	/// <param name="size">格子組1大小</param>
+	/// <param name="targetBasePos">基準格2(最左下)</param>
+	/// <param name="targetSize">格子組2大小</param>
+	/// <param name="pos">輸出1</param>
+	/// <param name="targetPos">輸出2</param>
+	public static void GetClosestPos(GridPos basePos, int size, GridPos targetBasePos, int targetSize, out GridPos pos, out GridPos targetPos)
+	{
+		//用位置差來判斷最近的距離是哪個
+		//0會有問題，防呆
+		size = Mathf.Max(1, size);
+		targetSize = Mathf.Max(1, targetSize);
+
+		GridPos posDelta = basePos - targetBasePos;
+		pos = basePos;
+		targetPos = targetBasePos;
+		switch (System.Math.Sign(posDelta.x))
+		{
+			//case 0: //0正上或正下，就都用basepos就好
+			case -1:
+				//target在右邊
+				//超過size就+size不然+posDelta
+				pos.x = basePos.x + Mathf.Min(Mathf.Abs(posDelta.x),size - 1);
+				break;
+			case 1:
+				//target在左邊
+				targetPos.x = targetBasePos.x + Mathf.Min(Mathf.Abs(posDelta.x),targetSize - 1);
+				break;	
+		}
+
+		switch (System.Math.Sign(posDelta.y))
+		{
+			//case 0: 正左或正右，就都用basepos就好
+			case -1://target在上
+				//超過size就+size不然+posDelta
+				pos.y = basePos.y + Mathf.Min(Mathf.Abs(posDelta.y), size - 1);
+				break;
+			case 1://target在下
+				targetPos.y = targetBasePos.y + Mathf.Min(Mathf.Abs(posDelta.y),targetSize - 1);
+				break;
+		}
+	}
+	public static bool GetClosestPos(Unit unit, Unit targetUnit, out GridPos pos, out GridPos targetPos)
+	{
+		if (unit == null || targetUnit == null)
+		{
+			pos = GridPos.Null;
+			targetPos = GridPos.Null;
+			return false;
+		}
+		GetClosestPos(unit.BasePos, unit.Size, targetUnit.BasePos, targetUnit.Size, out pos, out targetPos);
+		return true;
+	}
+
+	public static List<GridPos> GetBaseposOfClosestPos(GridPos closestPos, int size, GridPos targetBasePos)
+	{
+		List<GridPos> result = new List<GridPos>();
+
+		size = Mathf.Max(1, size);
+
+		GridPos posDelta = closestPos - targetBasePos;
+		if (posDelta.x == 0 && posDelta.y == 0)
+			return result;
+		GridPos basePos = new GridPos();
+		switch (System.Math.Sign(posDelta.x))
+		{
+			case -1:
+				//target在右邊
+				basePos.x = closestPos.x - (size - 1);
+				break;
+			case 1:
+				//target在左邊
+				basePos.x = closestPos.x;
+				break;
+		}
+
+		switch (System.Math.Sign(posDelta.y))
+		{
+			case -1://target在上
+				//超過size就+size不然+posDelta
+				basePos.y = closestPos.y - (size - 1);
+				break;
+			case 1://target在下
+				basePos.y = closestPos.y;
+				break;
+		}
+
+		if (posDelta.x == 0)//正上或正下方，可能會有複數basepos最近的格子都是同一個
+		{
+			for (int i = -(size - 1); i <= 0; i++)
+			{
+				basePos.x = closestPos.x + i;
+				result.Add(basePos);
+			}
+		}
+		else if (posDelta.y == 0) //正左或正右，可能會有複數basepos最近的格子都是同一個
+		{
+			for (int i = -(size - 1); i <= 0; i++)
+			{
+				basePos.y = closestPos.y + i;
+				result.Add(basePos);
+			}
+		}
+		else
+			result.Add(basePos);
+
+		return result;
+	}
+
+	/// <summary>
+	/// 傳回目前可以移動且可以打到目標的所有位置（BasePos）
+	/// </summary>
+	/// <param name="self">攻擊方單位</param>
+	/// <param name="target">目標單位</param>
+	/// <param name="RangeMode">攻擊射程種類</param>
+	/// <param name="RangeSize">攻擊射程</param>
+	public static List<GridPos> Get_MovablePos_AroundTarget_InAttackRange(Unit self, Unit target, int RangeMode, int RangeSize)
+	{
+		if (self == null || target == null)
+			return new List<GridPos>();
+
+		return Get_MovablePos_AroundTarget_InAttackRange(self, target.BasePos, target.Size, RangeMode, RangeSize);
+	}
+
+	/*
+	 * 測試的時候發現結果的格子跟，目標座標往左下位移攻擊方大小-1個單位，大小為攻擊方大小加目標大小-1，這個座標資料的攻擊範圍的格子是一樣的
+	 * 所以以下是用這個樣子的方式去取可以移動座標
+	 */
+	/// <summary>
+	/// 傳回目前可以移動且可以打到目標的所有位置（BasePos）
+	/// </summary>
+	/// <param name="selfSize">攻擊方單位所佔格子大小</param>
+	/// <param name="targetPos">目標單位位置</param>
+	/// <param name="targetSize">目標單位所佔格子大小</param>
+	/// <param name="RangeMode">攻擊射程種類</param>
+	/// <param name="RangeSize">攻擊射程</param>
+	public static List<GridPos> Get_MovablePos_AroundTarget_InAttackRange(Unit self, GridPos targetPos, int targetSize, int RangeMode, int RangeSize)
+	{
+		if (Instance == null)
+			return new List<GridPos>();
+		GridPos basePos = new GridPos(targetPos.x - (self.Size - 1), targetPos.y - (self.Size - 1));
+		int size = self.Size + targetSize - 1;
+		GridPos[,] Pos = new GridPos[size,size];//basePos大小為size的格子區塊，這裡不會在可移動範圍中（會跟目標重疊），要在結果中先移除這些位置
+		IEnumerable<GridPos> tempResult = new List<GridPos>();
+		for (int i = 0; i < size; i++)
+		{
+			for (int j = 0; j < size; j++)
+			{
+				Pos[i,j] = new GridPos(basePos.x + i, basePos.y + j);
+				//只做四周的格子
+				if (i == 0 || j == 0 || i == size - 1 || j == size - 1)
+				{
+					tempResult = tempResult.Union(Get_EmptyGrid(RangeMode, Pos[i, j], eDirection.Both, RangeSize));
+				}
+			}
+		}
+		tempResult = tempResult.Except(Pos.Cast<GridPos>());
+		List<GridPos> result = new List<GridPos>();
+		foreach (GridPos gpi in tempResult)
+		{
+			if (Movable(self, gpi))
+				result.Add(gpi);
+		}
+		return result;
+
 	}
 	#endregion
 
@@ -523,7 +866,7 @@ public class BattleManager : BattleState
 		UnitCamera.cullingMask = ~(1 << GLOBALCONST.GameSetting.LAYER_BACKGROUND);
 		UnitCamera.clearFlags = CameraClearFlags.Depth;
 		UnitCamera.orthographicSize = GLOBALCONST.GameSetting.UNIT_CAMERA_SIZE;
-            
+
 		postEffectManager = UnitCamera.gameObject.AddComponent<PostEffectManager>();
 		postEffectManager.TargetCamera = UnitCamera;
 		//
@@ -537,7 +880,7 @@ public class BattleManager : BattleState
 			InformalDataBase.IniInstance();
 
 		//戰鬥格子資料
-		g = new GridInfo(Vector3.one, GLOBALCONST.GameSetting.GRID_SIZE, GLOBALCONST.GameSetting.GRID_COUNT_W, GLOBALCONST.GameSetting.GRID_COUNT_L);
+		BattleGridInfo = new GridInfo(Vector3.one, GLOBALCONST.GameSetting.GRID_SIZE, GLOBALCONST.GameSetting.GRID_COUNT_W, GLOBALCONST.GameSetting.GRID_COUNT_L);
 
 		//角色產生器
 		Generater = new UnitGenerater();
@@ -548,9 +891,9 @@ public class BattleManager : BattleState
         control.GUIStation.Form<UI_Battle>().SetBossMessageVisible(false);
         for (int i = 0; i <  GLOBALCONST.UI_BATTLE_ROLE_ICON_COUNT; ++i)
         {
-            if (i < Players.Length) { control.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true, Players[i].Life, Players[i].MaxLife); }
-            else { control.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, false);}
-        }
+			if (i < Players.Length && Players[i] != null){control.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true, Players[i].Life, Players[i].MaxLife);	}
+			else { control.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, false); } // , 0, 1); }
+		}
     }
 
     /// <summary>
@@ -585,11 +928,47 @@ public class BattleManager : BattleState
 		//Unit_Clear();
 		Generater.ClearGrave();
 		TimeMachine.SetTimeScale(1);
-		if(Result == BattleResult.Lose)
+		if(BattleResult == eBattleResult.Lose)
 			postEffectManager.SetDefaultEffect_1(BattleState.instance);
 	}
-}
 
+	#if UNITY_EDITOR
+	public Unit AddUnit(GridPos pos)
+	{
+		if (IsEmpty(pos, 2))
+		{
+			Unit u = new ActionUnit();
+			u.Size = 3;
+			UnitOccupy(u, pos);
+			return u;
+		}
+		else
+			return null;
+	}
+	public void DrawAllGrid()
+	{
+		BattleGridInfo.DrawGrid();
+	}
+	public void DrawGrid(GridPos basePos, int size, Color color)
+	{
+		for (int i = 0; i < size; i++)
+			for (int j = 0; j < size; j++)
+				DrawGrid(new GridPos(basePos.x + i, basePos.y + j), color);
+	}
+	public void DrawGrid(GridPos pos, Color color)
+	{
+		BattleGridInfo.DrawGrid(pos, color);
+	}
+	public void DrawLine(GridPos pos1, GridPos pos2, Color color)
+	{
+		Gizmos.color = color;
+		Gizmos.DrawLine(BattleGridInfo.Get_GridCenterWorldPos(pos1), BattleGridInfo.Get_GridCenterWorldPos(pos2));
+	}
+	#endif
+}
+/*
+ * BattleManager.GetBaseposOfClosestPos ←這裡用了同一個變數重複改值再加入list，如果打算要改成class這裡記得要一起改
+ */
 public struct GridPos
 {
 	public static readonly GridPos Null = new GridPos(-100000, -100000); //本來是用int.MaxValue不過再拿去加減在abs會有意想不到的結果，先-100000就好
@@ -600,6 +979,18 @@ public struct GridPos
 	public static bool operator !=(GridPos gp1, GridPos gp2)
 	{
 		return (gp1.x != gp2.x || gp1.y != gp2.y);
+	}
+	public static GridPos operator +(GridPos gp1, GridPos gp2)
+	{
+		gp1.x += gp2.x;
+		gp1.y += gp2.y;
+		return gp1;
+	}
+	public static GridPos operator -(GridPos gp1, GridPos gp2)
+	{
+		gp1.x -= gp2.x;
+		gp1.y -= gp2.y;
+		return gp1;
 	}
 	public static float SimpleDistance(GridPos gp1, GridPos gp2)
 	{
@@ -628,6 +1019,12 @@ public struct GridPos
 	public int x;
 	public int y;
 }
+
+/// <summary>
+/// 戰鬥格子的資料,最左下為0,0;
+/// 因應多格unit，移除防呆檢查，操作簡化只有佔格子跟移除
+/// 所有相關防呆跟unit移動部份移到battlemanager中來處理
+/// </summary>
 public class GridInfo
 {
 	enum eGridState
@@ -640,12 +1037,20 @@ public class GridInfo
 	{
 		get{ return Grids.GetUpperBound(0); }
 	}
+	public int Cols
+	{
+		get { return GridColBound + 1; }
+	}
 	int GridRowBound
 	{
 		get { return Grids.GetUpperBound(1); }
 	}
+	public int Rows
+	{
+		get { return GridRowBound + 1; }
+	}
 	public Vector3 StartPoint;
-	Vector2 GridSize;
+	public Vector2 GridSize;
 	public GridInfo()
 	{
 		InitGrid(1, 1, 1, 1);
@@ -675,28 +1080,6 @@ public class GridInfo
 		Grids = new Unit[cols, rows];
 	}
 
-	public bool Appear(GridPos pos, Unit unit)
-	{
-		if (CheckEmpty(pos))
-		{
-			Occupy(pos, unit);
-			return true;
-		}
-		else
-			return false;
-	}
-	public bool Move(GridPos curPos, GridPos targetPos)
-	{
-		if (CheckEmpty(targetPos))
-		{
-			Unit unit = Grids[curPos.x,curPos.y];
-			Left(curPos);
-			Occupy(targetPos, unit);
-			return true;
-		}
-		else
-			return false;
-	}
 	public bool CheckEmpty(GridPos pos)
 	{
 		if (PosCheck(pos))
@@ -709,21 +1092,14 @@ public class GridInfo
 	public void Left(GridPos pos)
 	{
 		if (PosCheck(pos))
-		{
-			if (Grids[pos.x, pos.y] != null)
-				Grids[pos.x, pos.y].Pos = GridPos.Null;
 			Grids[pos.x, pos.y] = null;
-		}
 	}
-	void Occupy(GridPos pos,Unit unit)
+	public void Occupy(GridPos pos,Unit unit)
 	{
 		if (unit == null)
 			return;
 		if (PosCheck(pos))
-		{
 			Grids[pos.x, pos.y] = unit;
-			unit.Pos = pos;
-		}
 	}
 
 	public List<GridPos> GetEmptyGrid()
@@ -744,6 +1120,15 @@ public class GridInfo
 					result.Add(new GridPos(i, j));
 		return result;
 	}
+	public List<GridPos> GetEmptyGrid_RightColumn(int numbers)
+	{
+		List<GridPos> result = new List<GridPos>();
+		for (int i = 0; i < numbers && i <= GridColBound; i++)
+			for (int j = 0; j <= GridRowBound; j++)
+				if (Grids[GridColBound - i, j] == null)
+					result.Add(new GridPos(GridColBound - i, j));
+		return result;
+	}
 	public Vector3 Get_GridWorldPos(GridPos pos)
 	{
 		return Get_GridWorldPos(pos.x, pos.y);
@@ -751,6 +1136,23 @@ public class GridInfo
 	public Vector3 Get_GridWorldPos(int x, int y)
 	{
 		return StartPoint + new Vector3(x * GridSize.x + GridSize.x / 2, 0, y * GridSize.y + GridSize.y / 5);
+	}
+
+	/// <summary>
+	/// 取得一組格子的世界座標
+	/// （這個是調整過的，放unit的實際圖看起來比較好看一點，中心點請取Get_GridCenterWorldPos）
+	/// </summary>
+	public Vector3 Get_GridWorldPos(GridPos pos, int GridGroupSize)
+	{
+		return Get_GridWorldPos(pos.x, pos.y, GridGroupSize);
+	}
+	/// <summary>
+	/// 取得一組格子的世界座標
+	/// （這個是調整過的，放unit的實際圖看起來比較好看一點，中心點請取Get_GridCenterWorldPos）
+	/// </summary>
+	public Vector3 Get_GridWorldPos(int x, int y,int GridGroupSize)
+	{
+		return StartPoint + new Vector3(x * GridSize.x + (GridSize.x * GridGroupSize) / 2, 0, y * GridSize.y + GridSize.y / 5);
 	}
 	public Vector3 Get_GridCenterWorldPos(GridPos pos)
 	{
@@ -838,10 +1240,20 @@ public class GridInfo
 			return null;
 		return Grids[pos.x, pos.y];
 	}
+	public Unit Get_GridUnit(int x, int y)
+	{
+		if (!PosCheck(x,y))
+			return null;
+		return Grids[x, y];
+	}
 
-	bool PosCheck(GridPos pos)
+	public bool PosCheck(GridPos pos)
 	{
 		return pos.x >= 0 && pos.y >= 0 && pos.x <= GridColBound && pos.y <= GridRowBound;
+	}
+	public bool PosCheck(int x, int y)
+	{
+		return x >= 0 && y >= 0 && x <= GridColBound && y <= GridRowBound;
 	}
 	List<GridPos> Get_AreaGrid_Mode0(GridPos pos, int range)
 	{
@@ -1120,7 +1532,7 @@ public abstract class BattleState : IGameState
 		}
 	}
 	public static uint BattleID;
-	public static BattleResult Result = BattleResult.None;
+	public static eBattleResult BattleResult = eBattleResult.None;
 	
 	public abstract void OnChangeIn(GameControl control);
 
@@ -1128,7 +1540,7 @@ public abstract class BattleState : IGameState
 
 	public abstract void OnChangeOut(GameControl control);
 
-	public enum BattleResult
+	public enum eBattleResult
 	{
 		None,
 		Lose,
@@ -1159,7 +1571,7 @@ public class BattleEntering : BattleState
 	{
 		Application.LoadLevel("BattleField");
 		TimeMachine.SetTimeScale(1);
-		Result = BattleResult.None;
+		BattleResult = eBattleResult.None;
 	}
 
 	public override void Update(GameControl control)
@@ -1192,14 +1604,14 @@ public class BattleLeaving :BattleState
 	public override void OnChangeIn(GameControl control)
 	{
 		BattleID = uint.MinValue;
-		if (Result != BattleResult.None)
+		if (BattleResult != eBattleResult.None)
 		{
 			ChangeTime = Time.realtimeSinceStartup + 5;
 			DisplayResult = true;
 			#region 臨時顯示結果文字
 			//產生顯示結果的TextMesh
 			TextMesh tm = new GameObject("HUDText").AddComponent<TextMesh>();
-            UIFont uifont = UIFontManager.GetUIDynamicFont(UIFontName.MSJH);
+			UIFont uifont = ResourceStation.GetUIFont("MSJH_30");
 			if (uifont != null)
 				tm.font = uifont.dynamicFont;
 			else
@@ -1216,7 +1628,7 @@ public class BattleLeaving :BattleState
 			if(tm.font != null)
 				tm.renderer.sharedMaterial = tm.font.material;
 			tm.anchor = TextAnchor.LowerCenter;
-			tm.text = BattleState.Result.ToString();
+			tm.text = BattleState.BattleResult.ToString();
 			if (BattleManager.UnitCamera != null)
 			{
 				tm.gameObject.layer = GLOBALCONST.GameSetting.LAYER_UNIT;
@@ -1276,6 +1688,6 @@ public class BattleLeaving :BattleState
 
 	public override void OnChangeOut(GameControl control)
 	{
-		Result = BattleResult.None;
+		BattleResult = eBattleResult.None;
 	}
 }

@@ -26,6 +26,11 @@ public class InformalDataBase{
 	public InformalDataBase()
 	{
 		SkillDataBase = LoadData<uint, SkillData>(GLOBALCONST.FILENAME_SKILL, "ID");
+		SkillDataBase[5].Range = 1;
+		SkillDataBase[5].RangeMode = 3;
+
+		SkillDataBase[6].Range = 1;
+		SkillDataBase[6].RangeMode = 3;
 		NpcDataBase = LoadData<uint, NPCData>(GLOBALCONST.FILENAME_NPC, "NPCID");
 		SPEffectDatas = LoadData<uint, SpecialEffect>(GLOBALCONST.FILENAME_SKILLEFFECT, "ID");
 		BattleDatas = new Dictionary<uint,List<Battle>>();
@@ -49,39 +54,51 @@ public class InformalDataBase{
 		int tempIndex = 0;
 		playerInfo[tempIndex] = new UnitInfo();
 		playerInfo[tempIndex].AttackID = 0;
-		playerInfo[tempIndex].SkillID = new ushort[] { 2, 3 };
+		playerInfo[tempIndex].SkillID = new ushort[] { 1, 5 };
 		playerInfo[tempIndex].MaxLife = 300;
 		playerInfo[tempIndex].MoveMode = 1;
 		playerInfo[tempIndex].MoveSpeed = 3;
-		playerInfo[tempIndex].spriteNames = new string[] { InformalDataBase.TestAtlasName[0], InformalDataBase.TestAtlasName[0], InformalDataBase.TestAtlasName[0],
-				InformalDataBase.TestAtlasName[0], InformalDataBase.TestAtlasName[0], InformalDataBase.TestAtlasName[0] ,"",""};
+		playerInfo[tempIndex].BoneName = TestBoneAnimationName[0];
+		playerInfo[tempIndex].spriteNames = new string[GLOBALCONST.TOTAL_BONE_NUMBER];
+		for (int i = 0; i < playerInfo[tempIndex].spriteNames.Length; i++)
+			playerInfo[tempIndex].spriteNames[i] = InformalDataBase.TestPlayAtlasName[1];
+
 		tempIndex = 1;
 		playerInfo[tempIndex] = new UnitInfo();
 		playerInfo[tempIndex].AttackID = 6;
-		playerInfo[tempIndex].SkillID = new ushort[] { 1, 2 };
+		playerInfo[tempIndex].SkillID = new ushort[] { 1, 5 };
 		playerInfo[tempIndex].MaxLife = 250;
 		playerInfo[tempIndex].MoveMode = 1;
 		playerInfo[tempIndex].MoveSpeed = 3;
-		playerInfo[tempIndex].spriteNames = new string[] { InformalDataBase.TestAtlasName[0], InformalDataBase.TestAtlasName[0], InformalDataBase.TestAtlasName[0],
-		        InformalDataBase.TestAtlasName[0], InformalDataBase.TestAtlasName[0], InformalDataBase.TestAtlasName[0],"","" };
+		playerInfo[tempIndex].BoneName = TestBoneAnimationName[0];
+		playerInfo[tempIndex].spriteNames = new string[GLOBALCONST.TOTAL_BONE_NUMBER];
+		for (int i = 0; i < playerInfo[tempIndex].spriteNames.Length; i++)
+			playerInfo[tempIndex].spriteNames[i] = InformalDataBase.TestPlayAtlasName[1];
+		playerInfo[tempIndex].spriteNames[1] = InformalDataBase.TestPlayAtlasName[1];
 		tempIndex = 2;
 		playerInfo[tempIndex] = new UnitInfo();
 		playerInfo[tempIndex].AttackID = 6;
-		playerInfo[tempIndex].SkillID = new ushort[] { 7, 100 };
+		playerInfo[tempIndex].SkillID = new ushort[] { 1, 5 };
 		playerInfo[tempIndex].MaxLife = 200;
 		playerInfo[tempIndex].MoveMode = 1;
 		playerInfo[tempIndex].MoveSpeed = 3;
-		playerInfo[tempIndex].spriteNames = new string[] { InformalDataBase.TestAtlasName[0], InformalDataBase.TestAtlasName[0], InformalDataBase.TestAtlasName[0],
-		        InformalDataBase.TestAtlasName[0], InformalDataBase.TestAtlasName[0], InformalDataBase.TestAtlasName[0],"","" };
+		playerInfo[tempIndex].BoneName = TestBoneAnimationName[0];
+		playerInfo[tempIndex].spriteNames = new string[GLOBALCONST.TOTAL_BONE_NUMBER];
+		for (int i = 0; i < playerInfo[tempIndex].spriteNames.Length; i++)
+			playerInfo[tempIndex].spriteNames[i] = InformalDataBase.TestPlayAtlasName[1];
+		playerInfo[tempIndex].spriteNames[1] = InformalDataBase.TestPlayAtlasName[1];
 		tempIndex = 3;
 		playerInfo[tempIndex] = new UnitInfo();
 		playerInfo[tempIndex].AttackID = 6;
-		playerInfo[tempIndex].SkillID = new ushort[] { 8 };
+		playerInfo[tempIndex].SkillID = new ushort[] { 1 };
 		playerInfo[tempIndex].MaxLife = 200;
 		playerInfo[tempIndex].MoveMode = 1;
 		playerInfo[tempIndex].MoveSpeed = 3;
-		playerInfo[tempIndex].spriteNames = new string[] { InformalDataBase.TestAtlasName[0], InformalDataBase.TestAtlasName[0], InformalDataBase.TestAtlasName[0],
-		        InformalDataBase.TestAtlasName[0], InformalDataBase.TestAtlasName[0], InformalDataBase.TestAtlasName[0] ,"",""};
+		playerInfo[tempIndex].BoneName = TestBoneAnimationName[0];
+		playerInfo[tempIndex].spriteNames = new string[GLOBALCONST.TOTAL_BONE_NUMBER];
+		for (int i = 0; i < playerInfo[tempIndex].spriteNames.Length; i++)
+			playerInfo[tempIndex].spriteNames[i] = InformalDataBase.TestPlayAtlasName[1];
+		playerInfo[tempIndex].spriteNames[1] = InformalDataBase.TestPlayAtlasName[1];
 		#endregion
 
 	}
@@ -147,4 +164,6 @@ public class InformalDataBase{
 		return result;
 	}
 	public static string[] TestAtlasName = new string[] { "NindoTestSprite", "GrayKappa", "BlueKappa", "RedKappa" };
+	public static string[] TestPlayAtlasName = new string[] {"Basic", "Monotaro", };
+	public static string[] TestBoneAnimationName = new string[] { "BasicFaceLeft" };
 }

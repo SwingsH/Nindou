@@ -5,7 +5,7 @@ using System.IO;
 /// <summary>
 /// 全域 const 變數皆放置於此
 /// </summary>
-public class GLOBALCONST
+public static class GLOBALCONST
 {
 	public const string GAME_MAIN_VERSION = "1";
 
@@ -19,6 +19,8 @@ public class GLOBALCONST
 		public static readonly Vector2 GRID_SIZE = new Vector2(8, 6);
 		public const int GRID_COUNT_W = 9;
 		public const int GRID_COUNT_L = 5;
+
+		public const int ENEMY_MAX_NUMBER = 3;
 	}
 	public static class BattleSettingValue
 	{
@@ -33,6 +35,7 @@ public class GLOBALCONST
         public static readonly Color AVATAR_NORMAL_COLOR = CommonFunction.Color256Bit(255, 255, 255, 255); 
     }
 
+	public const int TOTAL_BONE_NUMBER = 11;
 	public const string HAND_LEFT = "HandL";
 	public const string HAND_RIGHT = "HandR";
 	public const string HEAD = "Head";
@@ -45,10 +48,15 @@ public class GLOBALCONST
     public const string BONE_ROOT_NAME = "Root"; // Bone 資訊的主節點 GameObject name
     public const string UNIT_NAME_ENEMY = "Enemy_{0}_{1}";
     public const string UNIT_NAME_PLAYER = "Player_{0}";
-
+	public const string EYES = "Eyes";
+	public const string HAIR = "Hair";
+	public const string HEADDRESS = "Headdress";
 	public static readonly string[] BONE_NAME = new string[]
 	{
 		HEAD,
+		EYES,
+		HAIR,
+		HEADDRESS,
 		BODY,
 		HAND_LEFT,
 		HAND_RIGHT,
@@ -57,6 +65,28 @@ public class GLOBALCONST
 		WEAPON_LEFT,
 		WEAPON_RIGHT,
 	};
+
+	/// <summary>
+	/// 對應到BONE_NAME的index
+	/// </summary>
+ 	public enum eModelPartName:int
+	{
+		HEAD,
+		EYES,
+		HAIR,
+		BODY,
+		HAND_LEFT,
+		HAND_RIGHT,
+		LEG_LEFT,
+		LEG_RIGHT,
+		WEAPON_LEFT,
+		WEAPON_RIGHT,
+	}
+	public static string GetBoneName(this eModelPartName ePartName)
+	{
+		return BONE_NAME[(int)ePartName];
+	}
+
 
     #region UI相關設定
     public const int LAYER_UI_BASE = 31; // 基本ui layer

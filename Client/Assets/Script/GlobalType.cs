@@ -4,6 +4,7 @@ using System.Text;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using Random = UnityEngine.Random;
 
 /// <summary>
 /// 自定義屬性宣告, StringValue
@@ -391,6 +392,38 @@ enum AreaType : byte
     Activity = 2 //活動關卡
 }
 
+#region NPC相關
+
+[StructLayout(LayoutKind.Sequential)]
+public class UnitInfo
+{
+	public uint MaxLife;
+	public ushort AttackPower;
+	public ushort Accuracy;
+	public ushort CriticleRate;
+	public ushort Defend;
+	public ushort EvadeRate;
+	public ushort AttackID;
+	public ushort[] SkillID = new ushort[2];
+	public ushort[] PassiveSkillID = new ushort[2];
+	public byte MoveMode;
+	public ushort MoveSpeed;
+
+	public byte Size;
+	public string BoneName = "NindoTestBone";
+	public string[] spriteNames = new string[GLOBALCONST.TOTAL_BONE_NUMBER];
+}
+
+[StructLayout(LayoutKind.Sequential)]
+public class NPCData
+{
+	public uint NPCID;
+	public string Name;
+	public ushort LV;
+	public UnitInfo Info;
+}
+
+#endregion
 
 #region 技能相關
 [StructLayout(LayoutKind.Sequential)]
@@ -420,6 +453,8 @@ public class SkillData
 public class SpecialEffect
 {
 	public uint ID;
+	//public byte TargetType;
+	//public byte TriggerType;
 	public byte EffectType;
 	public uint EffectPower; //用uint是為了可以填技能id，平時還是以ushort為主
 	public ushort EffectChance;
@@ -464,3 +499,17 @@ public enum SPEffectType : byte
 	ExtrimSkill = 255,
 }
 #endregion
+
+public static class ListExtensions
+{
+	public static void RandomizeListOrder<T>(this List<T> list)
+	{
+		for (int i = 0; i < list.Count; i++)
+		{
+			T tempT = list[i];
+			int RandomI = Random.Range(0, list.Count);
+			list[i] = list[RandomI];
+			list[RandomI] = tempT;
+		}
+	}
+}
