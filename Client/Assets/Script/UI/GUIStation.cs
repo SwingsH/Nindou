@@ -322,7 +322,7 @@ public class GUIStation
     /// <param name="btnLabelText">按鈕標籤文字(沒有傳入字體時無作用)</param>
     /// <param name="btnLabelColor">按鈕標籤顏色(沒有傳入字體時無作用)</param>
     /// <returns>建出的UIButton</returns>
-    public static UIButton CreateUIButton(GameObject parentObj, string btnName, Vector3 relativePos, int depth, SpriteName btnBG, int width, int height,
+    public static UIButton CreateUIButton(GameObject parentObj, string btnName, Vector3 relativePos, int depth, NGUISpriteData btnBG, int width, int height,
         UIFont font, Color btnLabelColor, string btnLabelText)
     {
         GameObject retButtonObj = NGUITools.AddChild(parentObj);
@@ -365,14 +365,14 @@ public class GUIStation
     /// <param name="height">Progress Bar（=背景圖）高度</param>
     /// <returns>建出的 ProgressBar</returns>
     public static UISlider CreateUIProgressBar(GameObject parentObj, string progressBarName, Vector3 relativePos, int depth,
-        SpriteName foreground, SpriteName background, int width, int height)
+        NGUISpriteData foreground, NGUISpriteData background, int width, int height)
     {
         GameObject progressBarObject = NGUITools.AddChild(parentObj);
         progressBarObject.name = progressBarName;
         progressBarObject.transform.localPosition = relativePos;
 
         // Background sprite (傳入空值，不產生sprite
-        if (background != SpriteName.NONE)
+        if (background != NGUISpriteData.NONE)
         {
             UISprite back = UIImageManager.CreateUISprite(progressBarObject, background);
             back.Init(back.type, depth, UIWidget.Pivot.Left, width, height);
@@ -391,6 +391,50 @@ public class GUIStation
         retSilder.value = 0.0f;
 
         return retSilder;
+    }
+
+    public static UISlider CreateUISlider(GameObject parentObj, string sliderName, Vector3 relativePos, int depth,
+        NGUISpriteData foreground, NGUISpriteData background, NGUISpriteData thumb, int width, int height, bool canUserInterative)
+    {
+        GameObject sliderObject = NGUITools.AddChild(parentObj);
+        sliderObject.name = sliderName;
+        sliderObject.transform.localPosition = relativePos;
+        // Background
+        if (background != NGUISpriteData.NONE)
+        {
+            UISprite back = UIImageManager.CreateUISprite(sliderObject, background);
+            back.Init(back.type, depth, UIWidget.Pivot.Left, width, height);
+            back.name = "Background";
+            back.transform.localPosition = Vector3.zero; // 因為調整pivot會影響localPosition，所以需要再次重設
+        }
+        // Foreground
+        UISprite front = UIImageManager.CreateUISprite(sliderObject, foreground);
+        front.Init(front.type, depth + 1, UIWidget.Pivot.Left, width, height);
+        front.name = "Foreground";
+        front.transform.localPosition = Vector3.zero; // 因為調整pivot會影響localPosition，所以需要再次重設
+        // 如果能夠控制，加上碰撞盒
+        if (canUserInterative) NGUITools.AddWidgetCollider(sliderObject);
+        // Add the slider script
+        UISlider retSlider = sliderObject.AddComponent<UISlider>();
+        retSlider.foreground = front.transform;
+        // 有給Thumb的SpriteName，產生Thumb
+        if (thumb != NGUISpriteData.NONE)
+        {
+            UISprite thb = UIImageManager.CreateUISprite(sliderObject, thumb);
+            thb.Init(thb.type, thb.depth, thb.pivot, 20, 40);
+            thb.name = "Thumb";
+            thb.transform.localPosition = new Vector3(200, 0, 0);
+            // 如果能夠控制，加上碰撞盒 &預設的按鈕反應
+            if (canUserInterative)
+            {
+                NGUITools.AddWidgetCollider(thb.gameObject);
+                thb.gameObject.AddComponent<UIButtonColor>();
+                thb.gameObject.AddComponent<UIButtonScale>();
+            }
+            retSlider.thumb = thb.transform;
+        }
+        retSlider.value = 0.0f;
+        return retSlider;
     }
 
     /// <summary>
@@ -460,7 +504,7 @@ public class GUIStation
     /// todo: UIInput 只是"輸入框"相關元件*3 的其中一個, 回傳的 UIInput 提供使用者能做的操作 有限 & 不便, 有時間可建新input類別 + 封裝
     /// </summary>
     public static UIInput CreateUIInput(GameObject parentObject, string inputName, Vector3 relativePos, Color inputColor, string inputInitText,
-        int depth, SpriteName background, UIFont font, int width, int height)
+        int depth, NGUISpriteData background, UIFont font, int width, int height)
     {
         GameObject inputRootObject = NGUITools.AddChild(parentObject);
         inputRootObject.name = inputName;
@@ -541,7 +585,7 @@ public static class GUIComponents
     public static UIButton DialogFrame(GameObject parent)
     {
         UIButton button = GUIStation.CreateUIButton(parent, "DialogFrame", Vector3.zero, 0, 
-            SpriteName.DIALOG_FRAME,
+            NGUISpriteData.DIALOG_FRAME,
             GUIStation.MANUAL_SCREEN_WIDTH / 2, GUIStation.MANUAL_SCREEN_HEIGHT / 2, null, Color.white, string.Empty);
 
         return button;
@@ -552,7 +596,7 @@ public static class GUIComponents
     /// </summary>
     public static UISprite StageFrame(GameObject parent)
     {
-        UISprite stageFrameSprite = UIImageManager.CreateUISprite(parent, SpriteName.STAGE_FRAME);
+        UISprite stageFrameSprite = UIImageManager.CreateUISprite(parent, NGUISpriteData.STAGE_FRAME);
         stageFrameSprite.Init(UISprite.Type.Sliced, 1, UIWidget.Pivot.Center, (int)(GUIStation.MANUAL_SCREEN_WIDTH * 0.95f), (int)(GUIStation.MANUAL_SCREEN_HEIGHT * 0.95f));
         stageFrameSprite.name = "StageFrame";
         stageFrameSprite.transform.localPosition = Vector3.zero; // 因為調整pivot會影響localPosition，所以需要再次重設
@@ -568,7 +612,7 @@ public static class GUIComponents
         int height = CalculateStageWideButtonHeight();
 
         UIButton button = GUIStation.CreateUIButton(parent, "StageBtn", Vector3.zero, depth,
-            SpriteName.STAGE_BG_OPEN,
+            NGUISpriteData.STAGE_BG_OPEN,
             (int)(GUIStation.MANUAL_SCREEN_WIDTH * 0.9f), height, null, Color.white, string.Empty);
 
         button.SetColor(Color.white, Color.white, new Color(184.0f / 255.0f, 184.0f / 255.0f, 184.0f / 255.0f, 1.0f), new Color(184.0f / 255.0f, 184.0f / 255.0f, 184.0f / 255.0f, 1.0f));
@@ -603,7 +647,7 @@ public static class GUIComponents
     {
         // todo: 不應該讓 UI 實作者處理 depth 這個參數
         UIButton button = GUIStation.CreateUIButton(parent, "DialogButton", Vector3.zero, depth,
-            SpriteName.BTN_GENERIC_BG,
+            NGUISpriteData.BTN_GENERIC_BG,
             116, 94,
             UIFontManager.GetUIDynamicFont(UIFontName.DragonWord),
             Color.white, showWord);
@@ -619,7 +663,7 @@ public static class GUIComponents
     {
         // todo: 不應該讓 UI 實作者處理 depth 這個參數
         UIInput input = GUIStation.CreateUIInput(parent, "NormalInput", Vector3.zero, Color.white, showWord, depth,
-            SpriteName.INPUT_NAME_BG,
+            NGUISpriteData.INPUT_NAME_BG,
             UIFontManager.GetUIDynamicFont(UIFontName.DragonWord),
             341, 75);
 
@@ -636,7 +680,7 @@ public static class GUIComponents
         float iconScale = 1.6f;
 
         character = GUIStation.CreateUIButton(parent, "Chatacter", new Vector3(x, y, 0), 10,
-            SpriteName.ICON_PERSON,
+            NGUISpriteData.ICON_PERSON,
             (int)(136 * iconScale), (int)(115 * iconScale),
             UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
             Color.white, GLOBAL_STRING.CHARACTER_BTN_TEXT);
@@ -647,7 +691,7 @@ public static class GUIComponents
 
         x = x + leftPadding;
         bag = GUIStation.CreateUIButton(parent, "Bag", new Vector3(x, y, 0), 10, 
-                                        SpriteName.ICON_BAG,
+                                        NGUISpriteData.ICON_BAG,
                                         (int)(135 * iconScale), (int)(122 * iconScale),
                                         UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
                                         Color.white, GLOBAL_STRING.BAG_BTN_TEXT);
@@ -658,7 +702,7 @@ public static class GUIComponents
 
         x = x + leftPadding;
         shop = GUIStation.CreateUIButton(parent, "Shop", new Vector3(x, y, 0), 10,
-                                        SpriteName.ICON_STORE,
+                                        NGUISpriteData.ICON_STORE,
                                         (int)(133 * iconScale), (int)(115 * iconScale),
                                         UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
                                         Color.white, GLOBAL_STRING.SHOP_BTN_TEXT);
@@ -669,7 +713,7 @@ public static class GUIComponents
 
         x = x + leftPadding;
         friend = GUIStation.CreateUIButton(parent, "Friend", new Vector3(x, y, 0), 10,
-                                            SpriteName.ICON_FRIEND,
+                                            NGUISpriteData.ICON_FRIEND,
                                             (int)(136 * iconScale), (int)(122 * iconScale),
                                             UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
                                             Color.white, GLOBAL_STRING.FRIEND_BTN_TEXT);
@@ -684,7 +728,7 @@ public static class GUIComponents
     /// </summary>
     public static UISprite MainBackground(GameObject parent, int depth )
     {
-        UISprite background = UIImageManager.CreateUISprite(parent, SpriteName.MAIN_BG);
+        UISprite background = UIImageManager.CreateUISprite(parent, NGUISpriteData.MAIN_BG);
         background.Init(UISprite.Type.Simple, depth, UIWidget.Pivot.Center, GUIStation.MANUAL_SCREEN_WIDTH, GUIStation.MANUAL_SCREEN_HEIGHT);
         background.name = "Background";
         background.transform.localPosition = Vector3.zero; // 因為調整pivot會影響localPosition，所以需要再次重設
@@ -696,7 +740,7 @@ public static class GUIComponents
     /// </summary>
     public static UISprite WorldMapBackground(GameObject parent, int depth)
     {
-        UISprite background = UIImageManager.CreateUISprite(parent, SpriteName.WORLDMAP_BG);
+        UISprite background = UIImageManager.CreateUISprite(parent, NGUISpriteData.WORLDMAP_BG);
         background.Init(UISprite.Type.Simple, depth, UIWidget.Pivot.Center, GUIStation.MANUAL_SCREEN_WIDTH, GUIStation.MANUAL_SCREEN_HEIGHT);
         background.name = "Background";
         background.transform.localPosition = Vector3.zero; // 因為調整pivot會影響localPosition，所以需要再次重設
@@ -705,7 +749,7 @@ public static class GUIComponents
 
     public static UISprite WorldMap(GameObject parent)
     {
-        UISprite worldMap = UIImageManager.CreateUISprite(parent, SpriteName.WORLDMAP);
+        UISprite worldMap = UIImageManager.CreateUISprite(parent, NGUISpriteData.WORLDMAP);
         worldMap.Init(UISprite.Type.Simple, 1, UIWidget.Pivot.Center, 1760, 838);
         worldMap.name = "WorldMap";
         worldMap.transform.localPosition = new Vector3(10, 35, 0); // 因為調整pivot會影響localPosition，所以需要再次重設

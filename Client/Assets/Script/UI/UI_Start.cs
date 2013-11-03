@@ -26,7 +26,7 @@ public class UI_Start : GUIFormBase
 
         // 登入的全畫面圖按鈕
         _loginBtn = GUIStation.CreateUIButton(panel.gameObject, "Login BG", Vector3.zero, 0,
-            SpriteName.MAIN_BG,
+            NGUISpriteData.MAIN_BG,
             GUIStation.MANUAL_SCREEN_WIDTH, GUIStation.MANUAL_SCREEN_HEIGHT, null, Color.white, string.Empty);
         _loginBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         // 登入文字
@@ -37,7 +37,7 @@ public class UI_Start : GUIFormBase
         _loginBtn.onClick.Add(new EventDelegate(this, "LoginClick"));
         // 繼承按鈕
         _inheritBtn = GUIStation.CreateUIButton(panel.gameObject, "Inhert Button", new Vector3(294, -159, 0), 1,
-            SpriteName.BTN_INHERIT,
+            NGUISpriteData.BTN_INHERIT,
             40, 40, null, Color.white, string.Empty);
         _inheritBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         // 加上event
@@ -66,9 +66,9 @@ public class UI_Start : GUIFormBase
         if (_loginHint != null) { NGUITools.Destroy(_loginHint.gameObject); }
         _loginHint = null;
 
-        _loadingBar.Dispose();
+        if (_loadingBar != null) { _loadingBar.Dispose(); }
         _loadingBar = null;
-        
+
         if (_inheritBtn != null) { NGUITools.Destroy(_inheritBtn.gameObject); }
         _inheritBtn = null;
 

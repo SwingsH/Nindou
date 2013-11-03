@@ -15,19 +15,38 @@ public class SubUI_LoadingBar : GUISubFormBase
         : base(parent, subUILoadingBarName, relativePos)
     {
         // 讀取進度條
-        _progressBar = GUIStation.CreateUIProgressBar(_subUIRoot.gameObject, "Progress Bar_Build", Vector3.zero, depth,
-                                                    SpriteName.SLICE_LOADING_BAR_FG,
-                                                    SpriteName.SLICE_LOADING_BAR_BG,
-                                                    1535, 91);
+        //_progressBar = GUIStation.CreateUIProgressBar(_subUIRoot.gameObject, "Progress Bar_Build", Vector3.zero, depth,
+        //                                            SpriteName.SLICE_LOADING_BAR_FG,
+        //                                            SpriteName.SLICE_LOADING_BAR_BG,
+        //                                            1535, 91);
+
+        _progressBar = GUIStation.CreateUISlider(_subUIRoot.gameObject, "Progress Bar", Vector3.zero, depth,
+            NGUISpriteData.SLICE_LOADING_BAR_FG,
+            NGUISpriteData.SLICE_LOADING_BAR_BG,
+            NGUISpriteData.ICON_LOADING_ANIME,
+            1535, 91, false);
         _progressBar.foreground.localPosition = new Vector3(27, 0, 0);
         _progressBar.fullSize = new Vector2(1385, 28);
+        _progressBar.thumb.localPosition = new Vector3(0, 44, 0);
+        UISprite thumbSprite = _progressBar.thumb.gameObject.GetComponent<UISprite>();
+        thumbSprite.type = UISprite.Type.Sliced; // 避免在播動畫時呼叫MakePixelPerfect()導致回復原圖大小
+        thumbSprite.width = 138;
+        thumbSprite.height = 132;
+        // 加入播放Sprite動畫的元件&設定（每張Sprite名字以「'_'+數字」結尾
+        string loadingAnimationFirstPicName = NGUISpriteData.ICON_LOADING_ANIME.GetSpriteName();
+        if (loadingAnimationFirstPicName.LastIndexOf('_') > 0)
+        {
+            UISpriteAnimation loadingAnimation = _progressBar.thumb.gameObject.AddComponent<UISpriteAnimation>();
+            loadingAnimation.namePrefix = loadingAnimationFirstPicName.Substring(0, loadingAnimationFirstPicName.LastIndexOf('_') + 1);
+            loadingAnimation.framesPerSecond = 15;
+        }
         // 讀取進度的數值文字
         _progressText = GUIStation.CreateUILabel(_subUIRoot.gameObject, "LoadingProgressText", UIWidget.Pivot.Center, new Vector3(678, -4, 0), depth + 2,
             UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
             Color.white, "0%");
         _progressText.overflowMethod = UILabel.Overflow.ResizeFreely; // fs: 讓文字佔的空間自由地重新配置
         // 讀取條左邊的沙漏圖
-        UISprite sandFilter = UIImageManager.CreateUISprite(_subUIRoot.gameObject, SpriteName.ICON_SANDFILTER);
+        UISprite sandFilter = UIImageManager.CreateUISprite(_subUIRoot.gameObject, NGUISpriteData.ICON_SANDFILTER);
         sandFilter.Init(UISprite.Type.Simple, depth+2, UIWidget.Pivot.Center, 138, 135);
         sandFilter.name = "LoadingSandFilter";
         sandFilter.transform.localPosition = Vector3.zero;  // 因為調整pivot會影響localPosition，所以需要再次重設

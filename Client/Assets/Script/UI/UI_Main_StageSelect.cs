@@ -66,7 +66,7 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
                 UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
                 Color.red, GLOBAL_STRING.STAGE_NOT_OPEN_TEXT);
             // 探索度的背景圖
-            _exploreProgressBackground = UIImageManager.CreateUISprite(_subUIRoot, SpriteName.EXPLORE_PROGRESS_BG);
+            _exploreProgressBackground = UIImageManager.CreateUISprite(_subUIRoot, NGUISpriteData.EXPLORE_PROGRESS_BG);
             _exploreProgressBackground.Init(UISprite.Type.Simple, depth + 2, _exploreProgressBackground.pivot, EXPLORE_PROGRESS_BG_WIDTH, EXPLORE_PROGRESS_BG_HEIGHT);
             _exploreProgressBackground.name = "ExploreProgress";
             _exploreProgressBackground.transform.localPosition = new Vector3(430, 0, 0);
@@ -79,9 +79,9 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
 
             // 取得關卡開啟/關閉時底圖SpriteName，方便之後動態切換
             EnumUISpriteConfig tempUISpriteConfig;
-            if (CommonFunction.GetAttribute<EnumUISpriteConfig>(SpriteName.STAGE_BG_OPEN, out tempUISpriteConfig)) { _stageOpenSpriteName = tempUISpriteConfig.SpriteName; }
+            if (CommonFunction.GetAttribute<EnumUISpriteConfig>(NGUISpriteData.STAGE_BG_OPEN, out tempUISpriteConfig)) { _stageOpenSpriteName = tempUISpriteConfig.SpriteName; }
             else { _stageOpenSpriteName = string.Empty; }
-            if (CommonFunction.GetAttribute<EnumUISpriteConfig>(SpriteName.STAGE_BG_CLOSE, out tempUISpriteConfig)) { _stageCloseSpriteName = tempUISpriteConfig.SpriteName; }
+            if (CommonFunction.GetAttribute<EnumUISpriteConfig>(NGUISpriteData.STAGE_BG_CLOSE, out tempUISpriteConfig)) { _stageCloseSpriteName = tempUISpriteConfig.SpriteName; }
             else { _stageCloseSpriteName = string.Empty; }
         }
         #endregion
@@ -237,7 +237,7 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         _stageSelectBackground = GUIComponents.StageFrame(stageSelectObjectsTween.gameObject);
 
         // 場景名稱、進度的背景圖
-        UISprite stageName = UIImageManager.CreateUISprite(_stageSelectBackground.gameObject, SpriteName.STAGE_TITLE_BG);
+        UISprite stageName = UIImageManager.CreateUISprite(_stageSelectBackground.gameObject, NGUISpriteData.STAGE_TITLE_BG);
         stageName.Init(stageName.type, 2, stageName.pivot, STAGE_TITLE_BG_WIDTH, STAGE_TITLE_BG_HEIGHT);
         stageName.name = "StageTitle";
         stageName.transform.localPosition = new Vector3(-249, 342, 0);
@@ -251,7 +251,7 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
             Color.white, "探索度：80%");
         // 回到上一層的按鈕
         _returnPreviousUIBtn = GUIStation.CreateUIButton(_stageSelectBackground.gameObject, "X", new Vector3(783, 321, 0), 4,
-            SpriteName.BTN_CLOSE,
+            NGUISpriteData.BTN_CLOSE,
             100, 100, null, Color.white, string.Empty);
         _returnPreviousUIBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _returnPreviousUIBtn.onClick.Add(new EventDelegate(this, "ReturnPreviousUI"));

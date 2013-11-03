@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 
 /// <summary>
-/// NGUI介面會使用到的Sprite名稱，請將所有NGUI會用到的介面圖名稱統整在這
+/// NGUI介面會使用到的Sprite資料（包含所在的UIAtlas和Sprite名稱），請將所有NGUI會用到的介面圖名稱統整在這
 /// </summary>
-public enum SpriteName
+public enum NGUISpriteData
 {
     //  UIAtlas名稱, Sprite名稱
     [EnumUISpriteConfig("", "")]                                    NONE, // 空圖
@@ -19,6 +19,7 @@ public enum SpriteName
     [EnumUISpriteConfig("Atlas_Slices", "slice_LoadingBarFG")]      SLICE_LOADING_BAR_FG, // 讀取條的前景圖
 
     [EnumUISpriteConfig("Atlas_Icons", "icon_SandFilter")]          ICON_SANDFILTER, // 讀取條左邊的沙漏圖
+    [EnumUISpriteConfig("Atlas_Icons", "icon_loading_anime_1")]     ICON_LOADING_ANIME, // 讀取條的忍者跑步動畫圖（第一張）
 
     [EnumUISpriteConfig("Atlas_Slices", "slice_parchment")]         DIALOG_FRAME, // 對話提示框    
 
@@ -91,7 +92,7 @@ public static class UIImageManager
     /// <param name="sn">Sprite名稱相關資料</param>
     /// <param name="isOK">是否沒問題</param>
     [Conditional("DEVELOP_DEBUG")]
-    private static void CheckInputUISpriteData(SpriteName sn, ref bool isOK)
+    private static void CheckInputUISpriteData(NGUISpriteData sn, ref bool isOK)
     {
         //CommonFunction.DebugMsgFormat("Check sprite");
 
@@ -119,7 +120,7 @@ public static class UIImageManager
     /// <param name="parentObj">parent物件</param>
     /// <param name="sn">存有Atlas和Sprite名字資料的Enum</param>
     /// <returns>建出的UISprite</returns>
-    public static UISprite CreateUISprite(GameObject parentObj, SpriteName sn)
+    public static UISprite CreateUISprite(GameObject parentObj, NGUISpriteData sn)
     {
         //CommonFunction.DebugMsgFormat("GUIImageManager.CreateUISprite()");
         bool dataIsOK = true;
@@ -134,5 +135,17 @@ public static class UIImageManager
         UISprite retUISprite = NGUITools.AddSprite(parentObj, GetUIAtlas(uiSpriteConfig.AtlasName), uiSpriteConfig.SpriteName);
         retUISprite.MakePixelPerfect();
         return retUISprite;
+    }
+
+    /// <summary>
+    /// 從Enum NGUISpriteData中取得對應的Sprite名稱
+    /// </summary>
+    public static string GetSpriteName(this NGUISpriteData sprite)
+    {
+        EnumUISpriteConfig uiSpriteConfig;
+        // 無法取得資料，回傳空字串
+        if (!CommonFunction.GetAttribute<EnumUISpriteConfig>(sprite, out uiSpriteConfig)) { return string.Empty; }
+
+        return string.IsNullOrEmpty(uiSpriteConfig.SpriteName) ? string.Empty : uiSpriteConfig.SpriteName;
     }
 }

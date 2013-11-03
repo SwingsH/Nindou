@@ -21,7 +21,7 @@ public class UI_Main : GUIFormBase
         UIPanel panel = NGUITools.AddChild<UIPanel>(anchor.gameObject);
 
         // 背景圖
-        UISprite backgroundPic = UIImageManager.CreateUISprite(panel.gameObject, SpriteName.WORLDMAP_BG);
+        UISprite backgroundPic = UIImageManager.CreateUISprite(panel.gameObject, NGUISpriteData.WORLDMAP_BG);
         backgroundPic.Init(UISprite.Type.Simple, 0, UIWidget.Pivot.Center, GUIStation.MANUAL_SCREEN_WIDTH, GUIStation.MANUAL_SCREEN_HEIGHT);
         backgroundPic.name = "Background";
         // 下方物件的parent
@@ -91,7 +91,7 @@ public class UI_Main : GUIFormBase
         float iconScale = 1.6f;
 
         character = GUIStation.CreateUIButton(parent, "Chatacter", new Vector3(x, y, 0), 10,
-            SpriteName.ICON_PERSON,
+            NGUISpriteData.ICON_PERSON,
             (int)(136 * iconScale), (int)(115 * iconScale),
             UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
             Color.white, GLOBAL_STRING.CHARACTER_BTN_TEXT);
@@ -102,7 +102,7 @@ public class UI_Main : GUIFormBase
 
         x = x + leftPadding;
         bag = GUIStation.CreateUIButton(parent, "Bag", new Vector3(x, y, 0), 10,
-                                        SpriteName.ICON_BAG,
+                                        NGUISpriteData.ICON_BAG,
                                         (int)(135 * iconScale), (int)(122 * iconScale),
                                         UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
                                         Color.white, GLOBAL_STRING.BAG_BTN_TEXT);
@@ -113,7 +113,7 @@ public class UI_Main : GUIFormBase
 
         x = x + leftPadding;
         shop = GUIStation.CreateUIButton(parent, "Shop", new Vector3(x, y, 0), 10,
-                                        SpriteName.ICON_STORE,
+                                        NGUISpriteData.ICON_STORE,
                                         (int)(133 * iconScale), (int)(115 * iconScale),
                                         UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
                                         Color.white, GLOBAL_STRING.SHOP_BTN_TEXT);
@@ -124,7 +124,7 @@ public class UI_Main : GUIFormBase
 
         x = x + leftPadding;
         friend = GUIStation.CreateUIButton(parent, "Friend", new Vector3(x, y, 0), 10,
-                                            SpriteName.ICON_FRIEND,
+                                            NGUISpriteData.ICON_FRIEND,
                                             (int)(136 * iconScale), (int)(122 * iconScale),
                                             UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
                                             Color.white, GLOBAL_STRING.FRIEND_BTN_TEXT);

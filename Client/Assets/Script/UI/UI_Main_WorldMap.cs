@@ -72,7 +72,7 @@ public class UI_Main_WorldMap : GUIFormBase
             Color.black, string.Format(GLOBAL_STRING.UI_LABEL_PLAYER_NAME, _guistation.Account.PlayerName));
         // 體力條
         _stamina = GUIStation.CreateUIProgressBar(topObjectsTween.gameObject, "Stamina", new Vector3(-698, 329, 0), 8,
-            SpriteName.HP_FG, SpriteName.ROLE_HP_BG, 438, 82);
+            NGUISpriteData.HP_FG, NGUISpriteData.ROLE_HP_BG, 438, 82);
         // 調整體力條FG位置&全滿時大小
         _stamina.foreground.localPosition = new Vector3(29, 5, 0);
         _stamina.fullSize = new Vector2(270, 38);
@@ -83,16 +83,16 @@ public class UI_Main_WorldMap : GUIFormBase
             Color.white, string.Format("目前體力：{0}/{1}", _staPoint, _staMaxPoint));
         // 「人物頭像」按鈕
         _headPictureBtn = GUIStation.CreateUIButton(topObjectsTween.gameObject, "HeadPicture", new Vector3(0, 318, 0), 5,
-            SpriteName.ROLE_ICON,
+            NGUISpriteData.ROLE_ICON,
             220, 219, null, Color.white, string.Empty);
         _headPictureBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _headPictureBtn.onClick.Add(new EventDelegate(this, "HeadPictureBtnClick"));
         // 「點數」
-        UISprite pointBasePic = UIImageManager.CreateUISprite(topObjectsTween.gameObject, SpriteName.BTN_GENERIC_BG);
+        UISprite pointBasePic = UIImageManager.CreateUISprite(topObjectsTween.gameObject, NGUISpriteData.BTN_GENERIC_BG);
         pointBasePic.Init(pointBasePic.type, 6, pointBasePic.pivot, POINT_BG_WIDTH, POINT_BG_HEIGHT);
         pointBasePic.name = "Point";
         pointBasePic.transform.localPosition = new Vector3(347, 328, 0);
-        UISprite pointGraphPic = UIImageManager.CreateUISprite(pointBasePic.gameObject, SpriteName.POINT_PIC);
+        UISprite pointGraphPic = UIImageManager.CreateUISprite(pointBasePic.gameObject, NGUISpriteData.POINT_PIC);
         pointGraphPic.Init(pointGraphPic.type, 7, pointGraphPic.pivot, POINT_PIC_WIDTH, POINT_PIC_HEIGHT);
         pointGraphPic.name = "PointGraph";
         pointGraphPic.transform.localPosition = new Vector3(-155, 0, 0);
@@ -101,7 +101,7 @@ public class UI_Main_WorldMap : GUIFormBase
             Color.red, string.Format("目前點數：{0}", _gamePoint));
         // 「選單」按鈕
         _menuBtn = GUIStation.CreateUIButton(topObjectsTween.gameObject, "Menu", new Vector3(669, 330, 0), 2,
-            SpriteName.ICON_MENU,
+            NGUISpriteData.ICON_MENU,
             MENU_BG_WIDTH, MENU_BG_HEIGHT,
             UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
             Color.red, GLOBAL_STRING.MENU_BTN_TEXT);
@@ -121,7 +121,7 @@ public class UI_Main_WorldMap : GUIFormBase
             Color.red, GLOBAL_STRING.WARNING_LABEL_TEXT);
         // 「關卡」按鈕
         _stageBtn = GUIStation.CreateUIButton(worldMap.gameObject, "Stage", new Vector3(-9, -97, 0), 4,
-            SpriteName.MAIN_STAGE_BG,
+            NGUISpriteData.MAIN_STAGE_BG,
             STAGE_BG_WIDTH, STAGE_BG_HEIGHT,
             null, Color.white, string.Empty);
         _stageBtn.SetColor(Color.white, Color.black, Color.grey, Color.grey);

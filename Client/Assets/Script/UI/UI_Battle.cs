@@ -27,15 +27,12 @@ public class UI_Battle : GUIFormBase
 
         UIPanel panel = NGUITools.AddChild<UIPanel>(anchor.gameObject);
         // BOSS 圖片
-        _bossPic = UIImageManager.CreateUISprite(panel.gameObject, SpriteName.BOSS_PIC);
+        _bossPic = UIImageManager.CreateUISprite(panel.gameObject, NGUISpriteData.BOSS_PIC);
         _bossPic.Init(_bossPic.type, 3, _bossPic.pivot, BOSS_ICON_WIDTH, BOSS_ICON_HEIGHT);
 
         //// TODO:sprite設定，之後統整出去---
         _bossPic.name = "Boss Pic";
         _bossPic.transform.localPosition = new Vector3(-400, 440, 0); // 因為調整pivot會影響localPosition，所以需要再次重設
-        //_bossPic.depth = 3;
-        //_bossPic.width = BOSS_ICON_WIDTH;
-        //_bossPic.height = BOSS_ICON_HEIGHT;
         ////---------------------------------
         // BOSS 名稱
         _bossNameText = GUIStation.CreateUILabel(_bossPic.gameObject, "Boss Name", UIWidget.Pivot.Left, new Vector3(73, -8, 0), 4,
@@ -43,22 +40,22 @@ public class UI_Battle : GUIFormBase
             Color.white, "Boss名稱哈哈琳");
         // Boss HP 血條
         _bossHPBar = GUIStation.CreateUIProgressBar(_bossPic.gameObject, "Boss HP Bar", new Vector3(0, -25, 0), 1,
-            SpriteName.HP_FG, SpriteName.BOSS_HP_BG, 999, 72);
+            NGUISpriteData.HP_FG, NGUISpriteData.BOSS_HP_BG, 999, 72);
         // 調整FG位置&slider全滿時大小
         _bossHPBar.foreground.localPosition = new Vector3(32, 1, 0);
         _bossHPBar.fullSize = new Vector2(826, 28);
         // 加速鈕
         _fastForwardBtn = GUIStation.CreateUIButton(panel.gameObject, "FastForward", new Vector3(714, 428, 0), 6,
-            SpriteName.BTN_FAST_FORWARD, 150, 150, null, Color.white, string.Empty);
+            NGUISpriteData.BTN_FAST_FORWARD, 150, 150, null, Color.white, string.Empty);
         _fastForwardBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _fastForwardBtn.onClick.Add(new EventDelegate(this, "FastForwardBtnClick"));
         // 暫停鈕
         _pauseBtn = GUIStation.CreateUIButton(panel.gameObject, "Pause", new Vector3(884, 428, 0), 5,
-            SpriteName.PAUSE, 150, 150, null, Color.white, string.Empty);
+            NGUISpriteData.PAUSE, 150, 150, null, Color.white, string.Empty);
         _pauseBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _pauseBtn.onClick.Add(new EventDelegate(this, "PauseBtnClick"));
         // 放置角色Icon的背景圖版
-        _iconBackground = UIImageManager.CreateUISprite(panel.gameObject, SpriteName.ROLE_ICON_PLATE);
+        _iconBackground = UIImageManager.CreateUISprite(panel.gameObject, NGUISpriteData.ROLE_ICON_PLATE);
         // TODO:sprite設定，之後統整出去---
         _iconBackground.name = "IconBackground";
         _iconBackground.transform.localPosition = new Vector3(0, -398, 0);
@@ -218,14 +215,14 @@ public class UI_Battle : GUIFormBase
         int playerIndex = _iconBtns.Count;
         // 角色按鈕兼底圖
         UIButton tempIconBtn = GUIStation.CreateUIButton(parentObj, string.Format("Icon_{0}", playerIndex), new Vector3(-656 + leftPadding * playerIndex, 12, 0), 1,
-            SpriteName.ROLE_ICON,  (int)(220 * iconScale), (int)(219*iconScale), null, Color.white, string.Empty);
+            NGUISpriteData.ROLE_ICON,  (int)(220 * iconScale), (int)(219*iconScale), null, Color.white, string.Empty);
         tempIconBtn.tweenTarget.name = "Role BG";
         tempIconBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         tempIconBtn.onClick.Add(new EventDelegate(this, "IconBtnClick"));
         _iconBtns.Add(tempIconBtn);
         // 角色血條
         UISlider tempHPBar = GUIStation.CreateUIProgressBar(tempIconBtn.gameObject, "Role HP Bar", new Vector3(-104, -93, 0), 2,
-            SpriteName.HP_FG, SpriteName.ROLE_HP_BG, (int)(219 * iconScale), (int)(41 * iconScale));
+            NGUISpriteData.HP_FG, NGUISpriteData.ROLE_HP_BG, (int)(219 * iconScale), (int)(41 * iconScale));
         // 調整位置& Slider全滿時大小
         tempHPBar.foreground.localPosition = new Vector3(21, 4, 0);
         tempHPBar.fullSize = new Vector2(205, 28);
