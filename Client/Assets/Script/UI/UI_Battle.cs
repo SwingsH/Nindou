@@ -27,8 +27,9 @@ public class UI_Battle : GUIFormBase
 
         UIPanel panel = NGUITools.AddChild<UIPanel>(anchor.gameObject);
         // BOSS 圖片
-        _bossPic = UIImageManager.CreateUISprite(panel.gameObject, NGUISpriteData.BOSS_PIC);
-        _bossPic.Init(_bossPic.type, 3, _bossPic.pivot, BOSS_ICON_WIDTH, BOSS_ICON_HEIGHT);
+         _bossPic = UIImageManager.CreateUISprite(panel.gameObject, NGUISpriteData.BOSS_PIC);
+        _bossPic.SetEffectSizeParameter(_bossPic.type, _bossPic.pivot, BOSS_ICON_WIDTH, BOSS_ICON_HEIGHT);
+        _bossPic.depth = 3;
 
         //// TODO:sprite設定，之後統整出去---
         _bossPic.name = "Boss Pic";
@@ -56,12 +57,11 @@ public class UI_Battle : GUIFormBase
         _pauseBtn.onClick.Add(new EventDelegate(this, "PauseBtnClick"));
         // 放置角色Icon的背景圖版
         _iconBackground = UIImageManager.CreateUISprite(panel.gameObject, NGUISpriteData.ROLE_ICON_PLATE);
+        _iconBackground.SetEffectSizeParameter(_iconBackground.type, _iconBackground.pivot, ROLE_ICON_PLATE_BG_WIDTH, ROLE_ICON_PLATE_BG_HEIGHT);
+        _iconBackground.depth = 0;
         // TODO:sprite設定，之後統整出去---
         _iconBackground.name = "IconBackground";
         _iconBackground.transform.localPosition = new Vector3(0, -398, 0);
-        _iconBackground.depth = 0;
-        _iconBackground.width = ROLE_ICON_PLATE_BG_WIDTH;
-        _iconBackground.height = ROLE_ICON_PLATE_BG_HEIGHT;
         // --------------------------------
         // 玩家角色圖像 & 血條
         for (int i = 0; i < GLOBALCONST.UI_BATTLE_ROLE_ICON_COUNT; ++i)

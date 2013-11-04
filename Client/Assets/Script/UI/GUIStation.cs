@@ -330,9 +330,10 @@ public class GUIStation
         retButtonObj.transform.localPosition = relativePos;
         // 設定按鈕背景圖
         UISprite bg = UIImageManager.CreateUISprite(retButtonObj, btnBG);
-
-        bg.Init(UISprite.Type.Sliced, depth, bg.pivot, width, height);
         bg.name = "Background";
+
+        bg.SetEffectSizeParameter(UISprite.Type.Sliced, bg.pivot, width, height);
+        bg.depth = depth;
         // font
         if (font != null)
         {
@@ -375,14 +376,18 @@ public class GUIStation
         if (background != NGUISpriteData.NONE)
         {
             UISprite back = UIImageManager.CreateUISprite(progressBarObject, background);
-            back.Init(back.type, depth, UIWidget.Pivot.Left, width, height);
             back.name = "Background";
+
+            back.SetEffectSizeParameter(back.type, UIWidget.Pivot.Left, width, height);
+            back.depth = depth;
             back.transform.localPosition = Vector3.zero; // 因為調整pivot會影響localPosition，所以需要再次重設
         }
         // Foreground sprite
         UISprite front = UIImageManager.CreateUISprite(progressBarObject, foreground);
-        front.Init(front.type, depth + 1, UIWidget.Pivot.Left, width, height);
         front.name = "Foreground";
+
+        front.SetEffectSizeParameter(front.type, UIWidget.Pivot.Left, width, height); 
+        front.depth = depth + 1;
         front.transform.localPosition = Vector3.zero; // 因為調整pivot會影響localPosition，所以需要再次重設
         
         // Add the slider script
@@ -403,14 +408,16 @@ public class GUIStation
         if (background != NGUISpriteData.NONE)
         {
             UISprite back = UIImageManager.CreateUISprite(sliderObject, background);
-            back.Init(back.type, depth, UIWidget.Pivot.Left, width, height);
             back.name = "Background";
+            back.SetEffectSizeParameter(back.type, UIWidget.Pivot.Left, width, height);
+            back.depth = depth;
             back.transform.localPosition = Vector3.zero; // 因為調整pivot會影響localPosition，所以需要再次重設
         }
         // Foreground
         UISprite front = UIImageManager.CreateUISprite(sliderObject, foreground);
-        front.Init(front.type, depth + 1, UIWidget.Pivot.Left, width, height);
         front.name = "Foreground";
+        front.SetEffectSizeParameter(front.type, UIWidget.Pivot.Left, width, height);
+        front.depth = depth + 1;
         front.transform.localPosition = Vector3.zero; // 因為調整pivot會影響localPosition，所以需要再次重設
         // 如果能夠控制，加上碰撞盒
         if (canUserInterative) NGUITools.AddWidgetCollider(sliderObject);
@@ -421,9 +428,9 @@ public class GUIStation
         if (thumb != NGUISpriteData.NONE)
         {
             UISprite thb = UIImageManager.CreateUISprite(sliderObject, thumb);
-            thb.Init(thb.type, thb.depth, thb.pivot, 20, 40);
             thb.name = "Thumb";
-            thb.transform.localPosition = new Vector3(200, 0, 0);
+            thb.SetEffectSizeParameter(thb.type, thb.pivot, 20, 40);
+            thb.transform.localPosition = new Vector3(200, 0, 0); // 因為調整pivot會影響localPosition，所以需要再次重設
             // 如果能夠控制，加上碰撞盒 &預設的按鈕反應
             if (canUserInterative)
             {
@@ -464,6 +471,7 @@ public class GUIStation
         retLabel.MakePixelPerfect();
         return retLabel;
     }
+
     /// <summary>
     /// 依據設定 建立一個Scroll Bar
     /// </summary>
@@ -471,17 +479,29 @@ public class GUIStation
     /// <param name="scName">ScrollBar名字</param>
     /// <param name="relativePos">ScrollBar位置（相對於preantObj）</param>
     /// <param name="depth">深度</param>
-    /// <param name="atlas">使用的Atlas</param>
+    /// <param name="Background">背景圖資訊</param>
+    /// <param name="Foreground">前景圖資訊</param>
+    /// <param name="width">Scroll Bar寬</param>
+    /// <param name="height">Scroll Bar高</param>
+    /// <param name="dir">Scroll Bar的方向</param>
+    /// <param name="canMoveThumb">Thumb是否可移動</param>
     /// <returns>建出的ScrollBar</returns>
     public static UIScrollBar CreateUIScrollBar(GameObject parentObj, string scName, Vector3 relativePos, int depth,
-        UIAtlas atlas, string backgroundName, string foregroundName, int width, int height, UIScrollBar.Direction dir, bool canMoveThumb)
+        NGUISpriteData Background, NGUISpriteData Foreground, int width, int height, UIScrollBar.Direction dir, bool canMoveThumb)
     {
         GameObject ScrollBarObject = NGUITools.AddChild(parentObj);
         ScrollBarObject.name = scName;
         ScrollBarObject.transform.localPosition = relativePos;
 
-        UISprite bg = CreateUISprite(ScrollBarObject, "Background", UISprite.Type.Sliced, depth, atlas, backgroundName, UIWidget.Pivot.Center, width, height);
-        UISprite fg = CreateUISprite(ScrollBarObject, "Foreground", UISprite.Type.Sliced, depth + 1, atlas, foregroundName, UIWidget.Pivot.Center, width, height);
+        UISprite bg = UIImageManager.CreateUISprite(ScrollBarObject, Background);
+        bg.name = "Background";
+        bg.SetEffectSizeParameter(UISprite.Type.Sliced, UIWidget.Pivot.Center, width, height);
+        bg.depth = depth;
+        
+        UISprite fg = UIImageManager.CreateUISprite(ScrollBarObject, Foreground);
+        fg.name = "Foreground";
+        fg.SetEffectSizeParameter(UISprite.Type.Sliced, UIWidget.Pivot.Center, width, height);
+        fg.depth = depth + 1;
 
         UIScrollBar retSC = ScrollBarObject.AddComponent<UIScrollBar>();
         retSC.background = bg;
@@ -495,7 +515,6 @@ public class GUIStation
             NGUITools.AddWidgetCollider(bg.gameObject);
             NGUITools.AddWidgetCollider(fg.gameObject);
         }
-
         return retSC;
     }
 
@@ -511,8 +530,9 @@ public class GUIStation
         inputRootObject.transform.localPosition = relativePos;
 
         UISprite bg = UIImageManager.CreateUISprite(inputRootObject, background);
-        bg.Init(UISprite.Type.Sliced, depth + 1, UIWidget.Pivot.Center, width, height);
         bg.name = "Background";
+        bg.SetEffectSizeParameter(UISprite.Type.Sliced, UIWidget.Pivot.Center, width, height);
+        bg.depth = depth + 1;
 
         UILabel targetLabel = CreateUILabel(inputRootObject, inputName + typeof(UIInput).ToString(), UIWidget.Pivot.Center,
                                             Vector3.zero, depth + 2, font, inputColor, inputInitText);
@@ -597,8 +617,9 @@ public static class GUIComponents
     public static UISprite StageFrame(GameObject parent)
     {
         UISprite stageFrameSprite = UIImageManager.CreateUISprite(parent, NGUISpriteData.STAGE_FRAME);
-        stageFrameSprite.Init(UISprite.Type.Sliced, 1, UIWidget.Pivot.Center, (int)(GUIStation.MANUAL_SCREEN_WIDTH * 0.95f), (int)(GUIStation.MANUAL_SCREEN_HEIGHT * 0.95f));
         stageFrameSprite.name = "StageFrame";
+        stageFrameSprite.SetEffectSizeParameter(UISprite.Type.Sliced, UIWidget.Pivot.Center, (int)(GUIStation.MANUAL_SCREEN_WIDTH * 0.95f), 900); // (int)(GUIStation.MANUAL_SCREEN_HEIGHT * 0.95f));
+        stageFrameSprite.depth = 1;
         stageFrameSprite.transform.localPosition = Vector3.zero; // 因為調整pivot會影響localPosition，所以需要再次重設
 
         return stageFrameSprite;
@@ -729,8 +750,9 @@ public static class GUIComponents
     public static UISprite MainBackground(GameObject parent, int depth )
     {
         UISprite background = UIImageManager.CreateUISprite(parent, NGUISpriteData.MAIN_BG);
-        background.Init(UISprite.Type.Simple, depth, UIWidget.Pivot.Center, GUIStation.MANUAL_SCREEN_WIDTH, GUIStation.MANUAL_SCREEN_HEIGHT);
         background.name = "Background";
+        background.SetEffectSizeParameter(UISprite.Type.Simple, UIWidget.Pivot.Center, GUIStation.MANUAL_SCREEN_WIDTH, GUIStation.MANUAL_SCREEN_HEIGHT);
+        background.depth = depth;
         background.transform.localPosition = Vector3.zero; // 因為調整pivot會影響localPosition，所以需要再次重設
         return background;
     }
@@ -741,8 +763,9 @@ public static class GUIComponents
     public static UISprite WorldMapBackground(GameObject parent, int depth)
     {
         UISprite background = UIImageManager.CreateUISprite(parent, NGUISpriteData.WORLDMAP_BG);
-        background.Init(UISprite.Type.Simple, depth, UIWidget.Pivot.Center, GUIStation.MANUAL_SCREEN_WIDTH, GUIStation.MANUAL_SCREEN_HEIGHT);
         background.name = "Background";
+        background.SetEffectSizeParameter(UISprite.Type.Simple, UIWidget.Pivot.Center, GUIStation.MANUAL_SCREEN_WIDTH, GUIStation.MANUAL_SCREEN_HEIGHT);
+        background.depth = depth;
         background.transform.localPosition = Vector3.zero; // 因為調整pivot會影響localPosition，所以需要再次重設
         return background;
     }
@@ -750,10 +773,10 @@ public static class GUIComponents
     public static UISprite WorldMap(GameObject parent)
     {
         UISprite worldMap = UIImageManager.CreateUISprite(parent, NGUISpriteData.WORLDMAP);
-        worldMap.Init(UISprite.Type.Simple, 1, UIWidget.Pivot.Center, 1760, 838);
         worldMap.name = "WorldMap";
+        worldMap.SetEffectSizeParameter(UISprite.Type.Simple, UIWidget.Pivot.Center, 1760, 838);
+        worldMap.depth = 1;
         worldMap.transform.localPosition = new Vector3(10, 35, 0); // 因為調整pivot會影響localPosition，所以需要再次重設
-
         return worldMap;
     }
 }

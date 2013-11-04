@@ -8,25 +8,19 @@ using System.Collections;
 public static class NGUIExtension
 {
     #region UISprite
-
     /// <summary>
-    /// 將UISprite的參數初始化
+    /// 設定會影響圖大小的相關參數
     /// </summary>
     /// <param name="sp">要修改的UISprite</param>
-    /// <param name="spriteType">填圖方式</param>
-    /// <param name="depth">深度</param>
+    /// <param name="spriteType">Sprite繪製方式</param>
     /// <param name="pivot">錨點</param>
     /// <param name="width">圖片寬</param>
     /// <param name="height">圖片高</param>
-    public static void Init(this UISprite sp, UISprite.Type spriteType, int depth, UISprite.Pivot pivot, int width, int height)
+    public static void SetEffectSizeParameter(this UISprite sp, UISprite.Type spriteType, UISprite.Pivot pivot, int width, int height)
     {
         sp.type = spriteType;
-        sp.depth = depth;
-        if (sp.pivot != pivot) 
-        {
-            sp.pivot = pivot;
-            sp.MakePixelPerfect(); // 如果type = simple or filled 會改回近原大小，故在呼叫此函式後才修改寬高    
-        }
+        sp.pivot = pivot;
+        sp.MakePixelPerfect(); // 如果type = simple or filled 會改回近原大小，故在呼叫此函式後才修改寬高  
         sp.width = width;
         sp.height = height;
     }

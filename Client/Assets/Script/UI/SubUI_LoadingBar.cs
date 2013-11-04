@@ -47,7 +47,8 @@ public class SubUI_LoadingBar : GUISubFormBase
         _progressText.overflowMethod = UILabel.Overflow.ResizeFreely; // fs: 讓文字佔的空間自由地重新配置
         // 讀取條左邊的沙漏圖
         UISprite sandFilter = UIImageManager.CreateUISprite(_subUIRoot.gameObject, NGUISpriteData.ICON_SANDFILTER);
-        sandFilter.Init(UISprite.Type.Simple, depth+2, UIWidget.Pivot.Center, 138, 135);
+        sandFilter.SetEffectSizeParameter(UISprite.Type.Simple, UIWidget.Pivot.Center, 138, 135);
+        sandFilter.depth = depth + 2;
         sandFilter.name = "LoadingSandFilter";
         sandFilter.transform.localPosition = Vector3.zero;  // 因為調整pivot會影響localPosition，所以需要再次重設
         // 「讀取進度」文字

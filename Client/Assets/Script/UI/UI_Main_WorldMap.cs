@@ -89,11 +89,13 @@ public class UI_Main_WorldMap : GUIFormBase
         _headPictureBtn.onClick.Add(new EventDelegate(this, "HeadPictureBtnClick"));
         // 「點數」
         UISprite pointBasePic = UIImageManager.CreateUISprite(topObjectsTween.gameObject, NGUISpriteData.BTN_GENERIC_BG);
-        pointBasePic.Init(pointBasePic.type, 6, pointBasePic.pivot, POINT_BG_WIDTH, POINT_BG_HEIGHT);
+        pointBasePic.SetEffectSizeParameter(pointBasePic.type, pointBasePic.pivot, POINT_BG_WIDTH, POINT_BG_HEIGHT);
+        pointBasePic.depth = 6;
         pointBasePic.name = "Point";
         pointBasePic.transform.localPosition = new Vector3(347, 328, 0);
         UISprite pointGraphPic = UIImageManager.CreateUISprite(pointBasePic.gameObject, NGUISpriteData.POINT_PIC);
-        pointGraphPic.Init(pointGraphPic.type, 7, pointGraphPic.pivot, POINT_PIC_WIDTH, POINT_PIC_HEIGHT);
+        pointGraphPic.SetEffectSizeParameter(pointGraphPic.type, pointGraphPic.pivot, POINT_PIC_WIDTH, POINT_PIC_HEIGHT);
+        pointGraphPic.depth = 7;
         pointGraphPic.name = "PointGraph";
         pointGraphPic.transform.localPosition = new Vector3(-155, 0, 0);
         _pointText = GUIStation.CreateUILabel(pointBasePic.gameObject, "PointText", UIWidget.Pivot.Left, new Vector3(-107, -6, 0), 10,

@@ -22,7 +22,8 @@ public class UI_Main : GUIFormBase
 
         // 背景圖
         UISprite backgroundPic = UIImageManager.CreateUISprite(panel.gameObject, NGUISpriteData.WORLDMAP_BG);
-        backgroundPic.Init(UISprite.Type.Simple, 0, UIWidget.Pivot.Center, GUIStation.MANUAL_SCREEN_WIDTH, GUIStation.MANUAL_SCREEN_HEIGHT);
+        backgroundPic.SetEffectSizeParameter(UISprite.Type.Simple, UIWidget.Pivot.Center, GUIStation.MANUAL_SCREEN_WIDTH, GUIStation.MANUAL_SCREEN_HEIGHT);
+        backgroundPic.depth = 0;
         backgroundPic.name = "Background";
         // 下方物件的parent
         TweenPosition tweenPos = GUIComponents.AddShowMoveEffect(backgroundPic.gameObject, new Vector3(0, -206, 0), Vector3.zero);
