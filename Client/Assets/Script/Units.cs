@@ -77,7 +77,7 @@ public abstract class Unit
 	}
 	
 	public abstract void Damaged(DamageInfo info);
-
+	#if UNITY_EDITOR
 	public virtual void Draw(Color color)
 	{
 		foreach (GridPos gp in Pos)
@@ -86,7 +86,7 @@ public abstract class Unit
 				BattleManager.Instance.DrawGrid(gp, color);
 		}
 	}
-
+	#endif
 	public override string ToString()
 	{
 		string result = base.ToString();
@@ -916,7 +916,7 @@ public class ActionUnit : AnimUnit
 				State.AddState(se);
 		}
 	}
-
+	#if UNITY_EDITOR
 	public override void Draw(Color color)
 	{
 		DrawSkillRange(color);
@@ -940,6 +940,8 @@ public class ActionUnit : AnimUnit
 				}
 		}
 	}
+	#endif
+
 	~ActionUnit()
 	{
 		totalCount--;	
