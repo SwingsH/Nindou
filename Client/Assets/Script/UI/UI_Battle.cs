@@ -28,11 +28,11 @@ public class UI_Battle : GUIFormBase
         UIPanel panel = NGUITools.AddChild<UIPanel>(anchor.gameObject);
         // BOSS 圖片
          _bossPic = UIImageManager.CreateUISprite(panel.gameObject, NGUISpriteData.BOSS_PIC);
+        _bossPic.name = "Boss Pic";
         _bossPic.SetEffectSizeParameter(_bossPic.type, _bossPic.pivot, BOSS_ICON_WIDTH, BOSS_ICON_HEIGHT);
         _bossPic.depth = 3;
 
         //// TODO:sprite設定，之後統整出去---
-        _bossPic.name = "Boss Pic";
         _bossPic.transform.localPosition = new Vector3(-400, 440, 0); // 因為調整pivot會影響localPosition，所以需要再次重設
         ////---------------------------------
         // BOSS 名稱

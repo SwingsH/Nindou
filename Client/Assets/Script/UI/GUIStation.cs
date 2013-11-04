@@ -273,19 +273,6 @@ public class GUIStation
 
 
     #region NGUI 基本元件相關
-    public static UISprite CreateUISprite(GameObject parentObj, string spriteObjName, UISprite.Type spriteType, int depth, UIAtlas atlas, string spriteName,
-        UISprite.Pivot pivot, int width, int height)
-    {
-        UISprite retSprite = NGUITools.AddWidget<UISprite>(parentObj);
-        retSprite.atlas = atlas;
-        retSprite.spriteName = spriteName;
-        retSprite.Init(spriteType, depth, pivot, width, height);
-        retSprite.name = spriteObjName;
-        retSprite.transform.localPosition = Vector3.zero;
-
-        return retSprite;
-    }
-
     /// <summary>
     /// 從 resouce 中讀取一個 texture 
     /// </summary>
