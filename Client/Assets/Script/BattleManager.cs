@@ -79,7 +79,7 @@ public class BattleManager : BattleState
         // 將玩家角色HP變動更新到UI上
         for (int i = 0; i < Players.Length; ++i)
         {
-            if (Players[i] == null || Players[i].Life <= 0) { GameControl.Instance.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true, 0, 1); }
+            if (Players[i] == null || Players[i].Life <= 0) { GameControl.Instance.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true); }
             else { GameControl.Instance.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true, Players[i].Life, Players[i].MaxLife); }
         }
 	}
@@ -445,6 +445,12 @@ public class BattleManager : BattleState
 				{
 					IsBattleStart = false;
 					BattleResult = eBattleResult.Lose;
+                    // fs : 強制將所有角色UI的HP顯示歸0
+                    for (int i = 0; i < Players.Length; ++i)
+                    {
+                        if (Players[i] == null || Players[i].Life <= 0) { GameControl.Instance.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true); }
+                        else { GameControl.Instance.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true, Players[i].Life, Players[i].MaxLife); }
+                    }
 				}
 				break;
 		}
@@ -851,7 +857,6 @@ public class BattleManager : BattleState
 
 	public override void OnChangeIn(GameControl control)
 	{
-
 		if (UnitCamera == null)
 		{
 			UnitCamera = new GameObject("UnitCamera").AddComponent<Camera>();
@@ -886,14 +891,8 @@ public class BattleManager : BattleState
 		Generater = new UnitGenerater();
 
 		BattleStart();
-        // fs: 切換完畢後關閉選擇關卡UI，開啟戰鬥UI
-        control.GUIStation.ShowAndHideOther(typeof(UI_Battle));
-        control.GUIStation.Form<UI_Battle>().SetBossMessageVisible(false);
-        for (int i = 0; i <  GLOBALCONST.UI_BATTLE_ROLE_ICON_COUNT; ++i)
-        {
-			if (i < Players.Length && Players[i] != null){control.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true, Players[i].Life, Players[i].MaxLife);	}
-			else { control.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, false); } // , 0, 1); }
-		}
+        // fs: 切換完畢後，設定並顯示UI_Battle
+        SetAndShowUIBattle(control);
     }
 
     /// <summary>
@@ -965,6 +964,21 @@ public class BattleManager : BattleState
 		Gizmos.DrawLine(BattleGridInfo.Get_GridCenterWorldPos(pos1), BattleGridInfo.Get_GridCenterWorldPos(pos2));
 	}
 	#endif
+
+    /// <summary>
+    /// 設定並顯示UI_Battle
+    /// </summary>
+    void SetAndShowUIBattle(GameControl control)
+    {
+        control.GUIStation.Form<UI_Battle>().Show(); // 此處如果直接用GUIStation.ShowAndHideOther() 會有順序上的問題導致UI_Battle顯示不出來
+        control.GUIStation.Form<UI_Battle>().SetBossMessageVisible(false);
+        for (int i = 0; i < GLOBALCONST.UI_BATTLE_ROLE_ICON_COUNT; ++i)
+        {
+            if (i < Players.Length && Players[i] != null) { control.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true, Players[i].Life, Players[i].MaxLife); }
+            else { control.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, false); }
+        }
+    }
+
 }
 /*
  * BattleManager.GetBaseposOfClosestPos ←這裡用了同一個變數重複改值再加入list，如果打算要改成class這裡記得要一起改
@@ -1578,8 +1592,8 @@ public class BattleEntering : BattleState
 	{
 		if (Application.loadedLevelName == "BattleField")
 		{
-			GameControl.Instance.ChangeGameState(BattleManager.Instance);
-		}
+            GameControl.Instance.ChangeGameState(BattleManager.Instance);
+        }
 	}
 	public override void OnChangeOut(GameControl control)
 	{
@@ -1611,7 +1625,7 @@ public class BattleLeaving :BattleState
 			#region 臨時顯示結果文字
 			//產生顯示結果的TextMesh
 			TextMesh tm = new GameObject("HUDText").AddComponent<TextMesh>();
-			UIFont uifont = ResourceStation.GetUIFont("MSJH_30");
+            UIFont uifont = UIFontManager.GetUIDynamicFont(UIFontName.MSJH);
 			if (uifont != null)
 				tm.font = uifont.dynamicFont;
 			else

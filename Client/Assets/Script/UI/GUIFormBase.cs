@@ -86,7 +86,6 @@ public abstract class GUIFormBase : MonoBehaviour
 
     void EnableEventReceiver(bool enable)
     {
-        CommonFunction.DebugMsgFormat("{1} EnableEventReceiver ({0})", enable, name);
         // 關閉UICamera的事件接收
         _guistation.UICameraEventReceiverMask = (enable) ? 1 << GLOBALCONST.LAYER_UI_BASE : 0;
         //Collider[] allCollider = GetComponentsInChildren<Collider>(true);

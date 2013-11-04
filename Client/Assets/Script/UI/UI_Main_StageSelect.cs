@@ -397,13 +397,24 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
             CommonFunction.DebugMsgFormat("{0}   關卡已經開啟，進入探索", _allSubStage[stageIndex].StageName);
             // for test : 進入戰鬥
             BattleState.BattleID = (uint)(stageIndex % 3 + 1);
-            GameControl.Instance.ChangeGameState(BattleState.instance);
+            // 加入delegate：隱藏完畢後才呼叫切換狀態
+            AddShowOrHideFinishedDelegate(false, new EventDelegate(this, "EnterBattle"));
+            _guistation.Form<UI_Main_StageSelect>().Hide();
         }
         else // 關卡尚未開啟，顯示開啟條件
         {
             CommonFunction.DebugMsgFormat("{0}   關卡尚未開啟", _allSubStage[stageIndex].StageName);
         }
     }
+    
+    /// <summary>
+    /// 進入戰鬥
+    /// </summary> 
+    void EnterBattle()
+    {
+        GameControl.Instance.ChangeGameState(BattleState.instance);
+    }
+
 
     #region 關卡子UI相關
     /// <summary>
