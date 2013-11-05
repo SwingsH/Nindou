@@ -12,5 +12,6 @@ public static class GLOBAL_DEFINE
         "SKIP_TEST_NETWORK",    // 略過檢查 c 端網路能力
         "SKIP_CONNECT_CHECK",  // 略過檢查 server 連線
         //"SHOW_BATTLE_ONGUI",  // 顯示戰鬥的 OnGUI資訊
+         //"UI_OFFLINE_TEST",   // UI離線測試
     };
 }

@@ -22,6 +22,7 @@ public class GUIStation
 {
     public const int MANUAL_SCREEN_WIDTH    = 1920; //鏡頭指定解析度 W, 與螢幕解析度無關
     public const int MANUAL_SCREEN_HEIGHT   = 1080;   //鏡頭指定解析度 H, 與螢幕解析度無關
+    public const float RESOLUTION_SCALE_BETWEEN_ART_AND_UI = 1.5f; // 美術給的圖預設的解析度（美術以此解析度為參考繪製）和UI鏡頭解析度的倍率差
 
     private GameControl _gameControl = null;
     private UIRoot _uiRoot = null;

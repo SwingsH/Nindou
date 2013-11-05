@@ -80,7 +80,7 @@ public class BattleManager : BattleState
         // 將玩家角色HP變動更新到UI上
         for (int i = 0; i < Players.Length; ++i)
         {
-            if (Players[i] == null || Players[i].Life <= 0) { GameControl.Instance.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true, 0, 1); }
+            if (Players[i] == null || Players[i].Life <= 0) { GameControl.Instance.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true); }
             else { GameControl.Instance.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true, Players[i].Life, Players[i].MaxLife); }
         }
 	}
@@ -982,9 +982,10 @@ public class BattleManager : BattleState
     /// </summary>
     void SetAndShowUIBattle(GameControl control)
     {
-        control.GUIStation.Form<UI_Battle>().Show(); // 此處如果直接用GUIStation.ShowAndHideOther() 會有順序上的問題導致UI_Battle顯示不出來
+        //control.GUIStation.Form<UI_Battle>().Show(); // 此處如果直接用GUIStation.ShowAndHideOther() 會有順序上的問題導致UI_Battle顯示不出來
+        //control.GUIStation.ShowAndHideOther(typeof(UI_Battle));
         control.GUIStation.Form<UI_Battle>().SetBossMessageVisible(false);
-        for (int i = 0; i < GLOBALCONST.UI_BATTLE_ROLE_ICON_COUNT; ++i)
+        for (int i = 0; i < GLOBALCONST.MAX_BATTLE_ROLE_COUNT; ++i)
         {
             if (i < Players.Length && Players[i] != null) { control.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true, Players[i].Life, Players[i].MaxLife); }
             else { control.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, false); }
@@ -1579,6 +1580,7 @@ public class BattleEntering : BattleState
 {
 	private static BattleEntering _instance;
 
+    AsyncOperation loadSceneOp = null;
 	/*
 	 * 因為static無法override所以用new
 	 * 雖然new會有變數型別不同會有不同的結果的情況
@@ -1595,17 +1597,39 @@ public class BattleEntering : BattleState
 	}
 	public override void OnChangeIn(GameControl control)
 	{
-		Application.LoadLevel("BattleField");
-		TimeMachine.SetTimeScale(1);
+        //Application.LoadLevel("BattleField");
+        control.GUIStation.ShowAndHideOther(typeof(UI_Loading_Before_Battle));
+        control.StartCoroutine(LoadBattleScene());
+        TimeMachine.SetTimeScale(1);
 		BattleResult = eBattleResult.None;
 	}
 
+    IEnumerator LoadBattleScene()
+    {
+        loadSceneOp = Application.LoadLevelAsync("BattleField");
+        yield return loadSceneOp;
+    }
+
 	public override void Update(GameControl control)
 	{
-		if (Application.loadedLevelName == "BattleField")
-		{
-            GameControl.Instance.ChangeGameState(BattleManager.Instance);
+        if (loadSceneOp != null)
+        {
+            // 理論上ProgressPercent >= 100 時已經換完場，不過以防萬一多檢查isDone
+            if (loadSceneOp.isDone && control.GUIStation.Form<UI_Loading_Before_Battle>().ProgressPercent >= 100.0f)
+            {
+                loadSceneOp = null;
+                control.GUIStation.ShowAndHideOther(typeof(UI_Battle));
+                GameControl.Instance.ChangeGameState(BattleManager.Instance);
+            }
+            else
+            {
+                control.GUIStation.Form<UI_Loading_Before_Battle>().ProgressPercent = loadSceneOp.progress * 100.0f;
+            }
         }
+        //if (Application.loadedLevelName == "BattleField")
+        //{
+        //    GameControl.Instance.ChangeGameState(BattleManager.Instance);
+        //}
 	}
 	public override void OnChangeOut(GameControl control)
 	{

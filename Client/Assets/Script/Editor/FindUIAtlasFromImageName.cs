@@ -12,7 +12,7 @@ public class FindUIAtlasFromImageName : ScriptableWizard
     List<UIAtlas> _allUIAtlas = new List<UIAtlas>();
     List<UIAtlas> _searchResult = new List<UIAtlas>();
 
-    [MenuItem("Tools/Find UIAtlas From Image")]
+    [MenuItem("Tools/UI/Find UIAtlas From Image")]
     static void FindUIAtlasFromImage()
     {
         _firstSearchFromTool = true;

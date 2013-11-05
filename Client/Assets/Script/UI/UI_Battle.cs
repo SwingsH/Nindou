@@ -64,7 +64,7 @@ public class UI_Battle : GUIFormBase
         _iconBackground.transform.localPosition = new Vector3(0, -398, 0);
         // --------------------------------
         // 玩家角色圖像 & 血條
-        for (int i = 0; i < GLOBALCONST.UI_BATTLE_ROLE_ICON_COUNT; ++i)
+        for (int i = 0; i < GLOBALCONST.MAX_BATTLE_ROLE_COUNT; ++i)
         {
             AddPlayerIcon(_iconBackground.gameObject);
         }

@@ -218,6 +218,17 @@ public class GUISubFormBase : System.IDisposable
 
     #region 物件建立
 
+#if UI_OFFLINE_TEST
+    /// <summary>
+    /// 建構式，只將傳入的物件設給_subUIRoot
+    /// </summary>
+    /// <param name="root">root</param>
+    protected GUISubFormBase(GameObject root)
+    {
+        _subUIRoot = root;
+    }
+#endif
+
     protected GUISubFormBase(GameObject parent, string subUIName, Vector3 relativePos)
     {
         // 最上層物件

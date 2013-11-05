@@ -29,7 +29,8 @@ public class UI_Main_WorldMap : GUIFormBase
     private UIButton _headPictureBtn; // 「人物頭像」按鈕
     private UILabel _pointText; // 「點數」說明文字
     private UIButton _menuBtn; // 「選單」按鈕
-    private UILabel _warningText; // 「強敵發現！！」文字
+    //private UILabel _warningText; // 「強敵發現！！」文字
+    private UISprite _warning; // 「強敵發現！！」底圖
     private UIButton _stageBtn; // 「關卡」按鈕
     #endregion
 
@@ -84,7 +85,7 @@ public class UI_Main_WorldMap : GUIFormBase
         // 「人物頭像」按鈕
         _headPictureBtn = GUIStation.CreateUIButton(topObjectsTween.gameObject, "HeadPicture", new Vector3(0, 318, 0), 5,
             NGUISpriteData.ROLE_ICON,
-            220, 219, null, Color.white, string.Empty);
+            330, 328, null, Color.white, string.Empty);
         _headPictureBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _headPictureBtn.onClick.Add(new EventDelegate(this, "HeadPictureBtnClick"));
         // 「點數」
@@ -118,9 +119,22 @@ public class UI_Main_WorldMap : GUIFormBase
         // 世界地圖的背景圖
         UISprite worldMap = GUIComponents.StageFrame(worldMapObjectsTween.gameObject);
         // 「強敵發現！！」文字
-        _warningText = GUIStation.CreateUILabel(worldMap.gameObject, "Warnging", UIWidget.Pivot.Center, new Vector3(-621, 195, 0), 11,
+        _warning = UIImageManager.CreateUISprite(
+            //new GORelativeInfo(worldMap.gameObject, new Vector3(-561, 185, 0), "Warning"),
+            worldMap.gameObject,
+            NGUISpriteData.ICON_EM_WARNING);
+        _warning.name = "Warning";
+        _warning.SetEffectSizeParameter(_warning.type, UIWidget.Pivot.Center, 367, 106);
+        _warning.depth = 2;
+        _warning.transform.localPosition = new Vector3(-561, 185, 0);
+
+        GUIStation.CreateUILabel(_warning.gameObject, "Warning", UIWidget.Pivot.Center, Vector3.zero, 3,
             UIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle: FontStyle.Bold),
-            Color.red, GLOBAL_STRING.WARNING_LABEL_TEXT);
+            Color.white, GLOBAL_STRING.WARNING_LABEL_TEXT);
+
+        //_warningText = GUIStation.CreateUILabel(worldMap.gameObject, "Warnging", UIWidget.Pivot.Center, new Vector3(-621, 195, 0), 11,
+        //    UIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle: FontStyle.Bold),
+        //    Color.red, GLOBAL_STRING.WARNING_LABEL_TEXT);
         // 「關卡」按鈕
         _stageBtn = GUIStation.CreateUIButton(worldMap.gameObject, "Stage", new Vector3(-9, -97, 0), 4,
             NGUISpriteData.MAIN_STAGE_BG,
@@ -191,8 +205,10 @@ public class UI_Main_WorldMap : GUIFormBase
         _pointText = null;
         if (_menuBtn != null) { NGUITools.Destroy(_menuBtn.gameObject); }
         _menuBtn = null;
-        if (_warningText != null) { NGUITools.Destroy(_warningText.gameObject); }
-        _warningText = null;
+        //if (_warningText != null) { NGUITools.Destroy(_warningText.gameObject); }
+        //_warningText = null;
+        if (_warning != null) { NGUITools.Destroy(_warning.gameObject); }
+        _warning = null;
         if (_stageBtn != null) { NGUITools.Destroy(_stageBtn.gameObject); }
         _stageBtn = null;
         base.OnDestroy();
@@ -206,7 +222,8 @@ public class UI_Main_WorldMap : GUIFormBase
     {
         CommonFunction.DebugMsg("按下 「人物」按鈕");
         // test : 隱藏警告提示
-        NGUITools.SetActive(_warningText.gameObject, false);
+        //NGUITools.SetActive(_warningText.gameObject, false);
+        NGUITools.SetActive(_warning.gameObject, false);
         CommonFunction.DebugMsg("隱藏警告提示");
     }
     /// <summary>
@@ -216,7 +233,8 @@ public class UI_Main_WorldMap : GUIFormBase
     {
         CommonFunction.DebugMsg("按下「背包」按鈕");
         // test : 顯示警告提示
-        NGUITools.SetActive(_warningText.gameObject, true);
+        //NGUITools.SetActive(_warningText.gameObject, true);
+        NGUITools.SetActive(_warning.gameObject, true);
         CommonFunction.DebugMsg("顯示警告提示");
     }
     /// <summary>

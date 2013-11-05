@@ -9,8 +9,24 @@ public class SubUI_LoadingBar : GUISubFormBase
     UISlider _progressBar; // 讀取進度條
     UILabel _progressText; // 讀取進度的數值文字
 
-    //TODO: 將忍者奔跑動畫加上
     #region 物件建立
+
+#if UI_OFFLINE_TEST
+    public SubUI_LoadingBar(GameObject root) : base(root)
+    {
+        _progressBar = root.GetComponentInChildren<UISlider>();
+        UILabel[] tempLabels = root.GetComponentsInChildren<UILabel>();
+        foreach (UILabel label in tempLabels)
+        {
+            if (label.name.Equals("LoadingProgress"))
+            {
+                _progressText = label;
+                break;
+            }
+        }
+    }
+#endif
+
     public SubUI_LoadingBar(GameObject parent, string subUILoadingBarName, Vector3 relativePos, int depth)
         : base(parent, subUILoadingBarName, relativePos)
     {
@@ -20,7 +36,7 @@ public class SubUI_LoadingBar : GUISubFormBase
         //                                            SpriteName.SLICE_LOADING_BAR_BG,
         //                                            1535, 91);
 
-        _progressBar = GUIStation.CreateUISlider(_subUIRoot.gameObject, "Progress Bar", Vector3.zero, depth,
+        _progressBar = GUIStation.CreateUISlider(_subUIRoot.gameObject, "LoadingBar", Vector3.zero, depth,
             NGUISpriteData.SLICE_LOADING_BAR_FG,
             NGUISpriteData.SLICE_LOADING_BAR_BG,
             NGUISpriteData.ICON_LOADING_ANIME,
@@ -41,7 +57,7 @@ public class SubUI_LoadingBar : GUISubFormBase
             loadingAnimation.framesPerSecond = 15;
         }
         // 讀取進度的數值文字
-        _progressText = GUIStation.CreateUILabel(_subUIRoot.gameObject, "LoadingProgressText", UIWidget.Pivot.Center, new Vector3(678, -4, 0), depth + 2,
+        _progressText = GUIStation.CreateUILabel(_subUIRoot.gameObject, "LoadingProgress", UIWidget.Pivot.Center, new Vector3(678, -4, 0), depth + 2,
             UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
             Color.white, "0%");
         _progressText.overflowMethod = UILabel.Overflow.ResizeFreely; // fs: 讓文字佔的空間自由地重新配置
@@ -52,7 +68,7 @@ public class SubUI_LoadingBar : GUISubFormBase
         sandFilter.name = "LoadingSandFilter";
         sandFilter.transform.localPosition = Vector3.zero;  // 因為調整pivot會影響localPosition，所以需要再次重設
         // 「讀取進度」文字
-        GUIStation.CreateUILabel(_subUIRoot.gameObject, "LoadingProgress", UIWidget.Pivot.Center, new Vector3(0, -7, 0), depth+3,
+        GUIStation.CreateUILabel(_subUIRoot.gameObject, "LoadingProgressText", UIWidget.Pivot.Center, new Vector3(0, -7, 0), depth+3,
             UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.LARGE, FontStyle.Bold),
             Color.white, "讀取進度");
     }
@@ -63,7 +79,9 @@ public class SubUI_LoadingBar : GUISubFormBase
         if (disposing)
         {
             NGUITools.Destroy(_progressBar);
+            NGUITools.Destroy(_progressText);
         }
+        _progressText = null;
         _progressBar = null;
 
         base.Dispose(disposing);

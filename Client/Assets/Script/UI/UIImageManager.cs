@@ -25,7 +25,7 @@ public enum NGUISpriteData
 
     [EnumUISpriteConfig("Atlas_Slices", "slice_frame_darkbrown")]   INPUT_NAME_BG, // 輸入名字的背景圖
 
-    [EnumUISpriteConfig("Atlas_Slices", "slice_parchment")]         STAGE_FRAME, // 關卡選擇外層框
+    [EnumUISpriteConfig("Atlas_Slices", "slice_frame")]             STAGE_FRAME, // 關卡選擇外層框
 
     [EnumUISpriteConfig("Atlas_Icons", "bosspic")]                  BOSS_PIC, // BOSS 圖
     [EnumUISpriteConfig("Atlas_Icons", "bossblood1")]               BOSS_HP_BG, // BOSS HP底圖
@@ -34,12 +34,17 @@ public enum NGUISpriteData
     [EnumUISpriteConfig("Atlas_Slices", "plate")]                   ROLE_ICON_PLATE, // 戰鬥UI 放置角色Icon的背景圖版
     [EnumUISpriteConfig("Atlas_Icons", "icon_role")]                ROLE_ICON, // 角色Icon
     [EnumUISpriteConfig("Atlas_Icons", "role_hp_bg")]               ROLE_HP_BG, // 角色HP底圖
+
     [EnumUISpriteConfig("Atlas_Backgrounds", "Night_Blade_1")]      MAIN_STAGE_BG, // 主介面進入探索的底圖
     [EnumUISpriteConfig("Atlas_Icons", "icon_friend")]              ICON_FRIEND, // 主介面的好友圖
     [EnumUISpriteConfig("Atlas_Icons", "icon_person")]              ICON_PERSON, // 主介面的人物圖
     [EnumUISpriteConfig("Atlas_Icons", "icon_backpape")]            ICON_BAG, // 主介面的背包圖
     [EnumUISpriteConfig("Atlas_Icons", "icon_store")]               ICON_STORE, // 主介面的商店圖
     [EnumUISpriteConfig("Atlas_Icons", "icon_menu")]                ICON_MENU,  // 主介面的選單圖
+    [EnumUISpriteConfig("Atlas_Icons", "icon_em")]                  ICON_EM_WARNING, // 主介面的「強敵發現」警告底圖
+
+    [EnumUISpriteConfig("Atlas_Icons", "icon_gamegold")]            ICON_GAME_GOLD, // 遊戲幣底圖
+    [EnumUISpriteConfig("Atlas_Icons", "icon_mallgold")]            ICON_MALL_GOLD, // 商城幣底圖
 
     [EnumUISpriteConfig("Atlas_Backgrounds", "nindou_3_bg")]        WORLDMAP, // 世界地圖
     [EnumUISpriteConfig("Atlas_Backgrounds", "shape1170")]          WORLDMAP_BG, // 主介面世界底圖
@@ -54,6 +59,14 @@ public enum NGUISpriteData
 
     [EnumUISpriteConfig("Atlas_Slices", "slice_button_grey")]       BTN_GENERIC_BG, // 一般的按鈕底圖
     [EnumUISpriteConfig("UI_Main_Atlas", "close")]                  BTN_CLOSE, // 關閉按鈕圖
+
+    #region 戰鬥前讀取介面用圖
+    [EnumUISpriteConfig("Atlas_Icons", "tile_bg_pattern")]          TILE_BG_PATTERN, // 要鋪成背景圖的基本圖
+    [EnumUISpriteConfig("Atlas_Icons", "icon_boss_before_battle")]  ICON_BOSS_BEFORE_BATTLE, // BOSS底圖
+    [EnumUISpriteConfig("Atlas_Slices", "slice_frame_lightbrown")]  ROLE_INFO_BASE, // 角色資訊底圖
+    [EnumUISpriteConfig("Atlas_Icons", "icon_equip")]               ICON_EQUIP_BG, // 裝備底圖
+    [EnumUISpriteConfig("Atlas_Icons", "icon_equipwbg")]            ICON_EQUIPPED_TEXT_BG, // 「已裝備」文字底圖
+    #endregion
 
     // TODO：改成正式用圖
     [EnumUISpriteConfig("TestAtlas", "gold")]                       POINT_PIC, // 點數指示圖
