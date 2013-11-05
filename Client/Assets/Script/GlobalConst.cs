@@ -24,6 +24,9 @@ public static class GLOBALCONST
 	}
 	public static class BattleSettingValue
 	{
+		public const float ATTACK_RANDOMRATE_MIN = 0.95f;
+		public const float ATTACK_RANDOMRATE_MAX = 1.05f;
+
 		public const ushort DEFAULT_NORMAL_ATTACK = 0;
 		public const float CRITICAL_BONUS =0.5f;
 		public const int AllInRangeModeGroup = 10;
@@ -74,6 +77,7 @@ public static class GLOBALCONST
 		HEAD,
 		EYES,
 		HAIR,
+		HEADDRESS,
 		BODY,
 		HAND_LEFT,
 		HAND_RIGHT,

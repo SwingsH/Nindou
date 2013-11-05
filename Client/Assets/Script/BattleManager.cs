@@ -65,7 +65,8 @@ public class BattleManager : BattleState
 	HUDManager hudManager;
 	//後製元件
 	PostEffectManager postEffectManager;
-	//float EffectCountDown;
+	
+	float StartCountDown;
 
 	void UnitRun()
 	{
@@ -79,7 +80,7 @@ public class BattleManager : BattleState
         // 將玩家角色HP變動更新到UI上
         for (int i = 0; i < Players.Length; ++i)
         {
-            if (Players[i] == null || Players[i].Life <= 0) { GameControl.Instance.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true); }
+            if (Players[i] == null || Players[i].Life <= 0) { GameControl.Instance.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true, 0, 1); }
             else { GameControl.Instance.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true, Players[i].Life, Players[i].MaxLife); }
         }
 	}
@@ -165,6 +166,8 @@ public class BattleManager : BattleState
 			if (Players.Length <= index)
 				System.Array.Resize<Unit>(ref Players, index + 1);
 			Players[index] = su;
+			Players[index].RefreshEntity();
+			Players[index].Direction = eDirection.Left;
 		}
 	}
 
@@ -176,7 +179,8 @@ public class BattleManager : BattleState
 			su.Group = eGroup.Enemy;
 			UnitOccupy(su, pos);
 			su.WorldPos = Get_GridWorldPos(pos,su.Size);
-
+			su.RefreshEntity();
+			su.Direction = eDirection.Right;
 			Enemys.Add(su);
 			return;
 		}
@@ -893,6 +897,8 @@ public class BattleManager : BattleState
 		BattleStart();
         // fs: 切換完畢後，設定並顯示UI_Battle
         SetAndShowUIBattle(control);
+
+		StartCountDown = 1.5f;
     }
 
     /// <summary>
@@ -918,6 +924,12 @@ public class BattleManager : BattleState
 
 	public override void Update(GameControl control)
 	{
+
+		if (StartCountDown > 0)
+		{
+			StartCountDown -= Time.deltaTime;
+			return;
+		}
 		UnitRun();
         UpdateUnits();
 	}

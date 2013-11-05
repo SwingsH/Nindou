@@ -439,7 +439,7 @@ public class TracingComponent : SimpleMoveComponent
 
 public class TeleportInRangeComponent : TracingComponent
 {
-	const float DefaultAnimTime = 0.1f;
+	const float DefaultAnimTime = 0.2f;
 	const float MaxWaitingTime = 1.5f;
 	float MoveTimeCounter;
 	protected override bool Moving()
@@ -449,6 +449,12 @@ public class TeleportInRangeComponent : TracingComponent
 		Vector3 nextV3 = BattleManager.Get_GridWorldPos(unit.BasePos,unit.Size);
 		if (unit.WorldPos != nextV3)
 		{
+			//開始移動，放個效果
+			if (MoveTimeCounter == 0)
+			{
+				ParticleManager.Emit("Teleport", unit.WorldCenter + unit.Entity.transform.forward * -2, (nextV3 - unit.WorldPos).normalized);
+				unit.Hide();
+			}
 			unit.Direction = (nextV3.x - unit.WorldPos.x) > 0 ? eDirection.Right : ((nextV3.x - unit.WorldPos.x) < 0 ? eDirection.Left : unit.Direction);
 			if (MoveTimeCounter < DefaultAnimTime)
 				unit.WorldPos = Vector3.MoveTowards(unit.WorldPos, nextV3, Vector3.Distance(nextV3, unit.WorldPos) * Time.deltaTime / (DefaultAnimTime - MoveTimeCounter));
@@ -463,6 +469,8 @@ public class TeleportInRangeComponent : TracingComponent
 			{
 				MoveTimeCounter = 0;
 				BusyTime = 0;
+				//ParticleManager.Emit("Appear", unit.WorldCenter + unit.Entity.transform.forward * -2, Vector3.forward);
+				unit.Show();
 			}
 			return true;
 		}

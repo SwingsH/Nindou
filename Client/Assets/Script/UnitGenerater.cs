@@ -44,8 +44,11 @@ public class UnitGenerater{
 		Sprite[] sprites;
 		actUnit.Entity = GenerateEntity(info.BoneName, info.spriteNames, out sprites);
 		actUnit.Sprites = sprites;
-		if(actUnit.Entity != null)
+		if (actUnit.Entity != null)
+		{
 			actUnit.SpriteBounds = GetSpriteBounds(actUnit.Entity.transform, sprites);
+			actUnit.Entity.transform.localScale = Vector3.one * actUnit.EntityScale;
+		}
 		return actUnit;
 	}
 
@@ -63,6 +66,7 @@ public class UnitGenerater{
             boneAnim = tempList[0];
             boneAnim.gameObject.SetActive(true);
             boneAnim.transform.parent = unitContainer.transform;
+			boneAnim.transform.localPosition = Vector3.zero;
             tempList.RemoveAt(0);
             boneAnim.gameObject.name = BoneAnimName;
         }

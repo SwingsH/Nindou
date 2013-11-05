@@ -46,8 +46,31 @@ public abstract class Unit
 		get { return (byte)Mathf.Max(_size, 1); }
 		set { _size = value; }
 	}
-
-	public eDirection Direction;
+	public float EntityScale
+	{
+		get { return 1 + (Size - 1) * 0.8f; }
+	}
+	private eDirection _direction;
+	public eDirection Direction
+	{
+		get { return _direction; }
+		set
+		{
+			if (_direction != value)
+			{
+				switch (value)
+				{
+					case eDirection.Left:
+						Entity.transform.localScale = Vector3.one * (1 + (Size - 1) * 0.8f);
+						break;
+					default:
+						Entity.transform.localScale = new Vector3(-1, 1, 1) * (1 + (Size - 1) * 0.8f);
+						break;
+				}
+			}
+			_direction = value;
+		}
+	}
 	public Vector3 WorldDirection
 	{
 		get { return Direction == eDirection.Left ? Vector3.left : Vector3.right; }
@@ -108,6 +131,15 @@ public abstract class Unit
     public virtual void Update()
     {
     }
+
+	public virtual void RefreshEntity()
+	{
+		if (Entity)
+		{
+			Entity.transform.position = BattleManager.Get_RealWorldPos(WorldPos);
+			Entity.transform.rotation = Camera.main.transform.rotation;
+		}
+	}
 }
 
 public class AnimUnit : Unit
@@ -156,8 +188,20 @@ public class AnimUnit : Unit
 				return WorldPos;
 		}
 	}
+	public Vector3 WorldCenter
+	{
+		get
+		{
+			if (Entity != null)
+			{
+				return Entity.transform.TransformPoint(SpriteBounds.center);
+			}
+			else
+				return WorldPos;
+		}
+	}
 	/// <summary>
-	/// 目前原始圖檔是面向右邊，所以前面指的是右邊
+	/// 目前原始圖檔是面向左邊，所以前面指的是左邊
 	/// </summary>
 	public Vector3 WorldForwardCenter
 	{
@@ -165,7 +209,7 @@ public class AnimUnit : Unit
 		{
 			if (Entity != null)
 			{
-				return Entity.transform.TransformPoint(SpriteBounds.center + new Vector3(SpriteBounds.extents.x,0));
+				return Entity.transform.TransformPoint(SpriteBounds.center - new Vector3(SpriteBounds.extents.x,0));
 			}
 			else
 				return WorldPos;
@@ -252,7 +296,7 @@ public class AnimUnit : Unit
 
 	public override void Run()
 	{
-		
+		RefreshEntity();
 	}
 	public override void Damaged(DamageInfo info)
 	{
@@ -264,22 +308,23 @@ public class AnimUnit : Unit
 			{
 				rate = 1 + info.CriticalBonus;
 			}
-			float value = Mathf.Ceil(rate * info.Power);
+			float value = Mathf.Ceil(rate * info.Power * Random.Range(GLOBALCONST.BattleSettingValue.ATTACK_RANDOMRATE_MIN, GLOBALCONST.BattleSettingValue.ATTACK_RANDOMRATE_MAX));
 
 			//跳血跟受擊效果
 			if (Entity)
 			{
-				ParticleManager.Emit(info.HitParticle, Entity.transform.position + Vector3.back * 10, Entity.transform.up);
+				ParticleManager.Emit(info.HitParticle, WorldCenter + Vector3.back, WorldDirection);
+
 				switch (info.DamageType)
 				{
 					case SkillDamageType.Heal:
-						BattleManager.ShowDamageText(SkillDamageType.Heal, Mathf.RoundToInt(value), WorldUpperCenter);
+						BattleManager.ShowDamageText(SkillDamageType.Heal, Mathf.RoundToInt(value), WorldUpperCenter + Vector3.back);
 						break;
 					case SkillDamageType.Damage:
 						if (info.MultiHit)
-							BattleManager.ShowDamageGroupText(info, this, Mathf.RoundToInt(value), WorldUpperCenter);
+							BattleManager.ShowDamageGroupText(info, this, Mathf.RoundToInt(value), WorldUpperCenter + Vector3.back);
 						else
-							BattleManager.ShowDamageText(SkillDamageType.Damage, Mathf.RoundToInt(value), WorldUpperCenter);
+							BattleManager.ShowDamageText(SkillDamageType.Damage, Mathf.RoundToInt(value), WorldUpperCenter + Vector3.back);
 
                         StartDamageEffect();
 						break;
@@ -375,6 +420,17 @@ public class AnimUnit : Unit
 
         Shake(shakePercent);
     }
+
+	public void Hide()
+	{
+		if (Anim)
+			Anim.transform.localScale = Vector3.zero;
+	}
+	public void Show()
+	{
+		if (Anim)
+			Anim.transform.localScale = Vector3.one;
+	}
 }
 
 public class ActionUnit : AnimUnit
@@ -625,21 +681,6 @@ public class ActionUnit : AnimUnit
 			MoveAction.Target = TargetUnit.BasePos;
 		else
 			MoveAction.Target = GridPos.Null;
-		
-		if (Entity)
-		{
-			Entity.transform.position =BattleManager.Get_RealWorldPos(WorldPos);
-			Entity.transform.rotation = Camera.main.transform.rotation;
-			switch (Direction)
-			{
-				case eDirection.Left:
-					Entity.transform.localScale = Vector3.one * Size;
-					break;
-				default:
-					Entity.transform.localScale =new Vector3(-1,1,1) * Size;
-					break;
-			}
-		}
 
 		if (currentAction != null && currentAction.State == ActionState.Busy)
 		{
@@ -652,6 +693,8 @@ public class ActionUnit : AnimUnit
 			if (currentAction != null)
 				currentAction.Active();
 		}
+		RefreshEntity();
+
 		//更新狀態時間
 		this.State.Reflash();
 	}

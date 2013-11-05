@@ -96,8 +96,11 @@ public class InformalDataBase{
 		playerInfo[tempIndex].MoveSpeed = 3;
 		playerInfo[tempIndex].BoneName = TestBoneAnimationName[0];
 		playerInfo[tempIndex].spriteNames = new string[GLOBALCONST.TOTAL_BONE_NUMBER];
-		for (int i = 0; i < playerInfo[tempIndex].spriteNames.Length; i++)
+		for (int i = 0; i <= (int)GLOBALCONST.eModelPartName.HEADDRESS; i++)
 			playerInfo[tempIndex].spriteNames[i] = InformalDataBase.TestPlayAtlasName[1];
+		for (int i =(int)GLOBALCONST.eModelPartName.BODY; i < playerInfo[tempIndex].spriteNames.Length; i++)
+			playerInfo[tempIndex].spriteNames[i] = InformalDataBase.TestPlayAtlasName[2];
+
 		playerInfo[tempIndex].spriteNames[1] = InformalDataBase.TestPlayAtlasName[1];
 		#endregion
 
@@ -164,6 +167,6 @@ public class InformalDataBase{
 		return result;
 	}
 	public static string[] TestAtlasName = new string[] { "NindoTestSprite", "GrayKappa", "BlueKappa", "RedKappa" };
-	public static string[] TestPlayAtlasName = new string[] {"Basic", "Monotaro", };
+	public static string[] TestPlayAtlasName = new string[] {"Basic", "Monotaro","NinJaBlack" };
 	public static string[] TestBoneAnimationName = new string[] { "BasicFaceLeft" };
 }
