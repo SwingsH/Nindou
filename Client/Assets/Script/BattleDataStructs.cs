@@ -7,11 +7,11 @@ using System.Runtime.InteropServices;
  * 戰鬥相關資料格式
  */ 
 
-public struct DamageInfo
+public class DamageInfo
 {
 	public Unit Attacker;
-	public int Power;
-	public SkillDamageType DamageType;
+	public uint Power;
+	public SkillTargetType TargetType;
 	public List<SpecialEffect> SPEffects;
 	public float Accuracy;
 	public float Critical;

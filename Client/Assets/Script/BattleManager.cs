@@ -485,7 +485,11 @@ public class BattleManager : BattleState
 			Players = new Unit[Players.Length];
 		}
 	}
-	
+
+	public static Vector3 Get_RealWorldPos(GridPos gridPos)
+	{
+		return Get_RealWorldPos(Get_GridWorldPos(gridPos));
+	}
 	public static Vector3 Get_RealWorldPos(Vector3 worldPos)
 	{
 		return TranslateCamera(UnitCamera, worldPos, Camera.main);
@@ -825,10 +829,21 @@ public class BattleManager : BattleState
 	/// <param name="damageType">傷害類型</param>
 	/// <param name="value">數值</param>
 	/// <param name="displayPosition">顯示的位置</param>
-	public static void ShowDamageText(SkillDamageType damageType, int value, Vector3 displayPosition)
+	public static void ShowDamageText(eGroup unitGroup, int value, Vector3 displayPosition)
 	{
 		if (Instance != null && Instance.hudManager != null)
-			Instance.hudManager.ShowDamageText(damageType, value, displayPosition);
+			Instance.hudManager.ShowDamageText(unitGroup, value, displayPosition);
+	}
+	/// <summary>
+	/// 顯示回復數字
+	/// </summary>
+	/// <param name="damageType">傷害類型</param>
+	/// <param name="value">數值</param>
+	/// <param name="displayPosition">顯示的位置</param>
+	public static void ShowHealText(int value, Vector3 displayPosition)
+	{
+		if (Instance != null && Instance.hudManager != null)
+			Instance.hudManager.ShowHealText(value, displayPosition);
 	}
 	/// <summary>
 	/// 顯示多段攻擊技能傷害數字
@@ -841,8 +856,11 @@ public class BattleManager : BattleState
 	{
 		if (Instance != null && Instance.hudManager != null)
 		{
-			long callerID = ((long)info.GetHashCode() >> 32) ^ (long)attackee.GetHashCode();
-			Instance.hudManager.ShowDamageGroupText(callerID, value, displayPosition);
+			if (info != null && attackee != null)
+			{
+				long callerID = ((long)info.GetHashCode() >> 32) ^ (long)attackee.GetHashCode();
+				Instance.hudManager.ShowDamageGroupText(callerID, value, displayPosition);
+			}
 		}
 	}
 

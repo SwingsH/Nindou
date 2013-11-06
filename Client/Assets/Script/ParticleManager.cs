@@ -50,6 +50,11 @@ public class ParticleManager : MonoBehaviour {
 		int i = 0 ;
 		while (i < actingParticleSystem.Count)
 		{
+			if (actingParticleSystem[i] == null)
+			{
+				actingParticleSystem.RemoveAt(i);
+				continue;
+			}
 			if (actingParticleSystem[i].IsAlive())
 				i++;
 			else
@@ -89,6 +94,13 @@ public class ParticleManager : MonoBehaviour {
 		displayingArray = actingParticleSystem.ToArray();
 #endif
 	}
+
+	void KeepWatchParticle(ParticleSystem particle)
+	{
+		if (!actingParticleSystem.Contains(particle))
+			actingParticleSystem.Add(particle);
+	}
+
 	public static void Emit(string particleName, Vector3 worldPos, Vector3 direction)
 	{
 		if (string.IsNullOrEmpty(particleName))
@@ -114,6 +126,8 @@ public class ParticleManager : MonoBehaviour {
 	/// <param name="trans">欲掛載的Transform</param>
 	public static void MountParticle(Transform trans, string particleName)
 	{
+		if (string.IsNullOrEmpty(particleName))
+			return;
 		List<ParticleSystem> tempList;
 		if (mountedParticle.TryGetValue(trans, out tempList))
 		{
@@ -129,10 +143,18 @@ public class ParticleManager : MonoBehaviour {
 			mountedParticle.Add(trans, tempList);
 		}
 		ParticleSystem particle = GetParticle(particleName);
-		particle.Play();
-		particle.transform.parent = trans;
 		if (particle != null)
 		{
+			/* Emission種類為Distance的Particle雖然已經sotp可是如果改變位置後再play的話，中間這段還是會產生particle
+			 * 所以先把active設為false再改位置，然後再設為true再play就會好了
+			 */
+			particle.gameObject.SetActive(false);
+			particle.transform.parent = trans;
+			particle.transform.localPosition = Vector3.zero;
+			particle.transform.localRotation = Quaternion.identity;
+			particle.gameObject.SetActive(true);
+			particle.Play(true);
+
 			tempList.Add(particle);
 		}
 	}
@@ -159,7 +181,8 @@ public class ParticleManager : MonoBehaviour {
 			if (target != null)
 			{
 				target.transform.parent = null;
-				Recycle(target);
+				//Recycle(target);//先不要回收，先停止然後等他播完後自動會回收
+				target.Stop(true);
 			}
 		}
 	}
@@ -172,7 +195,15 @@ public class ParticleManager : MonoBehaviour {
 		if (mountedParticle.TryGetValue(trans, out tempList))
 		{
 			for (int i = 0; i < tempList.Count; i++)
-				Recycle(tempList[i]);
+			{
+				//Recycle(tempList[i]);
+				//先不要回收，先停止然後等他播完後再回收
+				if (tempList[i] != null)
+				{
+					tempList[i].Stop(true);
+					tempList[i].transform.parent = null;
+				}
+			}
 		}
 		mountedParticle.Remove(trans);
 		tempList.Clear();
@@ -201,13 +232,13 @@ public class ParticleManager : MonoBehaviour {
 		if(tempps != null)
 		{
 			if(Instance != null )
-				Instance.actingParticleSystem.Add(tempps);
+				Instance.KeepWatchParticle(tempps);
+			tempps.Stop(true);
 			tempps.gameObject.SetActive(true);
-			tempps.Stop();
 		}
 		return tempps;
 	}
-	
+
 	/// <summary>
 	/// 回收一個 particle , 如果未超過上限 RESERVE_AMOUNT, 則把該 particle  隱藏, 下次使用
 	/// </summary>
@@ -215,12 +246,14 @@ public class ParticleManager : MonoBehaviour {
 	{
 		if (ps == null)
 			return;
+		ps.transform.parent = null;
 		List<ParticleSystem> tempList;
 		if (!AvailableParticles.TryGetValue(ps.name, out tempList))
 		{
 			tempList = new List<ParticleSystem>();
 			AvailableParticles.Add(ps.name, tempList);
 		}
+		ps.Stop(true);
 		ps.gameObject.SetActive(false);
 		if (tempList.Count < RESERVE_AMOUNT)
 			tempList.Add(ps);

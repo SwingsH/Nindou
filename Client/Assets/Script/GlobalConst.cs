@@ -33,7 +33,10 @@ public static class GLOBALCONST
 
         public const float AVATAR_DAMAGE_COLOR_TIME = 0.2f; //受擊後變色效果持續時間(秒)
         public const float AVATAR_DAMAGE_SHAKE_RANGE = 10.0f; //受擊後震動效果偏移值 X 
-        public static readonly Color FONT_DAMAGE_COLOR = Color.white;
+
+		public static readonly Color FONT_PLAYER_DAMAGE_COLOR = Color.red;
+        public static readonly Color FONT_ENEMY_DAMAGE_COLOR = Color.white;
+
         public static readonly Color AVATAR_DAMAGE_COLOR = CommonFunction.Color256Bit(200, 100, 100, 255); //受擊後變色效果
         public static readonly Color AVATAR_NORMAL_COLOR = CommonFunction.Color256Bit(255, 255, 255, 255); 
     }

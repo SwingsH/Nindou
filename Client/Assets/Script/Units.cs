@@ -80,6 +80,16 @@ public abstract class Unit
 	{
 		get { return BattleManager.Get_RealWorldPos(WorldPos); }
 	}
+	public virtual Vector3 WorldCenter
+	{
+		get
+		{
+			if (Entity != null)
+				return Entity.transform.position;
+			else
+				return WorldPos;
+		}
+	}
 	public Color c = Color.white;
 	public eGroup Group;
 
@@ -144,6 +154,8 @@ public abstract class Unit
 
 public class AnimUnit : Unit
 {
+	protected const float BOUND_ZOFFSET = 30;
+
     public Vector3 LWeaponTip;
     public Vector3 RWeaponTip;
     //角色圖片的範圍
@@ -176,40 +188,76 @@ public class AnimUnit : Unit
             }
 		}
 	}
+	/// <summary>
+	/// 取整體圖片的上方邊緣中心點，並往前（攝影機方向）BOUND_ZOFFSET 單位，方便放特效
+	/// </summary>
 	public Vector3 WorldUpperCenter
 	{
 		get
 		{
 			if (Entity != null)
 			{
-				return Entity.transform.TransformPoint(SpriteBounds.center + new Vector3(0, SpriteBounds.extents.y));
-			}
-			else
-				return WorldPos;
-		}
-	}
-	public Vector3 WorldCenter
-	{
-		get
-		{
-			if (Entity != null)
-			{
-				return Entity.transform.TransformPoint(SpriteBounds.center);
+				return Entity.transform.TransformPoint(SpriteBounds.center + new Vector3(0, SpriteBounds.extents.y, -BOUND_ZOFFSET));
 			}
 			else
 				return WorldPos;
 		}
 	}
 	/// <summary>
-	/// 目前原始圖檔是面向左邊，所以前面指的是左邊
+	/// 取整體圖片的中心點，並往前（攝影機方向）BOUND_ZOFFSET 單位，方便放特效
 	/// </summary>
-	public Vector3 WorldForwardCenter
+	public override Vector3 WorldCenter
 	{
 		get
 		{
 			if (Entity != null)
 			{
-				return Entity.transform.TransformPoint(SpriteBounds.center - new Vector3(SpriteBounds.extents.x,0));
+				return Entity.transform.TransformPoint(SpriteBounds.center + Vector3.back * BOUND_ZOFFSET);
+			}
+			else
+				return WorldPos;
+		}
+	}
+	/// <summary>
+	/// 取整體圖片的中心點，並往後（攝影機反方向）BOUND_ZOFFSET 單位，方便放特效
+	/// </summary>
+	public Vector3 WorldCenter_Back
+	{
+		get
+		{
+			if (Entity != null)
+			{
+				return Entity.transform.TransformPoint(SpriteBounds.center + Vector3.forward * BOUND_ZOFFSET);
+			}
+			else
+				return WorldPos;
+		}
+	}
+	/// <summary>
+	/// 取整體圖片的左邊界中心點，並往前（攝影機方向）BOUND_ZOFFSET 單位，方便放特效
+	/// </summary>
+	public Vector3 WorldLeftCenter
+	{
+		get
+		{
+			if (Entity != null)
+			{
+				return Entity.transform.TransformPoint(SpriteBounds.center - new Vector3(SpriteBounds.extents.x, 0, BOUND_ZOFFSET));
+			}
+			else
+				return WorldPos;
+		}
+	}
+	/// <summary>
+	/// 取整體圖片的左邊界中心點，並往後（攝影機反方向）BOUND_ZOFFSET 單位，方便放特效
+	/// </summary>
+	public Vector3 WorldLeftCenter_Back
+	{
+		get
+		{
+			if (Entity != null)
+			{
+				return Entity.transform.TransformPoint(SpriteBounds.center - new Vector3(SpriteBounds.extents.x, 0, -BOUND_ZOFFSET));
 			}
 			else
 				return WorldPos;
@@ -300,6 +348,8 @@ public class AnimUnit : Unit
 	}
 	public override void Damaged(DamageInfo info)
 	{
+		if (info == null)
+			return;
 
 		if (Random.value < info.Accuracy)
 		{
@@ -315,22 +365,22 @@ public class AnimUnit : Unit
 			{
 				ParticleManager.Emit(info.HitParticle, WorldCenter + Vector3.back, WorldDirection);
 
-				switch (info.DamageType)
+				switch (info.TargetType)
 				{
-					case SkillDamageType.Heal:
-						BattleManager.ShowDamageText(SkillDamageType.Heal, Mathf.RoundToInt(value), WorldUpperCenter + Vector3.back);
+					case SkillTargetType.Friend:
+						BattleManager.ShowHealText(Mathf.RoundToInt(value), WorldUpperCenter + Vector3.back);
 						break;
-					case SkillDamageType.Damage:
+					case SkillTargetType.Enemy:
 						if (info.MultiHit)
 							BattleManager.ShowDamageGroupText(info, this, Mathf.RoundToInt(value), WorldUpperCenter + Vector3.back);
 						else
-							BattleManager.ShowDamageText(SkillDamageType.Damage, Mathf.RoundToInt(value), WorldUpperCenter + Vector3.back);
+							BattleManager.ShowDamageText(Group, Mathf.RoundToInt(value), WorldUpperCenter + Vector3.back);
 
                         StartDamageEffect();
 						break;
 				}
 			}
-			if (info.DamageType == SkillDamageType.Heal)
+			if (info.TargetType == SkillTargetType.Friend)
 				value *= -1;
 			Damaged(value);
 		}
@@ -454,20 +504,16 @@ public class ActionUnit : AnimUnit
 	public ActionComponent AttackAction;
 	public GridPos TestOrderMove = GridPos.Null;
 
+	eMoveState _moveState;
 	public eMoveState MoveState
 	{
 		get
 		{
-			if (_moveAction is TracingComponent)
-			{
-				return (_moveAction as TracingComponent).MoveState;
-			}
-			return eMoveState.Closer;
+			return _moveState;
 		}
 		protected set
 		{
-			if (_moveAction is TracingComponent)
-				(_moveAction as TracingComponent).MoveState = value;
+			_moveState = value;
 		}
 	}
 
@@ -752,10 +798,25 @@ public class ActionUnit : AnimUnit
 	{
 		if (IsCasting)
 			return null;
-		if (AttackAction.State == ActionState.Idle)
-			return AttackAction;
-		if (MoveAction.State == ActionState.Idle)
-			return MoveAction;
+		if (MoveState == eMoveState.Closer)
+		{
+			if (AttackAction.State == ActionState.Idle)
+				return AttackAction;
+			if (MoveAction.State == ActionState.Idle)
+				return MoveAction;
+		}
+		else if (MoveState == eMoveState.KeepRange)
+		{
+			//移動優先，避免一直都移動，可是其實沒在移動，先這樣處理
+			if (MoveAction.State == ActionState.Idle)
+			{
+				MoveAction.Active();
+				if (MoveAction.State == ActionState.Busy)
+					return MoveAction;
+			}
+			if (AttackAction.State == ActionState.Idle)
+				return AttackAction;	
+		}
 
 		return null;
 	}
@@ -890,10 +951,22 @@ public class ActionUnit : AnimUnit
 		if (skill == null)
 			return new List<Unit>();
 		List<Unit> units;
-		if (skill.DamageType == SkillDamageType.Damage)
-			units = BattleManager.Get_EnemyUnitsInRange(this, skill.rangeMode, Direction, skill.range);
-		else
-			units = BattleManager.Get_FriendUnitsInRange(this, skill.rangeMode, Direction, skill.range);
+		switch(skill.TargetType)
+		{
+			case SkillTargetType.Enemy:
+				units = BattleManager.Get_EnemyUnitsInRange(this, skill.rangeMode, Direction, skill.range);
+				break;
+			case SkillTargetType.Friend:
+				units = BattleManager.Get_FriendUnitsInRange(this, skill.rangeMode, Direction, skill.range);
+				break;
+			case SkillTargetType.Self:
+				units = new List<Unit>();
+				units.Add(this);
+				break;
+			default:
+				units = new List<Unit>();
+				break;
+		}
 		if (units.Count == 0)
 			return units;
 		//單體目標技能，如現目標在範圍內用現在目標，不然用list裡第一個當目標
@@ -923,15 +996,28 @@ public class ActionUnit : AnimUnit
 				case AnimationSetting.HIT_TAG:
 					if (info.Target != null && info.DMGInfo.Attacker == this)
 					{
-						foreach (Unit u in info.Target)
-							u.Damaged(info.DMGInfo);
+						if (info.skill.ProjectileTime <= 0) //瞬發攻擊
+						{
+							foreach (Unit u in info.Target)
+								u.Damaged(info.DMGInfo);
+						}
+						else
+						{
+							foreach (Unit u in info.Target)
+							{
+								float flyTime = info.skill.ProjectileTime;
+								if(info.skill.range > 0)
+									flyTime *= GridPos.SimpleDistance(u.BasePos, BasePos)/info.skill.range;
+								ProjectileAttack.LaunchProjectile(info.DMGInfo, WorldLeftCenter, u, info.skill.ProjectileParticle, flyTime);
+							}
+						}
 					}
 					break;
 				case AnimationSetting.ATKSTART_TAG:
-					ParticleManager.Emit(info.skill.ParticleAttackStart, triggerEvent.boneTransform.position, WorldDirection);
+					ParticleManager.Emit(info.skill.ParticleAttackStart, triggerEvent.boneTransform.position - BattleManager.UnitCamera.transform.forward * BOUND_ZOFFSET, WorldDirection);
 					break;
 				case AnimationSetting.ATKEND_TAG:
-					ParticleManager.Emit(info.skill.ParticleAttackEnd, triggerEvent.boneTransform.position, WorldDirection);
+					ParticleManager.Emit(info.skill.ParticleAttackEnd, triggerEvent.boneTransform.position - BattleManager.UnitCamera.transform.forward * BOUND_ZOFFSET, WorldDirection);
 					break;
 				case AnimationSetting.END_TAG:
 					info.EndCount--;
@@ -952,6 +1038,8 @@ public class ActionUnit : AnimUnit
 
 	public override void Damaged(DamageInfo info)
 	{
+		if (info == null)
+			return;
 		base.Damaged(info);
 		foreach (SpecialEffect se in info.SPEffects)
 		{

@@ -26,11 +26,11 @@ public class InformalDataBase{
 	public InformalDataBase()
 	{
 		SkillDataBase = LoadData<uint, SkillData>(GLOBALCONST.FILENAME_SKILL, "ID");
-		SkillDataBase[5].Range = 1;
-		SkillDataBase[5].RangeMode = 3;
+		//SkillDataBase[5].Range = 1;
+		//SkillDataBase[5].RangeMode = 3;
 
-		SkillDataBase[6].Range = 1;
-		SkillDataBase[6].RangeMode = 3;
+		//SkillDataBase[6].Range = 1;
+		//SkillDataBase[6].RangeMode = 3;
 		NpcDataBase = LoadData<uint, NPCData>(GLOBALCONST.FILENAME_NPC, "NPCID");
 		SPEffectDatas = LoadData<uint, SpecialEffect>(GLOBALCONST.FILENAME_SKILLEFFECT, "ID");
 		BattleDatas = new Dictionary<uint,List<Battle>>();
@@ -78,7 +78,7 @@ public class InformalDataBase{
 		tempIndex = 2;
 		playerInfo[tempIndex] = new UnitInfo();
 		playerInfo[tempIndex].AttackID = 6;
-		playerInfo[tempIndex].SkillID = new ushort[] { 1, 5 };
+		playerInfo[tempIndex].SkillID = new ushort[] { 9, 10 };
 		playerInfo[tempIndex].MaxLife = 200;
 		playerInfo[tempIndex].MoveMode = 1;
 		playerInfo[tempIndex].MoveSpeed = 3;
@@ -90,7 +90,7 @@ public class InformalDataBase{
 		tempIndex = 3;
 		playerInfo[tempIndex] = new UnitInfo();
 		playerInfo[tempIndex].AttackID = 6;
-		playerInfo[tempIndex].SkillID = new ushort[] { 1 };
+		playerInfo[tempIndex].SkillID = new ushort[] { 11,12 };
 		playerInfo[tempIndex].MaxLife = 200;
 		playerInfo[tempIndex].MoveMode = 1;
 		playerInfo[tempIndex].MoveSpeed = 3;

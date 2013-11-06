@@ -431,19 +431,22 @@ public class SkillData
 {
 	public uint ID;
 	public string Name = "";
+	public string SkillInfo = "";
 	public byte SkillType;
-	public byte DamageType;
-	public ushort Power;
-	public ushort Critical;
-	public ushort Accuracy;
-	public ushort Range;
-	public ushort RangeMode;
+	public byte SkillWeaponType;//適應武器的種類
+	public byte TargetType;
+	public byte RangeSize;
+	public byte RangeType;
+	public byte AreaSize;
+	public byte AreaType;
 	public ushort Cooldown;
-	public uint[] SPEffect = new uint[3];
+	public uint[] SPEffect = new uint[10];
 
 	public string AnimName = "";
 	public ushort AnimPlayTimes;
 	public ushort CastTime;
+	public ushort ProjectileTime;
+	public string ProjectileParticle = "";
 	public string ParticleAttackStart = "";
 	public string ParticleAttackEnd = "";
 	public string ParticleHit = "";
@@ -460,11 +463,21 @@ public class SpecialEffect
 	public ushort EffectChance;
 	public ushort EffectDuration;
 }
-
-public enum SkillDamageType : byte
+public enum eWeaponType : byte
 {
-	Damage = 0,
-	Heal = 100,
+	Sword = 1,
+	Claw = 2,
+	Range = 3,
+}
+/// <summary>
+/// 技能施展對像種類
+/// </summary>
+public enum SkillTargetType : byte
+{
+	None = 0,
+	Self = 10,
+	Friend = 20,
+	Enemy = 30,
 }
 public enum SkillType : byte
 {
@@ -513,3 +526,5 @@ public static class ListExtensions
 		}
 	}
 }
+
+public delegate void SimpleDelegate();

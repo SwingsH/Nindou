@@ -86,6 +86,7 @@ public class NinDoAttackComponent : ActionComponent
 
 public class SimpleMoveComponent : ActionComponent
 {
+	const int LASTRECORD_SIZE = 5;
 	protected List<GridPos> Last = new List<GridPos>();
 	GridPos target = GridPos.Null;
 	public virtual GridPos Target
@@ -115,9 +116,7 @@ public class SimpleMoveComponent : ActionComponent
 					GridPos tempNext = FindNext(Target);
 					if (BattleManager.MoveUnit(unit, tempNext))
 					{
-						Last.Add(tempLast);
-						if (Last.Count > 5)
-							Last.RemoveAt(0);
+						AddLast(tempLast);
 					}
 				}
 				else
@@ -156,6 +155,8 @@ public class SimpleMoveComponent : ActionComponent
 		List<GridPos> empty = Get_CanMoveGrid();
 		empty.RandomizeListOrder();
 		float Score = GetDistanceScore(unit.BasePos, targetPos);
+		if (Last.Contains(unit.BasePos))
+			Score -= 3;
 		foreach (GridPos gp in empty)
 		{
 			float tempScore = GetDistanceScore(gp, targetPos);
@@ -206,6 +207,12 @@ public class SimpleMoveComponent : ActionComponent
 		return -GridPos.SimpleDistance(pos1,pos2);
 	}
 
+	protected void AddLast(GridPos last)
+	{
+		Last.Add(last);
+		if (Last.Count > LASTRECORD_SIZE)
+			Last.RemoveAt(0);
+	}
 }
 
 //移動的模式
@@ -222,18 +229,10 @@ public class TracingComponent : SimpleMoveComponent
 	//中繼目標，依移動模式決定移動到哪裡
 	protected GridPos SubTarget = GridPos.Null;
 
-	protected eMoveState _moveState = eMoveState.Closer;
 	public eMoveState MoveState
 	{
-		get { return _moveState; }
-		set
-		{
-			if (_moveState != value)
-			{
-				SubTarget = GridPos.Null;
-				_moveState = value;
-			}
-		}
+		get { return unit.MoveState; }
+		
 	}
 	public override GridPos Target
 	{
@@ -315,17 +314,23 @@ public class TracingComponent : SimpleMoveComponent
 					//找下一格
 					GridPos tempLast = unit.BasePos;
 					GridPos tempNext = FindNext(SubTarget);
+					//確認需要移動
 					if (unit.BasePos != tempNext)
 					{
 						if (BattleManager.MoveUnit(unit, tempNext))
 						{
-							Last.Add(tempLast);
-							if (Last.Count > 5)
-								Last.RemoveAt(0);
+							//紀錄過去移動的格子
+							AddLast(tempLast);
+							
 							BusyTime = float.MaxValue;
 							UnavailableTime = Get_UnavailableTime();
 							ResetMoveCount--;
 						}
+					}
+					else if(!alreadyInRange)
+					{
+						//避免雖然現在的格子打不到，可是分數是最高，然後就站著不動的情況
+						AddLast(tempLast);
 					}
 
 				}
@@ -371,7 +376,7 @@ public class TracingComponent : SimpleMoveComponent
 		foreach (GridPos gp in movableGrid)
 		{
 			//計算當basepos在gp跟target的最近距離的格子
-			BattleManager.GetClosestPos(SubTarget, unit.Size, unit.TargetUnit.BasePos, unit.TargetUnit.Size, out closestPos, out closestTargetPos);
+			BattleManager.GetClosestPos(gp, unit.Size, unit.TargetUnit.BasePos, unit.TargetUnit.Size, out closestPos, out closestTargetPos);
 			//分數，簡單計算x差幾格y差幾格
 			float tempScore = GetDistanceScore(closestPos, closestTargetPos) * (int)MoveState * MoveStateFix + GetDistanceScore(gp, unit.BasePos) * 2;
 			if (tempScore > Score)
@@ -452,7 +457,7 @@ public class TeleportInRangeComponent : TracingComponent
 			//開始移動，放個效果
 			if (MoveTimeCounter == 0)
 			{
-				ParticleManager.Emit("Teleport", unit.WorldCenter + unit.Entity.transform.forward * -2, (nextV3 - unit.WorldPos).normalized);
+				ParticleManager.Emit("Teleport", unit.WorldCenter, (nextV3 - unit.WorldPos).normalized);
 				unit.Hide();
 			}
 			unit.Direction = (nextV3.x - unit.WorldPos.x) > 0 ? eDirection.Right : ((nextV3.x - unit.WorldPos.x) < 0 ? eDirection.Left : unit.Direction);
@@ -469,7 +474,7 @@ public class TeleportInRangeComponent : TracingComponent
 			{
 				MoveTimeCounter = 0;
 				BusyTime = 0;
-				//ParticleManager.Emit("Appear", unit.WorldCenter + unit.Entity.transform.forward * -2, Vector3.forward);
+				ParticleManager.Emit("Appear", unit.WorldCenter, Vector3.forward);
 				unit.Show();
 			}
 			return true;

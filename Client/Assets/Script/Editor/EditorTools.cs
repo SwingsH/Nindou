@@ -146,8 +146,33 @@ public static class EditorTools {
 		AssetDatabase.Refresh();
 	}
 
-
-
+	//因為particle system不會讀scale，據說可以改shader來處理，不過還沒研究，目前先放大參數的來做比較快
+	//注意直事項：emission有兩種模式，當模式是distance的時候，放大之後要把這個值縮小同樣的比例，不過我找不到模式的參數，所以只好手動改了
+	[MenuItem("Tools/Enlarge Particle")]
+	public static void Enlarge_Particle()
+	{
+		if (Selection.activeGameObject)
+		{
+			Debug.Log(Selection.activeGameObject.GetComponentsInChildren<ParticleSystem>(true).Length);
+			foreach (ParticleSystem ps in Selection.activeGameObject.GetComponentsInChildren<ParticleSystem>(true))
+			{
+				ps.startSize *= 100;
+				ps.startSpeed *= 100;
+			}
+		}
+	}
+		[MenuItem("Tools/Narrow Particle")]
+	public static void Narrow_Particle()
+	{
+		if (Selection.activeGameObject)
+		{
+			foreach (ParticleSystem ps in Selection.activeGameObject.GetComponentsInChildren<ParticleSystem>())
+			{
+				ps.startSize /= 100;
+				ps.startSpeed /= 100;
+			}
+		}
+	}
 	#region XML
 	[MenuItem("Tools/Rebuild Class Xml For Excel")]
 	public static void RebuildXml()
@@ -243,17 +268,7 @@ public static class EditorTools {
 	[MenuItem("Tools/QuickTest")]
 	public static void QuickTest()
 	{
-			BoneAnimationData baData = Selection.activeObject as BoneAnimationData;
-			baData.needsRebuilt = true;
-			if (baData)
-			{
-				foreach (string i in baData.boneTransformPaths)
-					Debug.Log(i);
-				foreach (BoneData bd in baData.boneDataList)
-				{
-					Debug.Log(bd.boneName);
-				}
-			}
+		ProjectileAttack.LaunchProjectile_ForTest(new GridPos(1, 1), new GridPos(5, 5), "IceBallA", "IceHitA", 2);
 	}
 
 	[MenuItem("Tools/QuickTest1")]

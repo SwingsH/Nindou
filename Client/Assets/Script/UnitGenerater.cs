@@ -69,6 +69,8 @@ public class UnitGenerater{
 			boneAnim.transform.localPosition = Vector3.zero;
             tempList.RemoveAt(0);
             boneAnim.gameObject.name = BoneAnimName;
+			boneAnim.Rewind(0);//倒帶，只要是取bound的範圍的時候，不重設的話會每次取到不一樣的
+			
         }
         else
         {

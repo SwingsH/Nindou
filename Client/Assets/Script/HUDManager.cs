@@ -181,17 +181,20 @@ public class HUDManager : MonoBehaviour {
 		result.IntValue = 0;
 		return result;
 	}
-
 	void SetDamageAnim(HUDTextInfo info, Vector3 position)
+	{
+		SetDamageAnim(info, position, Color.red);
+	}
+	void SetDamageAnim(HUDTextInfo info, Vector3 position, Color color)
 	{
 		info.PosSeperateXY = true;
 		info.PosStart = position;
-		info.PosEnd = (Vector2)position + new Vector2(ShiftUnit * Random.Range(-2f,2f),ShiftUnit * -Random.Range(0.5f,3f));
+		info.PosEnd = (Vector2)position + new Vector2(ShiftUnit * Random.Range(-2f,2f),ShiftUnit * -Random.Range(1.5f,4f));
 		info.PosXCurve = new AnimationCurve(new Keyframe(0f, 0f, 1f, 1f), new Keyframe(1f, 1f, 1f, 1f));
 		info.PosYCurve = new AnimationCurve(new Keyframe(0f, 0f, -2f, -2f), new Keyframe(1f, 1f, 6f, 6f));
 		info.Duration = 1;
 
-        info.ColorStart = info.ColorEnd = GLOBALCONST.BattleSettingValue.FONT_DAMAGE_COLOR;
+		info.ColorStart = info.ColorEnd = color;
 		info.ColorEnd.a = 0;
 		info.ColorCurve = new AnimationCurve(new Keyframe(0.5f, 0f, 0f, 0f), new Keyframe(1f, 1f, 3f, 3f));
 
@@ -203,7 +206,7 @@ public class HUDManager : MonoBehaviour {
 	void SetDamageGroupAnim(HUDTextInfo info, Vector3 position)
 	{
 		info.PosStart = position;
-		info.PosEnd = position + new Vector3(0, 0.5f * ShiftUnit);
+		info.PosEnd = position + new Vector3(0, 1.5f * ShiftUnit);
 		info.PosXCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 		info.PosYCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 		info.Duration = 1.5f;
@@ -221,7 +224,7 @@ public class HUDManager : MonoBehaviour {
 	{
 		info.PosSeperateXY = true;
 		info.PosStart = position;
-		info.PosEnd = (Vector2)position + new Vector2(ShiftUnit * Random.Range(-1f, 1f), ShiftUnit * Random.Range(0.5f, 1f));
+		info.PosEnd = (Vector2)position + new Vector2(ShiftUnit * Random.Range(-1f, 1f), ShiftUnit * Random.Range(1.5f, 2f));
 		info.PosXCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 		info.PosYCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 		info.Duration = 1;
@@ -265,26 +268,34 @@ public class HUDManager : MonoBehaviour {
 
 	public void ShowDamageText(int value, Vector3 worldPosition)
 	{
-		ShowDamageText(SkillDamageType.Damage, value, worldPosition);
+		Vector3 localPosition = transform.InverseTransformPoint(worldPosition);
+		HUDTextInfo text = GetText();
+		SetDamageAnim(text, localPosition);
+		text.IntValue = value;
+		text.Play();
+		DisplayText.Add(text);
 	}
 	public void ShowHealText(int value, Vector3 worldPosition)
 	{
-		ShowDamageText(SkillDamageType.Heal, value, worldPosition);
+		Vector3 localPosition = transform.InverseTransformPoint(worldPosition);
+		HUDTextInfo text = GetText();
+		SetHealAnim(text, localPosition);
+		text.IntValue = value;
+		text.Play();
+		DisplayText.Add(text);
 	}
-	public void ShowDamageText(SkillDamageType damageType, int value, Vector3 worldPosition)
+	public void ShowDamageText(eGroup group, int value, Vector3 worldPosition)
 	{
 		Vector3 localPosition = transform.InverseTransformPoint(worldPosition);
 		HUDTextInfo text = GetText();
-		switch (damageType)
+		switch (group)
 		{
-			case SkillDamageType.Damage:
-				SetDamageAnim(text, localPosition);
+			//這裡要改成以效果來決定，不過還沒有套用，先用原來的
+			case eGroup.Player:
+				SetDamageAnim(text, localPosition, GLOBALCONST.BattleSettingValue.FONT_PLAYER_DAMAGE_COLOR);
 				break;
-			case SkillDamageType.Heal:
-				SetHealAnim(text, localPosition);
-				break;
-			default:
-				SetDamageAnim(text, localPosition);
+			case eGroup.Enemy:
+				SetDamageAnim(text, localPosition, GLOBALCONST.BattleSettingValue.FONT_ENEMY_DAMAGE_COLOR);
 				break;
 		}
 		text.IntValue = value;

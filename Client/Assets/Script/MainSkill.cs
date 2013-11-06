@@ -69,31 +69,31 @@ public class MainSkill
 			}
 		}
 	}
-	public SkillDamageType DamageType
+	public SkillTargetType TargetType
 	{
 		get
 		{
-			if (Enum.IsDefined(typeof(SkillDamageType), SkillData.DamageType))
-				return (SkillDamageType)SkillData.DamageType;
+			if (Enum.IsDefined(typeof(SkillTargetType), SkillData.TargetType))
+				return (SkillTargetType)SkillData.TargetType;
 			else
 			{
 				Debug.LogError("Undefined DamageType Value");
-				return SkillDamageType.Damage;
+				return SkillTargetType.None;
 			}
 		}
 	}
 
-	public int Power
+	public uint Power
 	{
-		get { return SkillData.Power + Passive.Power + State.Power; }
+		get { return SkillData.SPEffect[0] + Passive.Power + State.Power; }
 	}
 	public float Accuracy
 	{
-		get { return SkillData.Accuracy / 100f + Passive.Accuracy + State.Accuracy; }
+		get { return 1 + Passive.Accuracy + State.Accuracy; }
 	}
 	public float Critical
 	{
-		get { return SkillData.Critical / 100f + Passive.Critical + State.Critical; }
+		get { return 0 + Passive.Critical + State.Critical; }
 	}
 	public float CriticalBonus
 	{
@@ -101,12 +101,12 @@ public class MainSkill
 	}
 	public int range
 	{
-		get { return SkillData.Range; }
+		get { return SkillData.RangeSize; }
 	}
 
 	public int rangeMode
 	{
-		get { return SkillData.RangeMode; }
+		get { return SkillData.RangeType; }
 	}
 
 	public float CoolDown
@@ -137,6 +137,14 @@ public class MainSkill
 		get { return _speffect; }
 	}
 
+	public float ProjectileTime
+	{
+		get { return SkillData.ProjectileTime / 100f; }
+	}
+	public string ProjectileParticle
+	{
+		get { return SkillData.ProjectileParticle; }
+	}
 	public string ParticleAttackStart
 	{
 		get { return SkillData.ParticleAttackStart; }
@@ -157,7 +165,7 @@ public class MainSkill
 	{
 		DamageInfo di = new DamageInfo();
 		di.Attacker = caster;
-		di.DamageType = DamageType;
+		di.TargetType = TargetType;
 		di.Accuracy = Accuracy;
 		di.Power = Power;
 		di.Critical = Critical;
@@ -168,9 +176,14 @@ public class MainSkill
 		{
 			di.SPEffects.AddRange(caster.Passive.attackEffect);
 		}
+
 		int DamageTimes = AnimationData.GetAnimClipTriggerEventCount((caster as AnimUnit).Anim, AnimClipName, AnimationSetting.HIT_TAG);
+		if(AnimPlayTimes != 0)
+			DamageTimes *= AnimPlayTimes;
 		if (DamageTimes != 0)
-			di.Power = Mathf.Clamp(Power / DamageTimes, 1, int.MaxValue);
+			di.Power = (uint)Mathf.Clamp(Power / DamageTimes, 1, int.MaxValue);
+		Debug.Log(DamageTimes);
+		Debug.Log(Name);
 		di.MultiHit = DamageTimes > 1;
 		return di;
 	}
@@ -202,7 +215,7 @@ public class PassiveEffectInfo
 		return BonusValue;
 	}
 
-	public ushort Power
+	public uint Power
 	{
 		get { return BonusValue.Power; }
 	}
@@ -255,7 +268,7 @@ public class StateInfo
 	{
 		return BonusValue;
 	}
-	public ushort Power
+	public uint Power
 	{
 		get { return BonusValue.Power; }
 	}
@@ -328,7 +341,7 @@ public class StateInfo
 public struct AttrbuteBonus
 {
 	
-	public ushort Power;
+	public uint Power;
 	public float Critical;
 	public float Accuracy;
 
