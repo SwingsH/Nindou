@@ -225,16 +225,65 @@ public class UI_Battle : GUIFormBase
             NGUISpriteData.ROLE_ICON,  (int)(220 * iconScale), (int)(219*iconScale), null, Color.white, string.Empty);
         tempIconBtn.tweenTarget.name = "Role BG";
         tempIconBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
+        // 按鈕效果
         UIButtonScale tempBtnScale = tempIconBtn.gameObject.AddComponent<UIButtonScale>();
         tempBtnScale.tweenTarget = tempIconBtn.transform;
         tempIconBtn.onClick.Add(new EventDelegate(this, "IconBtnClick"));
         _iconBtns.Add(tempIconBtn);
-        SubUI_HPBar tempHPBar = new SubUI_HPBar(tempIconBtn.gameObject, "Role_HP_Bar", new Vector3(-104, -93, 0), 2,
+        // 角色圖示(暫定)
+#region 角色圖示(暫定)
+        SmoothMoves.TextureAtlas atlas = ResourceStation.GetAtlas(InformalDataBase.Instance.playerInfo[playerIndex].spriteNames[(int)GLOBALCONST.eModelPartName.HEAD]);
+        // Root
+        GameObject roleGraphGO = NGUITools.AddChild(tempIconBtn.gameObject);
+        roleGraphGO.name = "Role Graph";
+        roleGraphGO.transform.localPosition = new Vector3(12, -21, 0);
+        // 頭
+        UITexture testHead = NGUITools.AddChild<UITexture>(roleGraphGO);
+        testHead.name = "Head";
+        testHead.material = atlas.material;
+        
+        int headSmoothMoveAtlasIndex = atlas.GetTextureIndex(atlas.GetTextureGUIDFromName(GLOBALCONST.BONE_NAME[(int)GLOBALCONST.eModelPartName.HEAD]));
+
+        testHead.uvRect = atlas.uvs[headSmoothMoveAtlasIndex];
+
+        Vector2 headSize = atlas.GetTextureSize(headSmoothMoveAtlasIndex);
+        testHead.width = (int)headSize.x;
+        testHead.height = (int)headSize.y;
+        testHead.depth = 2;
+        // 眼睛
+        UITexture testEye = NGUITools.AddChild<UITexture>(roleGraphGO);
+        testEye.name = "Eye";
+        testEye.material = atlas.material;
+        
+        int eyeSmoothMoveAtlasIndex = atlas.GetTextureIndex(atlas.GetTextureGUIDFromName(GLOBALCONST.BONE_NAME[(int)GLOBALCONST.eModelPartName.EYES]));
+
+        testEye.uvRect = atlas.uvs[eyeSmoothMoveAtlasIndex];
+
+        Vector2 eyeSize = atlas.GetTextureSize(eyeSmoothMoveAtlasIndex);
+        testEye.width = (int)eyeSize.x;
+        testEye.height = (int)eyeSize.y;
+        testEye.depth = 3;
+        // 頭髮
+        UITexture testHair = NGUITools.AddChild<UITexture>(roleGraphGO);
+        testHair.name = "Hair";
+        testHair.material = atlas.material;
+
+        int hairSmoothMoveAtlasIndex = atlas.GetTextureIndex(atlas.GetTextureGUIDFromName(GLOBALCONST.BONE_NAME[(int)GLOBALCONST.eModelPartName.HAIR]));
+
+        testHair.uvRect = atlas.uvs[hairSmoothMoveAtlasIndex];
+
+        Vector2 hairSize = atlas.GetTextureSize(hairSmoothMoveAtlasIndex);
+        testHair.width = (int)hairSize.x;
+        testHair.height = (int)hairSize.y;
+        testHair.depth = 4;
+#endregion
+
+        SubUI_HPBar tempHPBar = new SubUI_HPBar(tempIconBtn.gameObject, "Role_HP_Bar", new Vector3(-104, -93, 0), 5,
             (int)(219 * iconScale), (int)(41 * iconScale));
         tempHPBar.FullSize = new Vector2(205, 28);
         _hpBars.Add(tempHPBar);
         // 角色名字
-        UILabel tempRoleName = GUIStation.CreateUILabel(tempIconBtn.gameObject, "Role Name", UIWidget.Pivot.Center, new Vector3(107, -57, 0), 4,
+        UILabel tempRoleName = GUIStation.CreateUILabel(tempIconBtn.gameObject, "Role Name", UIWidget.Pivot.Center, new Vector3(107, -57, 0), 5,
             UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.UI_BATTLE_ROLE_NAME, FontStyle.Bold),
             Color.red, "玩家一二三四");
         _roleNames.Add(tempRoleName);
