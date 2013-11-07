@@ -12,11 +12,11 @@ public static class NGUIExtension
     /// 設定會影響圖大小的相關參數
     /// </summary>
     /// <param name="sp">要修改的UISprite</param>
-    /// <param name="spriteType">Sprite繪製方式</param>
-    /// <param name="pivot">錨點</param>
     /// <param name="width">圖片寬</param>
     /// <param name="height">圖片高</param>
-    public static void SetEffectSizeParameter(this UISprite sp, UISprite.Type spriteType, UISprite.Pivot pivot, int width, int height)
+    /// <param name="spriteType">Sprite繪製方式</param>
+    /// <param name="pivot">錨點(=null則維持原值)</param>
+    public static void SetEffectSizeParameter(this UISprite sp, int width, int height, UISprite.Type spriteType , UISprite.Pivot pivot)
     {
         sp.type = spriteType;
         sp.pivot = pivot;
@@ -24,6 +24,22 @@ public static class NGUIExtension
         sp.width = width;
         sp.height = height;
     }
+
+    public static void SetEffectSizeParameter(this UISprite sp, int width, int height, UISprite.Pivot pivot)
+    {
+        sp.SetEffectSizeParameter(width, height, sp.type, pivot);
+    }
+
+    public static void SetEffectSizeParameter(this UISprite sp, int width, int height, UISprite.Type type)
+    {
+        sp.SetEffectSizeParameter(width, height, type, sp.pivot);
+    }
+
+    public static void SetEffectSizeParameter(this UISprite sp, int width, int height)
+    {
+        sp.SetEffectSizeParameter(width, height, sp.type, sp.pivot);
+    }
+
     #endregion
     #region UIButton
     /// <summary>

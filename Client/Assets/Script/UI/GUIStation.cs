@@ -317,11 +317,8 @@ public class GUIStation
         retButtonObj.name = btnName;
         retButtonObj.transform.localPosition = relativePos;
         // 設定按鈕背景圖
-        UISprite bg = UIImageManager.CreateUISprite(retButtonObj, btnBG);
-        bg.name = "Background";
-
-        bg.SetEffectSizeParameter(UISprite.Type.Sliced, bg.pivot, width, height);
-        bg.depth = depth;
+        UISprite bg = UIImageManager.CreateUISprite(new GORelativeInfo(retButtonObj, "Background"),
+            new UISpriteInfo(btnBG, width, height, depth, UISprite.Type.Sliced));
         // font
         if (font != null)
         {
@@ -363,21 +360,12 @@ public class GUIStation
         // Background sprite (傳入空值，不產生sprite
         if (background != NGUISpriteData.NONE)
         {
-            UISprite back = UIImageManager.CreateUISprite(progressBarObject, background);
-            back.name = "Background";
-
-            back.SetEffectSizeParameter(back.type, UIWidget.Pivot.Left, width, height);
-            back.depth = depth;
-            back.transform.localPosition = Vector3.zero; // 因為調整pivot會影響localPosition，所以需要再次重設
+            UISprite back = UIImageManager.CreateUISprite(new GORelativeInfo(progressBarObject, "Background"),
+                new UISpriteInfo(background, width, height, depth, pivot: UIWidget.Pivot.Left));
         }
         // Foreground sprite
-        UISprite front = UIImageManager.CreateUISprite(progressBarObject, foreground);
-        front.name = "Foreground";
-
-        front.SetEffectSizeParameter(front.type, UIWidget.Pivot.Left, width, height); 
-        front.depth = depth + 1;
-        front.transform.localPosition = Vector3.zero; // 因為調整pivot會影響localPosition，所以需要再次重設
-        
+        UISprite front = UIImageManager.CreateUISprite(new GORelativeInfo(progressBarObject, "Foreground"),
+            new UISpriteInfo(foreground, width, height, depth + 1, pivot: UIWidget.Pivot.Left));
         // Add the slider script
         UISlider retSilder = progressBarObject.AddComponent<UISlider>();
         retSilder.foreground = front.transform;
@@ -395,18 +383,12 @@ public class GUIStation
         // Background
         if (background != NGUISpriteData.NONE)
         {
-            UISprite back = UIImageManager.CreateUISprite(sliderObject, background);
-            back.name = "Background";
-            back.SetEffectSizeParameter(back.type, UIWidget.Pivot.Left, width, height);
-            back.depth = depth;
-            back.transform.localPosition = Vector3.zero; // 因為調整pivot會影響localPosition，所以需要再次重設
+            UISprite back = UIImageManager.CreateUISprite(new GORelativeInfo(sliderObject, "Background"),
+                new UISpriteInfo(background, width, height, depth, pivot: UIWidget.Pivot.Left));
         }
         // Foreground
-        UISprite front = UIImageManager.CreateUISprite(sliderObject, foreground);
-        front.name = "Foreground";
-        front.SetEffectSizeParameter(front.type, UIWidget.Pivot.Left, width, height);
-        front.depth = depth + 1;
-        front.transform.localPosition = Vector3.zero; // 因為調整pivot會影響localPosition，所以需要再次重設
+        UISprite front = UIImageManager.CreateUISprite(new GORelativeInfo(sliderObject, "Foreground"),
+            new UISpriteInfo(foreground, width, height, depth + 1, pivot: UIWidget.Pivot.Left));
         // 如果能夠控制，加上碰撞盒
         if (canUserInterative) NGUITools.AddWidgetCollider(sliderObject);
         // Add the slider script
@@ -415,10 +397,8 @@ public class GUIStation
         // 有給Thumb的SpriteName，產生Thumb
         if (thumb != NGUISpriteData.NONE)
         {
-            UISprite thb = UIImageManager.CreateUISprite(sliderObject, thumb);
-            thb.name = "Thumb";
-            thb.SetEffectSizeParameter(thb.type, thb.pivot, 20, 40);
-            thb.transform.localPosition = new Vector3(200, 0, 0); // 因為調整pivot會影響localPosition，所以需要再次重設
+            UISprite thb = UIImageManager.CreateUISprite(new GORelativeInfo(sliderObject, new Vector3(200, 0, 0), "Thumb"),
+                new UISpriteInfo(thumb, 20, 40));
             // 如果能夠控制，加上碰撞盒 &預設的按鈕反應
             if (canUserInterative)
             {
@@ -481,15 +461,11 @@ public class GUIStation
         ScrollBarObject.name = scName;
         ScrollBarObject.transform.localPosition = relativePos;
 
-        UISprite bg = UIImageManager.CreateUISprite(ScrollBarObject, Background);
-        bg.name = "Background";
-        bg.SetEffectSizeParameter(UISprite.Type.Sliced, UIWidget.Pivot.Center, width, height);
-        bg.depth = depth;
-        
-        UISprite fg = UIImageManager.CreateUISprite(ScrollBarObject, Foreground);
-        fg.name = "Foreground";
-        fg.SetEffectSizeParameter(UISprite.Type.Sliced, UIWidget.Pivot.Center, width, height);
-        fg.depth = depth + 1;
+        UISprite bg = UIImageManager.CreateUISprite(new GORelativeInfo(ScrollBarObject, "Background"),
+            new UISpriteInfo(Background, width, height, depth, UISprite.Type.Sliced, UIWidget.Pivot.Center));
+
+        UISprite fg = UIImageManager.CreateUISprite(new GORelativeInfo(ScrollBarObject, "Foreground"),
+            new UISpriteInfo(Foreground, width, height, depth + 1, UISprite.Type.Sliced, UIWidget.Pivot.Center));
 
         UIScrollBar retSC = ScrollBarObject.AddComponent<UIScrollBar>();
         retSC.background = bg;
@@ -517,10 +493,8 @@ public class GUIStation
         inputRootObject.name = inputName;
         inputRootObject.transform.localPosition = relativePos;
 
-        UISprite bg = UIImageManager.CreateUISprite(inputRootObject, background);
-        bg.name = "Background";
-        bg.SetEffectSizeParameter(UISprite.Type.Sliced, UIWidget.Pivot.Center, width, height);
-        bg.depth = depth + 1;
+        UISprite bg = UIImageManager.CreateUISprite(new GORelativeInfo(inputRootObject, "Background"),
+            new UISpriteInfo(background, width, height, depth + 1, UISprite.Type.Sliced, UIWidget.Pivot.Center));
 
         UILabel targetLabel = CreateUILabel(inputRootObject, inputName + typeof(UIInput).ToString(), UIWidget.Pivot.Center,
                                             Vector3.zero, depth + 2, font, inputColor, inputInitText);
@@ -604,12 +578,8 @@ public static class GUIComponents
     /// </summary>
     public static UISprite StageFrame(GameObject parent)
     {
-        UISprite stageFrameSprite = UIImageManager.CreateUISprite(parent, NGUISpriteData.STAGE_FRAME);
-        stageFrameSprite.name = "StageFrame";
-        stageFrameSprite.SetEffectSizeParameter(UISprite.Type.Sliced, UIWidget.Pivot.Center, (int)(GUIStation.MANUAL_SCREEN_WIDTH * 0.95f), 900); // (int)(GUIStation.MANUAL_SCREEN_HEIGHT * 0.95f));
-        stageFrameSprite.depth = 1;
-        stageFrameSprite.transform.localPosition = Vector3.zero; // 因為調整pivot會影響localPosition，所以需要再次重設
-
+        UISprite stageFrameSprite = UIImageManager.CreateUISprite(new GORelativeInfo(parent, new Vector3(0, 80, 0), "StageFrame"),
+            new UISpriteInfo(NGUISpriteData.STAGE_FRAME, (int)(GUIStation.MANUAL_SCREEN_WIDTH * 0.95f), 830, 1, UISprite.Type.Sliced, UIWidget.Pivot.Center));
         return stageFrameSprite;
     }
 
@@ -737,11 +707,8 @@ public static class GUIComponents
     /// </summary>
     public static UISprite MainBackground(GameObject parent, int depth )
     {
-        UISprite background = UIImageManager.CreateUISprite(parent, NGUISpriteData.MAIN_BG);
-        background.name = "Background";
-        background.SetEffectSizeParameter(UISprite.Type.Simple, UIWidget.Pivot.Center, GUIStation.MANUAL_SCREEN_WIDTH, GUIStation.MANUAL_SCREEN_HEIGHT);
-        background.depth = depth;
-        background.transform.localPosition = Vector3.zero; // 因為調整pivot會影響localPosition，所以需要再次重設
+        UISprite background = UIImageManager.CreateUISprite(new GORelativeInfo(parent, "Background"),
+            new UISpriteInfo(NGUISpriteData.MAIN_BG, GUIStation.MANUAL_SCREEN_WIDTH, GUIStation.MANUAL_SCREEN_HEIGHT, depth, UISprite.Type.Simple, UIWidget.Pivot.Center));
         return background;
     }
 
@@ -750,21 +717,169 @@ public static class GUIComponents
     /// </summary>
     public static UISprite WorldMapBackground(GameObject parent, int depth)
     {
-        UISprite background = UIImageManager.CreateUISprite(parent, NGUISpriteData.WORLDMAP_BG);
-        background.name = "Background";
-        background.SetEffectSizeParameter(UISprite.Type.Simple, UIWidget.Pivot.Center, GUIStation.MANUAL_SCREEN_WIDTH, GUIStation.MANUAL_SCREEN_HEIGHT);
-        background.depth = depth;
-        background.transform.localPosition = Vector3.zero; // 因為調整pivot會影響localPosition，所以需要再次重設
+        UISprite background = UIImageManager.CreateUISprite(new GORelativeInfo(parent, "Background"),
+            new UISpriteInfo(NGUISpriteData.WORLDMAP_BG, GUIStation.MANUAL_SCREEN_WIDTH, GUIStation.MANUAL_SCREEN_HEIGHT, depth, UISprite.Type.Simple, UIWidget.Pivot.Center));
         return background;
     }
 
     public static UISprite WorldMap(GameObject parent)
     {
-        UISprite worldMap = UIImageManager.CreateUISprite(parent, NGUISpriteData.WORLDMAP);
-        worldMap.name = "WorldMap";
-        worldMap.SetEffectSizeParameter(UISprite.Type.Simple, UIWidget.Pivot.Center, 1760, 838);
-        worldMap.depth = 1;
-        worldMap.transform.localPosition = new Vector3(10, 35, 0); // 因為調整pivot會影響localPosition，所以需要再次重設
+        UISprite worldMap = UIImageManager.CreateUISprite(new GORelativeInfo(parent, new Vector3(10, 35, 0), "WorldMap"),
+            new UISpriteInfo(NGUISpriteData.WORLDMAP, 1760, 838, 1, UISprite.Type.Simple, UIWidget.Pivot.Center));
         return worldMap;
     }
 }
+
+#region 輔助用類別
+
+/// <summary>
+/// UI建立時，需要用到和GameObject相關的資訊
+/// </summary>
+public class GORelativeInfo
+{
+    /// <summary>
+    /// 父物件
+    /// </summary>
+    public GameObject ParentObject
+    {
+        get;
+        protected set;
+    }
+    /// <summary>
+    /// 相對於ParentObject的位置
+    /// </summary>
+    public Vector3 LocalPosition
+    {
+        get;
+        protected set;
+    }
+    /// <summary>
+    /// 物件名稱，若為空，則產生UI時會以 「該UI的type名稱」+"Object" 為該物件名稱
+    /// </summary>
+    public string ObjectName
+    {
+        get;
+        protected set;
+    }
+
+    /// <summary>
+    /// 建構式(相對位置 = (0, 0, 0))
+    /// </summary>
+    /// <param name="parentObj">父物件</param>
+    /// <param name="name">物件名稱（若設為null或空字串，則產生UI時會以 「該UI的type名稱」+"Object" 為該物件名稱）</param>
+    public GORelativeInfo(GameObject parentObj, string name = null) : this(parentObj, Vector3.zero, name)
+    {
+    }
+
+    /// <summary>
+    /// 建構式
+    /// </summary>
+    /// <param name="parentObj">父物件</param>
+    /// <param name="relativePos">相對於parent的位置</param>
+    /// <param name="name">物件名稱（若設為null或空字串，則產生UI時會以 「該UI的type名稱」+"Object" 為該物件名稱）</param>
+    public GORelativeInfo(GameObject parentObj, Vector3 relativePos, string name = null)
+    {
+        ParentObject = parentObj;
+        LocalPosition = relativePos;
+        ObjectName = name;
+        
+    }
+
+    ~GORelativeInfo()
+    {
+        ParentObject = null;
+        ObjectName = null;
+    }
+
+    public override string ToString()
+    {
+        return string.Format("Parent = {0} LocalPosition = {1} ObjectName = {2}",
+            (ParentObject == null) ? "[Null Object]" : ParentObject.name,
+            LocalPosition, string.IsNullOrEmpty(ObjectName) ? "[null or empty]" : ObjectName);
+    }
+}
+
+/// <summary>
+/// UISprite建立時需要的資訊
+/// </summary>
+public class UISpriteInfo
+{
+    /// <summary>
+    /// 存放UIAtlas名字和Sprite名字等取資源用的資訊
+    /// </summary>
+    public NGUISpriteData SpriteResourceData
+    {
+        get;
+        protected set;
+    }
+    /// <summary>
+    /// 深度，若為null，產生UISprite時套用NGUITools.CalculateNextDepth()來取得深度
+    /// </summary>
+    public int? Depth
+    {
+        get;
+        protected set;
+    }
+    /// <summary>
+    /// 繪圖類型，若為null，產生UISprite會依照是否有邊界決定類型
+    /// </summary>
+    public UISprite.Type? Type
+    {
+        get;
+        protected set;
+    }
+    /// <summary>
+    /// 錨點
+    /// </summary>
+    public UISprite.Pivot Pivot
+    {
+        get;
+        protected set;
+    }
+    /// <summary>
+    /// 寬度，若為不合理值(小於等於0)，則在產生UISprite時不會修改寬度
+    /// </summary>
+    public int Width
+    {
+        get;
+        protected set;
+    }
+    /// <summary>
+    /// 高度，若為不合理值(小於等於0)，則在產生UISprite時不會修改高度
+    /// </summary>
+    public int Height
+    {
+        get;
+        protected set;
+    }
+
+    /// <summary>
+    /// 建構式
+    /// </summary>
+    /// <param name="sd">存放UIAtlas名字和Sprite名字等取資源用的資訊</param>
+    /// <param name="width">寬度，若為不合理值(小於等於0)，則在產生UISprite時不會修改寬度</param>
+    /// <param name="height">高度，若為不合理值(小於等於0)，則在產生UISprite時不會修改高度</param>
+    /// <param name="depth">深度，若為null，產生UISprite時套用NGUITools.CalculateNextDepth()來取得深度</param>
+    /// <param name="type">繪圖類型，若為null，產生UISprite會依照是否有邊界決定類型</param>
+    /// <param name="pivot">錨點</param>
+    public UISpriteInfo(NGUISpriteData sd, int width = 0, int height = 0, int? depth = null, UISprite.Type? type = null, UISprite.Pivot pivot = UIWidget.Pivot.Center)
+    {
+        SpriteResourceData = sd;
+        Depth = depth;
+        Type = type;
+        Pivot = pivot;
+        Width = width;
+        Height = height;
+    }
+
+    public override string ToString()
+    {
+        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+        sb.AppendFormat("SpriteResourceData = {0} ", SpriteResourceData);
+        sb.AppendFormat("Depth = {0}\n", Depth.HasValue ? Depth.Value.ToString() : "[null]");
+        sb.AppendFormat("Type = {0} Pivot = {1}\n", Type, Pivot);
+        sb.AppendFormat("size = ({0}, {1})", Width, Height);
+        return sb.ToString();
+    }
+}
+#endregion

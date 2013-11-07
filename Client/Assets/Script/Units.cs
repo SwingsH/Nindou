@@ -12,6 +12,15 @@ public abstract class Unit
 	}
 
 	public abstract void Run();
+
+    // fs : 此為我為了先完成跟隨血條寫的，之後麻煩有正式的取名字方式時，將這裡砍掉========
+    public virtual string Name
+    {
+        get;
+        set;
+    }
+    //====================================================================================
+    
 	/// <summary>
 	/// 最左下角的格子座標
 	/// </summary>

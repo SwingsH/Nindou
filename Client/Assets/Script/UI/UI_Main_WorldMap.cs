@@ -29,7 +29,6 @@ public class UI_Main_WorldMap : GUIFormBase
     private UIButton _headPictureBtn; // 「人物頭像」按鈕
     private UILabel _pointText; // 「點數」說明文字
     private UIButton _menuBtn; // 「選單」按鈕
-    //private UILabel _warningText; // 「強敵發現！！」文字
     private UISprite _warning; // 「強敵發現！！」底圖
     private UIButton _stageBtn; // 「關卡」按鈕
     #endregion
@@ -89,16 +88,12 @@ public class UI_Main_WorldMap : GUIFormBase
         _headPictureBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _headPictureBtn.onClick.Add(new EventDelegate(this, "HeadPictureBtnClick"));
         // 「點數」
-        UISprite pointBasePic = UIImageManager.CreateUISprite(topObjectsTween.gameObject, NGUISpriteData.BTN_GENERIC_BG);
-        pointBasePic.SetEffectSizeParameter(pointBasePic.type, pointBasePic.pivot, POINT_BG_WIDTH, POINT_BG_HEIGHT);
-        pointBasePic.depth = 6;
-        pointBasePic.name = "Point";
-        pointBasePic.transform.localPosition = new Vector3(347, 328, 0);
-        UISprite pointGraphPic = UIImageManager.CreateUISprite(pointBasePic.gameObject, NGUISpriteData.POINT_PIC);
-        pointGraphPic.SetEffectSizeParameter(pointGraphPic.type, pointGraphPic.pivot, POINT_PIC_WIDTH, POINT_PIC_HEIGHT);
-        pointGraphPic.depth = 7;
-        pointGraphPic.name = "PointGraph";
-        pointGraphPic.transform.localPosition = new Vector3(-155, 0, 0);
+        UISprite pointBasePic = UIImageManager.CreateUISprite(new GORelativeInfo(topObjectsTween.gameObject, new Vector3(347, 328, 0), "Point"),
+            new UISpriteInfo(NGUISpriteData.BTN_GENERIC_BG, POINT_BG_WIDTH, POINT_BG_HEIGHT, 6));
+
+        UISprite pointGraphPic = UIImageManager.CreateUISprite(new GORelativeInfo(pointBasePic.gameObject, new Vector3(-155, 0, 0), "PointGraph"),
+            new UISpriteInfo(NGUISpriteData.POINT_PIC, POINT_PIC_WIDTH, POINT_PIC_HEIGHT, 7));
+
         _pointText = GUIStation.CreateUILabel(pointBasePic.gameObject, "PointText", UIWidget.Pivot.Left, new Vector3(-107, -6, 0), 10,
             UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
             Color.red, string.Format("目前點數：{0}", _gamePoint));
@@ -112,29 +107,17 @@ public class UI_Main_WorldMap : GUIFormBase
         _menuBtn.onClick.Add(new EventDelegate(this, "MenuBtnClick"));
 
         #region 世界地圖部分
-
         TweenScale worldMapObjectsTween = GUIComponents.AddShowZoomEffect(backgroundPic.gameObject, Vector3.forward, Vector3.one);
         worldMapObjectsTween.duration = 0.8f;
         worldMapObjectsTween.name = "WorldMapBG";
         // 世界地圖的背景圖
         UISprite worldMap = GUIComponents.StageFrame(worldMapObjectsTween.gameObject);
-        // 「強敵發現！！」文字
-        _warning = UIImageManager.CreateUISprite(
-            //new GORelativeInfo(worldMap.gameObject, new Vector3(-561, 185, 0), "Warning"),
-            worldMap.gameObject,
-            NGUISpriteData.ICON_EM_WARNING);
-        _warning.name = "Warning";
-        _warning.SetEffectSizeParameter(_warning.type, UIWidget.Pivot.Center, 367, 106);
-        _warning.depth = 2;
-        _warning.transform.localPosition = new Vector3(-561, 185, 0);
-
+        // 「強敵發現！！」
+        _warning = UIImageManager.CreateUISprite(new GORelativeInfo(worldMap.gameObject, new Vector3(-561, 185, 0), "Warning"),
+            new UISpriteInfo(NGUISpriteData.ICON_EM_WARNING, 367, 106, 2));
         GUIStation.CreateUILabel(_warning.gameObject, "Warning", UIWidget.Pivot.Center, Vector3.zero, 3,
             UIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle: FontStyle.Bold),
             Color.white, GLOBAL_STRING.WARNING_LABEL_TEXT);
-
-        //_warningText = GUIStation.CreateUILabel(worldMap.gameObject, "Warnging", UIWidget.Pivot.Center, new Vector3(-621, 195, 0), 11,
-        //    UIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle: FontStyle.Bold),
-        //    Color.red, GLOBAL_STRING.WARNING_LABEL_TEXT);
         // 「關卡」按鈕
         _stageBtn = GUIStation.CreateUIButton(worldMap.gameObject, "Stage", new Vector3(-9, -97, 0), 4,
             NGUISpriteData.MAIN_STAGE_BG,

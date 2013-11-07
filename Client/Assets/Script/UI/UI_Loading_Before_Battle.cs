@@ -29,11 +29,8 @@ public class UI_Loading_Before_Battle: GUIFormBase
 
         UIPanel panel = NGUITools.AddChild<UIPanel>(anchor.gameObject);
 
-        UISprite background = UIImageManager.CreateUISprite(panel.gameObject, NGUISpriteData.TILE_BG_PATTERN);
-        background.name = "Background";
-        background.depth = 0;
-        background.SetEffectSizeParameter(UISprite.Type.Tiled, UIWidget.Pivot.Center, GUIStation.MANUAL_SCREEN_WIDTH, GUIStation.MANUAL_SCREEN_HEIGHT);
-        background.transform.localPosition = Vector3.zero; // 因為調整pivot會影響localPosition，所以需要再次重設
+        UISprite background = UIImageManager.CreateUISprite(new GORelativeInfo(panel.gameObject, "Background"),
+            new UISpriteInfo(NGUISpriteData.TILE_BG_PATTERN, GUIStation.MANUAL_SCREEN_WIDTH, GUIStation.MANUAL_SCREEN_HEIGHT, 0, UISprite.Type.Tiled, UIWidget.Pivot.Center));
 
         // 讀取進度條
         _loadingBar = new SubUI_LoadingBar(background.gameObject, "SubUI_LoadingBar", LOADING_BAR_POS, 1);

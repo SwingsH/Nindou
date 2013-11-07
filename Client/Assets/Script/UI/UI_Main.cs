@@ -21,10 +21,8 @@ public class UI_Main : GUIFormBase
         UIPanel panel = NGUITools.AddChild<UIPanel>(anchor.gameObject);
 
         // 背景圖
-        UISprite backgroundPic = UIImageManager.CreateUISprite(panel.gameObject, NGUISpriteData.WORLDMAP_BG);
-        backgroundPic.SetEffectSizeParameter(UISprite.Type.Simple, UIWidget.Pivot.Center, GUIStation.MANUAL_SCREEN_WIDTH, GUIStation.MANUAL_SCREEN_HEIGHT);
-        backgroundPic.depth = 0;
-        backgroundPic.name = "Background";
+        UISprite backgroundPic = UIImageManager.CreateUISprite(new GORelativeInfo(panel.gameObject, "Background"),
+            new UISpriteInfo(NGUISpriteData.WORLDMAP_BG, GUIStation.MANUAL_SCREEN_WIDTH, GUIStation.MANUAL_SCREEN_HEIGHT, 0, UISprite.Type.Simple, UIWidget.Pivot.Center));
         // 下方物件的parent
         TweenPosition tweenPos = GUIComponents.AddShowMoveEffect(backgroundPic.gameObject, new Vector3(0, -206, 0), Vector3.zero);
         tweenPos.name = "BottomObjects";

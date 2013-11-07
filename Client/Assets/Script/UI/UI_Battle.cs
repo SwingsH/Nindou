@@ -16,8 +16,12 @@ public class UI_Battle : GUIFormBase
     UIButton _pauseBtn; // 暫停鈕
     UISprite _iconBackground; // 角色icon所在的背景圖
     List<UIButton> _iconBtns = new List<UIButton>(); // 玩家角色圖像
-    List<UISlider> _hpBars = new List<UISlider>(); // 玩家角色血條
+    List<SubUI_HPBar> _hpBars = new List<SubUI_HPBar>(); 
     List<UILabel> _roleNames = new List<UILabel>(); // 玩家角色名字
+
+    Dictionary<string, SubUI_HPBar> _enemyInfos = new Dictionary<string, SubUI_HPBar>();
+
+    bool isPause = false;
 
      #region 繼承自GUIFormBase的method
     protected override void CreateAllComponent()
@@ -27,14 +31,8 @@ public class UI_Battle : GUIFormBase
 
         UIPanel panel = NGUITools.AddChild<UIPanel>(anchor.gameObject);
         // BOSS 圖片
-         _bossPic = UIImageManager.CreateUISprite(panel.gameObject, NGUISpriteData.BOSS_PIC);
-        _bossPic.name = "Boss Pic";
-        _bossPic.SetEffectSizeParameter(_bossPic.type, _bossPic.pivot, BOSS_ICON_WIDTH, BOSS_ICON_HEIGHT);
-        _bossPic.depth = 3;
-
-        //// TODO:sprite設定，之後統整出去---
-        _bossPic.transform.localPosition = new Vector3(-400, 440, 0); // 因為調整pivot會影響localPosition，所以需要再次重設
-        ////---------------------------------
+        _bossPic = UIImageManager.CreateUISprite(new GORelativeInfo(panel.gameObject, new Vector3(-400, 440, 0), "Boss Pic"),
+            new UISpriteInfo(NGUISpriteData.BOSS_PIC, BOSS_ICON_WIDTH, BOSS_ICON_HEIGHT, 3));
         // BOSS 名稱
         _bossNameText = GUIStation.CreateUILabel(_bossPic.gameObject, "Boss Name", UIWidget.Pivot.Left, new Vector3(73, -8, 0), 4,
             UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.UI_BATTLE_BOSS_NAME, FontStyle.Bold),
@@ -52,17 +50,12 @@ public class UI_Battle : GUIFormBase
         _fastForwardBtn.onClick.Add(new EventDelegate(this, "FastForwardBtnClick"));
         // 暫停鈕
         _pauseBtn = GUIStation.CreateUIButton(panel.gameObject, "Pause", new Vector3(884, 428, 0), 5,
-            NGUISpriteData.PAUSE, 150, 150, null, Color.white, string.Empty);
+            NGUISpriteData.ICON_PAUSE, 150, 150, null, Color.white, string.Empty);
         _pauseBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _pauseBtn.onClick.Add(new EventDelegate(this, "PauseBtnClick"));
         // 放置角色Icon的背景圖版
-        _iconBackground = UIImageManager.CreateUISprite(panel.gameObject, NGUISpriteData.ROLE_ICON_PLATE);
-        _iconBackground.SetEffectSizeParameter(_iconBackground.type, _iconBackground.pivot, ROLE_ICON_PLATE_BG_WIDTH, ROLE_ICON_PLATE_BG_HEIGHT);
-        _iconBackground.depth = 0;
-        // TODO:sprite設定，之後統整出去---
-        _iconBackground.name = "IconBackground";
-        _iconBackground.transform.localPosition = new Vector3(0, -398, 0);
-        // --------------------------------
+        _iconBackground = UIImageManager.CreateUISprite(new GORelativeInfo(panel.gameObject, new Vector3(0, -398, 0), "IconBackground"),
+            new UISpriteInfo(NGUISpriteData.ROLE_ICON_PLATE, ROLE_ICON_PLATE_BG_WIDTH, ROLE_ICON_PLATE_BG_HEIGHT, 0));
         // 玩家角色圖像 & 血條
         for (int i = 0; i < GLOBALCONST.MAX_BATTLE_ROLE_COUNT; ++i)
         {
@@ -95,11 +88,16 @@ public class UI_Battle : GUIFormBase
             if (iconBtn != null) { NGUITools.Destroy(iconBtn.gameObject); }
         }
         _iconBtns = null;
-        foreach (UISlider hpBar in _hpBars)
+        foreach (SubUI_HPBar hpBar in _hpBars)
         {
-            if (hpBar != null) { NGUITools.Destroy(hpBar.gameObject); }
+            hpBar.Dispose();
         }
         _hpBars = null;
+        foreach (SubUI_HPBar enemyInfo in _enemyInfos.Values)
+        {
+            enemyInfo.Dispose();
+        }
+        _enemyInfos = null;
         if (_pauseBtn != null) { NGUITools.Destroy(_pauseBtn.gameObject); }
         _pauseBtn = null;
         if (_fastForwardBtn != null) { NGUITools.Destroy(_fastForwardBtn.gameObject); }
@@ -121,8 +119,7 @@ public class UI_Battle : GUIFormBase
     void FastForwardBtnClick()
     {
         CommonFunction.DebugMsg("按下「加速鈕」");
-        // TODO : 看是否真是這樣
-        TimeMachine.SetTimeScale(Time.timeScale == 1 ? 5 : (Time.timeScale == 5 ? 10 : 1));
+        if (!isPause) { TimeMachine.FastForward(); }
     }
 
     /// <summary>
@@ -131,8 +128,15 @@ public class UI_Battle : GUIFormBase
     void PauseBtnClick()
     {
         CommonFunction.DebugMsg("按下「暫停鈕」");
-        // TODO：
-        TimeMachine.SetTimeScale(0.0f);
+        isPause = !isPause;
+
+        UISprite playAndPauseSprite = _pauseBtn.GetComponentInChildren<UISprite>();
+        // 暫停時，顯示播放的圖，播放時，顯示暫停的圖
+        playAndPauseSprite.spriteName = (isPause) ? NGUISpriteData.ICON_PLAY.GetSpriteName() : NGUISpriteData.ICON_PAUSE.GetSpriteName();
+
+        if (isPause) { TimeMachine.Pause(); }
+        else { TimeMachine.Resume(); }
+        
     }
     /// <summary>
     /// 按下角色Icon的反應函式
@@ -201,7 +205,10 @@ public class UI_Battle : GUIFormBase
     {
         // 設定該格資料
         NGUITools.SetActive(_iconBtns[playerIndex].gameObject, isVisible);
-        if (isVisible) { _hpBars[playerIndex].value = (float)life / (float)maxLife; }
+        if (isVisible)
+        {
+            _hpBars[playerIndex].SetHP((int)life, (int)maxLife);
+        }
     }
 
     /// <summary>
@@ -220,18 +227,76 @@ public class UI_Battle : GUIFormBase
         tempIconBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         tempIconBtn.onClick.Add(new EventDelegate(this, "IconBtnClick"));
         _iconBtns.Add(tempIconBtn);
-        // 角色血條
-        UISlider tempHPBar = GUIStation.CreateUIProgressBar(tempIconBtn.gameObject, "Role HP Bar", new Vector3(-104, -93, 0), 2,
-            NGUISpriteData.HP_FG, NGUISpriteData.ROLE_HP_BG, (int)(219 * iconScale), (int)(41 * iconScale));
-        // 調整位置& Slider全滿時大小
-        tempHPBar.foreground.localPosition = new Vector3(21, 4, 0);
-        tempHPBar.fullSize = new Vector2(205, 28);
+        SubUI_HPBar tempHPBar = new SubUI_HPBar(tempIconBtn.gameObject, "Role_HP_Bar", new Vector3(-104, -74, 0), 2,
+            (int)(219 * iconScale), (int)(41 * iconScale));
+        tempHPBar.FullSize = new Vector2(205, 28);
         _hpBars.Add(tempHPBar);
         // 角色名字
         UILabel tempRoleName = GUIStation.CreateUILabel(tempIconBtn.gameObject, "Role Name", UIWidget.Pivot.Center, new Vector3(107, -57, 0), 4,
             UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.UI_BATTLE_ROLE_NAME, FontStyle.Bold),
             Color.red, "玩家一二三四");
         _roleNames.Add(tempRoleName);
+    }
+    #endregion
+
+    #region 敵方場景上血條資訊
+    const float enemyBarScale = 0.65f;
+
+    // TODO: 此處只是測試使用==========
+    static int count = 0;
+    GameAttribute getTestGA()
+    {
+        return (GameAttribute)(count++ % System.Enum.GetValues(typeof(GameAttribute)).Length);
+    }
+    //=================================
+
+    public void AddEnemyInfoUI(string enemyName, Vector3 relativePos, int curHP, int maxHP, GameAttribute ga = GameAttribute.NONE)
+    {
+        SubUI_HPBar tempHPBar = new SubUI_HPBar(_bossPic.transform.parent.gameObject, string.Format("Enemy_{0}_HP", enemyName), Vector3.zero,
+            1, (int)(219 * GUIStation.RESOLUTION_SCALE_BETWEEN_ART_AND_UI * enemyBarScale), (int)(41 * GUIStation.RESOLUTION_SCALE_BETWEEN_ART_AND_UI * enemyBarScale),
+            ga, 
+            SubUI_HPBar.ShowMode.WITH_AVATAR);
+        tempHPBar.FullSize = new Vector2(205 * enemyBarScale, 28 * enemyBarScale);
+        tempHPBar.ForegroundPos = new Vector3(14, 2, 0);
+        tempHPBar.ShiftPos = new Vector2(-71, -12);
+        tempHPBar.SetHP(curHP, maxHP);
+        _enemyInfos.Add(enemyName, tempHPBar);
+        _enemyInfos[enemyName].UpdatePos(relativePos);
+    }
+
+    public void SetAllEnemyInfoUI(IList<Unit> allEnemy)
+    {
+        foreach (AnimUnit enemyUnit in allEnemy)
+        {
+            if (!_enemyInfos.ContainsKey(enemyUnit.Name))
+            {
+                AddEnemyInfoUI(enemyUnit.Name, BattleManager.UnitCamera.WorldToScreenPoint(enemyUnit.WorldUpperCenter), (int)enemyUnit.Life, (int)enemyUnit.MaxLife,
+                    getTestGA()); // TODO: 改由enemyUnit內資訊取得
+            }
+            else
+            {
+                _enemyInfos[enemyUnit.Name].SetHP((int)enemyUnit.Life);
+                _enemyInfos[enemyUnit.Name].UpdatePos(BattleManager.UnitCamera.WorldToScreenPoint(enemyUnit.WorldUpperCenter));
+            }
+        }
+    }
+
+    public void DeleteEnemyInfoUI(string enemyName)
+    {
+        if (_enemyInfos.ContainsKey(enemyName))
+        {
+            _enemyInfos[enemyName].Dispose();
+            _enemyInfos.Remove(enemyName);
+        }
+    }
+
+    public void ClearEnemyInfoUI()
+    {
+        foreach (SubUI_HPBar enemyInfo in _enemyInfos.Values)
+        {
+            enemyInfo.Dispose();
+        }
+        _enemyInfos.Clear();
     }
     #endregion
 }

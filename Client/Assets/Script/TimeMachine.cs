@@ -15,6 +15,10 @@ public class TimeMachine : MonoBehaviour {
 			return _instance;
 		}
 	}
+    // 加速使用的三階段速率常數
+    const float NORMAL_SPEED = 1;
+    const float FAST_SPEED = 5;
+    const float VERY_FAST_SPEED = 10;
 
 	static float TimeScaleSetting =1;
 	
@@ -31,6 +35,32 @@ public class TimeMachine : MonoBehaviour {
 	{
 		Time.timeScale = TimeScaleSetting;
 	}
+
+    public static void FastForward()
+    {
+        float nextTimeScale = TimeScaleSetting;
+        if (Mathf.Approximately(TimeScaleSetting, NORMAL_SPEED)) { nextTimeScale = FAST_SPEED; }
+        else if (Mathf.Approximately(TimeScaleSetting, FAST_SPEED)) { nextTimeScale = VERY_FAST_SPEED; }
+        else if (Mathf.Approximately(TimeScaleSetting, VERY_FAST_SPEED)) { nextTimeScale = NORMAL_SPEED; }
+        SetTimeScale(nextTimeScale);
+    }
+
+    public static void Resume()
+    {
+        if (_instance == null || Time.realtimeSinceStartup > _instance.stopTime)
+        {
+            Time.timeScale = TimeScaleSetting;
+        }
+    }
+
+    public static void Pause()
+    {
+        if (_instance == null || Time.realtimeSinceStartup > _instance.stopTime)
+        {
+            Time.timeScale = 0;
+        }
+    }
+
 	public static void SetTimeScale(float scale)
 	{
 		TimeScaleSetting = scale;

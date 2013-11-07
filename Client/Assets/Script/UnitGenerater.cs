@@ -5,6 +5,9 @@ using System.Collections.Generic;
 
 public class UnitGenerater{
 
+    // fs : 為了唯一標示單位暫時用，有正式方式後請刪除=======
+    static int index = 0;
+    //=======================================================
     //已經被回收的場景單位, 下次有同 外觀 unit 時重複使用
 	Dictionary<string, List<SmoothMoves.BoneAnimation>> UnitGrave = new Dictionary<string, List<SmoothMoves.BoneAnimation>>();
 
@@ -49,6 +52,10 @@ public class UnitGenerater{
 			actUnit.SpriteBounds = GetSpriteBounds(actUnit.Entity.transform, sprites);
 			actUnit.Entity.transform.localScale = Vector3.one * actUnit.EntityScale;
 		}
+
+        // fs : 為了唯一標示單位暫時用，有正式方式後請刪除=======
+        actUnit.Name = string.Format("Enemy_{0}", index++);
+        //=======================================================
 		return actUnit;
 	}
 

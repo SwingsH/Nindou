@@ -425,6 +425,41 @@ public class NPCData
 
 #endregion
 
+/// <summary>
+/// 遊戲內屬性
+/// </summary>
+public enum GameAttribute
+{
+    NONE, // 屬性：無
+    SUN,  // 屬性：陽
+    MOON, // 屬性：陰
+    MAN,  // 屬性：體
+}
+
+public static class GameAttributeExtensions
+{
+    public static NGUISpriteData GetCorrespondingNGUISpriteData(this GameAttribute ga)
+    {
+        switch (ga)
+        {
+            case GameAttribute.SUN:
+                return NGUISpriteData.ICON_ATTRIBUTE_SUN;
+            case GameAttribute.MOON:
+                return NGUISpriteData.ICON_ATTRIBUTE_MOON;
+            case GameAttribute.MAN:
+                return NGUISpriteData.ICON_ATTRIBUTE_MAN;
+            default:
+                return NGUISpriteData.NONE;
+        }
+    }
+
+    public static string GetCorrespondingSpriteName(this GameAttribute ga)
+    {
+        return ga.GetCorrespondingNGUISpriteData().GetSpriteName();
+    }
+}
+
+
 #region 技能相關
 [StructLayout(LayoutKind.Sequential)]
 public class SkillData

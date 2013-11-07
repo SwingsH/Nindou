@@ -66,11 +66,8 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
                 UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
                 Color.red, GLOBAL_STRING.STAGE_NOT_OPEN_TEXT);
             // 探索度的背景圖
-            _exploreProgressBackground = UIImageManager.CreateUISprite(_subUIRoot, NGUISpriteData.EXPLORE_PROGRESS_BG);
-            _exploreProgressBackground.SetEffectSizeParameter(UISprite.Type.Simple, _exploreProgressBackground.pivot, EXPLORE_PROGRESS_BG_WIDTH, EXPLORE_PROGRESS_BG_HEIGHT);
-            _exploreProgressBackground.depth = depth + 2;
-            _exploreProgressBackground.name = "ExploreProgress";
-            _exploreProgressBackground.transform.localPosition = new Vector3(430, 0, 0);
+            _exploreProgressBackground = UIImageManager.CreateUISprite(new GORelativeInfo(_subUIRoot, new Vector3(430, 0, 0), "ExploreProgress"),
+                new UISpriteInfo(NGUISpriteData.EXPLORE_PROGRESS_BG, EXPLORE_PROGRESS_BG_WIDTH, EXPLORE_PROGRESS_BG_HEIGHT, depth + 2, UISprite.Type.Simple));
 
             // 探索度的文字
             _exploreProgressText = GUIStation.CreateUILabel(_exploreProgressBackground.gameObject, "ExploreProgressText", UIWidget.Pivot.Left,
@@ -237,11 +234,9 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         _stageSelectBackground = GUIComponents.StageFrame(stageSelectObjectsTween.gameObject);
 
         // 場景名稱、進度的背景圖
-        UISprite stageName = UIImageManager.CreateUISprite(_stageSelectBackground.gameObject, NGUISpriteData.STAGE_TITLE_BG);
-        stageName.SetEffectSizeParameter(stageName.type, stageName.pivot, STAGE_TITLE_BG_WIDTH, STAGE_TITLE_BG_HEIGHT);
-        stageName.depth = 2;
-        stageName.name = "StageTitle";
-        stageName.transform.localPosition = new Vector3(-249, 342, 0);
+        UISprite stageName = UIImageManager.CreateUISprite(new GORelativeInfo(_stageSelectBackground.gameObject, new Vector3(-249, 342, 0), "StageTitle"),
+            new UISpriteInfo(NGUISpriteData.STAGE_TITLE_BG, STAGE_TITLE_BG_WIDTH, STAGE_TITLE_BG_HEIGHT, 2));
+
         // 場景名稱
         _stageNameText = GUIStation.CreateUILabel(stageName.gameObject, "StageNameText", UIWidget.Pivot.Left, new Vector3(-258, -26, 0), 3,
             UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),

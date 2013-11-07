@@ -77,12 +77,8 @@ public class BattleManager : BattleState
 			if (eu != null)
 				eu.Run();
 
-        // 將玩家角色HP變動更新到UI上
-        for (int i = 0; i < Players.Length; ++i)
-        {
-            if (Players[i] == null || Players[i].Life <= 0) { GameControl.Instance.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true); }
-            else { GameControl.Instance.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true, Players[i].Life, Players[i].MaxLife); }
-        }
+        // 更新UI_Battle的顯示資訊
+        UpdateUIBattle();
 	}
 
 	public void BattleStart()
@@ -419,6 +415,8 @@ public class BattleManager : BattleState
 					{
 						foreach (GridPos pos in unit.Pos)
 							Instance.BattleGridInfo.Left(pos);
+                        // fs: 刪除對應UI資訊
+                        DeleteEnemyInfoUI(unit.Name);
 						if (Instance.Enemys.Count == 0)
 							Instance.AllDeadEvent(eGroup.Enemy);
 					}
@@ -449,15 +447,11 @@ public class BattleManager : BattleState
 				{
 					IsBattleStart = false;
 					BattleResult = eBattleResult.Lose;
-                    // fs : 強制將所有角色UI的HP顯示歸0
-                    for (int i = 0; i < Players.Length; ++i)
-                    {
-                        if (Players[i] == null || Players[i].Life <= 0) { GameControl.Instance.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true); }
-                        else { GameControl.Instance.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true, Players[i].Life, Players[i].MaxLife); }
-                    }
 				}
 				break;
 		}
+        // fs: 戰鬥結束時的UI處理
+        BattleEndProcessUIBattle(group == eGroup.Enemy);
 		if (!IsBattleStart)
 			GameControl.Instance.ChangeGameState(BattleLeaving.instance);
 
@@ -913,8 +907,8 @@ public class BattleManager : BattleState
 		Generater = new UnitGenerater();
 
 		BattleStart();
-        // fs: 切換完畢後，設定並顯示UI_Battle
-        SetAndShowUIBattle(control);
+        // fs: 切換完畢後，設定UI_Battle資訊
+        SetUIBattle(control);
 
 		StartCountDown = 1.5f;
     }
@@ -995,14 +989,21 @@ public class BattleManager : BattleState
 	}
 	#endif
 
+    #region UI_Battle顯示設定相關
     /// <summary>
-    /// 設定並顯示UI_Battle
+    /// 設定UI_Battle
     /// </summary>
-    void SetAndShowUIBattle(GameControl control)
+    void SetUIBattle(GameControl control)
     {
-        //control.GUIStation.Form<UI_Battle>().Show(); // 此處如果直接用GUIStation.ShowAndHideOther() 會有順序上的問題導致UI_Battle顯示不出來
-        //control.GUIStation.ShowAndHideOther(typeof(UI_Battle));
+        // TODO: 此處應該根據是否有Boss來決定是否顯示
         control.GUIStation.Form<UI_Battle>().SetBossMessageVisible(false);
+        // fs: 設定敵方血條UI
+        foreach (AnimUnit enemyUnit in Enemys)
+        {
+            control.GUIStation.Form<UI_Battle>().AddEnemyInfoUI(enemyUnit.Name, BattleManager.UnitCamera.WorldToScreenPoint(enemyUnit.WorldUpperCenter),
+                (int)enemyUnit.Life, (int)enemyUnit.MaxLife); // TODO: 傳入屬性（陰、陽、體、無）資訊
+        }
+        // fs : 設定我方血條UI
         for (int i = 0; i < GLOBALCONST.MAX_BATTLE_ROLE_COUNT; ++i)
         {
             if (i < Players.Length && Players[i] != null) { control.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true, Players[i].Life, Players[i].MaxLife); }
@@ -1010,6 +1011,49 @@ public class BattleManager : BattleState
         }
     }
 
+    /// <summary>
+    /// 更新UI_Battle顯示資訊
+    /// </summary>
+    void UpdateUIBattle()
+    {
+        // TODO: 更新BOSS血條
+        // fs: 將敵方角色HP變動更新到UI上
+        GameControl.Instance.GUIStation.Form<UI_Battle>().SetAllEnemyInfoUI(Enemys.AsReadOnly());
+        // fs: 將玩家角色HP變動更新到UI上
+        for (int i = 0; i < Players.Length; ++i)
+        {
+            if (Players[i] == null || Players[i].Life <= 0) { GameControl.Instance.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true); }
+            else { GameControl.Instance.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true, Players[i].Life, Players[i].MaxLife); }
+        }
+
+    }
+
+    /// <summary>
+    /// 刪除敵方角色對應的UI資訊（血條、屬性圖示...等）
+    /// </summary>
+    static void DeleteEnemyInfoUI(string enemyName)
+    {
+        GameControl.Instance.GUIStation.Form<UI_Battle>().DeleteEnemyInfoUI(enemyName);
+    }
+
+    /// <summary>
+    /// 戰鬥結束時對UI_Battle的處置
+    /// </summary>
+    /// <param name="isWin">是否勝利</param>
+    void BattleEndProcessUIBattle(bool isWin)
+    {
+        // 清除所有敵方資訊
+        GameControl.Instance.GUIStation.Form<UI_Battle>().ClearEnemyInfoUI();
+        if (!isWin)
+        {
+            // fs : 強制將所有玩家角色UI的HP顯示歸0
+            for (int i = 0; i < Players.Length; ++i)
+            {
+                GameControl.Instance.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true);
+            }
+        }
+    }
+    #endregion
 }
 /*
  * BattleManager.GetBaseposOfClosestPos ←這裡用了同一個變數重複改值再加入list，如果打算要改成class這裡記得要一起改
@@ -1636,6 +1680,7 @@ public class BattleEntering : BattleState
             if (loadSceneOp.isDone && control.GUIStation.Form<UI_Loading_Before_Battle>().ProgressPercent >= 100.0f)
             {
                 loadSceneOp = null;
+                control.GUIStation.ResetAllCamera(); // 換場完畢，重設定Camera深度
                 control.GUIStation.ShowAndHideOther(typeof(UI_Battle));
                 GameControl.Instance.ChangeGameState(BattleManager.Instance);
             }
@@ -1743,6 +1788,7 @@ public class BattleLeaving :BattleState
 			//      故要在Update中持續等待LoadLevel()完成後才呼叫。
 			if (Application.loadedLevelName == "Empty")
 			{
+                control.GUIStation.ResetAllCamera(); // 換場完畢，重設定Camera深度
 				GameControl.Instance.ChangeGameState(GameStageSelect.Instance);
 			}
 		}

@@ -30,10 +30,8 @@ public enum NGUISpriteData
     [EnumUISpriteConfig("Atlas_Icons", "bosspic")]                  BOSS_PIC, // BOSS 圖
     [EnumUISpriteConfig("Atlas_Icons", "bossblood1")]               BOSS_HP_BG, // BOSS HP底圖
     [EnumUISpriteConfig("Atlas_Slices", "bossbloodbase")]           HP_FG, // HP的前景圖
-    [EnumUISpriteConfig("Atlas_Icons", "pause")]                    PAUSE, // 暫停圖
     [EnumUISpriteConfig("Atlas_Slices", "plate")]                   ROLE_ICON_PLATE, // 戰鬥UI 放置角色Icon的背景圖版
     [EnumUISpriteConfig("Atlas_Icons", "icon_role")]                ROLE_ICON, // 角色Icon
-    [EnumUISpriteConfig("Atlas_Icons", "role_hp_bg")]               ROLE_HP_BG, // 角色HP底圖
 
     [EnumUISpriteConfig("Atlas_Backgrounds", "Night_Blade_1")]      MAIN_STAGE_BG, // 主介面進入探索的底圖
     [EnumUISpriteConfig("Atlas_Icons", "icon_friend")]              ICON_FRIEND, // 主介面的好友圖
@@ -67,7 +65,16 @@ public enum NGUISpriteData
     [EnumUISpriteConfig("Atlas_Icons", "icon_equip")]               ICON_EQUIP_BG, // 裝備底圖
     [EnumUISpriteConfig("Atlas_Icons", "icon_equipwbg")]            ICON_EQUIPPED_TEXT_BG, // 「已裝備」文字底圖
     #endregion
+    #region 戰鬥介面用圖
+    [EnumUISpriteConfig("Atlas_Icons", "role_hp_bg")]               ROLE_HP_BG, // 角色HP底圖
+    [EnumUISpriteConfig("Atlas_Slices", "slice_blood_white_obase")] DATA_SLIDER_FG, // 資料Slider的前景圖
+    [EnumUISpriteConfig("Atlas_Icons", "icon_sun")]                 ICON_ATTRIBUTE_SUN, // 屬性：陽的圖示
+    [EnumUISpriteConfig("Atlas_Icons", "icon_moon")]                ICON_ATTRIBUTE_MOON, // 屬性：陰的圖示
+    [EnumUISpriteConfig("Atlas_Icons", "icon_man")]                 ICON_ATTRIBUTE_MAN, // 屬性：體的圖示
+    [EnumUISpriteConfig("Atlas_Icons", "icon_pause")]               ICON_PAUSE, // 暫停圖
+    [EnumUISpriteConfig("Atlas_Icons", "icon_play")]                ICON_PLAY, // 播放圖
 
+    #endregion
     // TODO：改成正式用圖
     [EnumUISpriteConfig("TestAtlas", "gold")]                       POINT_PIC, // 點數指示圖
     [EnumUISpriteConfig("TestAtlas", "fb_300_main")]                BTN_INHERIT, // 繼承按鈕圖
@@ -126,6 +133,7 @@ public static class UIImageManager
         isOK = true;
     }
 
+    [System.Obsolete("已過時，請改用CreateUISprite(GORelativeInfo, UISpriteInfo)")]
     /// <summary>
     /// 依據SpriteName提供資料，在parent下面建立附加了UISprite的物件。parentObj = null，則該物件在最上層
     /// sn資料有問題，則不做事
@@ -135,18 +143,36 @@ public static class UIImageManager
     /// <returns>建出的UISprite</returns>
     public static UISprite CreateUISprite(GameObject parentObj, NGUISpriteData sn)
     {
-        //CommonFunction.DebugMsgFormat("GUIImageManager.CreateUISprite()");
+        return CreateUISprite(new GORelativeInfo(parentObj), new UISpriteInfo(sn));
+    }
+
+    /// <summary>
+    /// 依據SpriteName提供資料，建立附加了UISprite的物件。
+    /// </summary>
+    /// <param name="goInfo">和GameObject相關的資訊（父物件、相對位置、名字）</param>
+    /// <param name="spriteInfo">和UISprite相關的資訊</param>
+    /// <returns>建出的UISprite</returns>
+    public static UISprite CreateUISprite(GORelativeInfo goInfo, UISpriteInfo spriteInfo)
+    {
         bool dataIsOK = true;
-        CheckInputUISpriteData(sn, ref dataIsOK);
+        CheckInputUISpriteData(spriteInfo.SpriteResourceData, ref dataIsOK);
         if (!dataIsOK) { return null; }
-        //CommonFunction.DebugMsgFormat("{0} 通過測試", sn);
 
-        // 到此步表示sn的值沒問題
+        // 到此步表示spriteInfo.SpriteResourceData資料沒問題
         EnumUISpriteConfig uiSpriteConfig;
-        CommonFunction.GetAttribute<EnumUISpriteConfig>(sn, out uiSpriteConfig);
+        CommonFunction.GetAttribute<EnumUISpriteConfig>(spriteInfo.SpriteResourceData, out uiSpriteConfig);
 
-        UISprite retUISprite = NGUITools.AddSprite(parentObj, GetUIAtlas(uiSpriteConfig.AtlasName), uiSpriteConfig.SpriteName);
-        retUISprite.MakePixelPerfect();
+        UISprite retUISprite = NGUITools.AddSprite(goInfo.ParentObject, GetUIAtlas(uiSpriteConfig.AtlasName), uiSpriteConfig.SpriteName);
+        retUISprite.name = string.IsNullOrEmpty(goInfo.ObjectName) ? "UISpriteObject" : goInfo.ObjectName;
+        retUISprite.depth = spriteInfo.Depth.HasValue ? spriteInfo.Depth.Value : NGUITools.CalculateNextDepth(goInfo.ParentObject);
+
+        if (spriteInfo.Type.HasValue) { retUISprite.type = spriteInfo.Type.Value; }
+        retUISprite.pivot = spriteInfo.Pivot;
+        retUISprite.MakePixelPerfect(); // 如果type = simple or filled 會改回近原大小，故在呼叫此函式後才修改寬高  
+        if (spriteInfo.Width > 0) { retUISprite.width = spriteInfo.Width; }
+        if (spriteInfo.Height > 0) { retUISprite.height = spriteInfo.Height; }
+        retUISprite.transform.localPosition = goInfo.LocalPosition; // 修改pivot會更動localPosition，故在修改後才改
+
         return retUISprite;
     }
 

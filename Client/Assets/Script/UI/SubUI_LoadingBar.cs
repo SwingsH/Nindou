@@ -31,11 +31,6 @@ public class SubUI_LoadingBar : GUISubFormBase
         : base(parent, subUILoadingBarName, relativePos)
     {
         // 讀取進度條
-        //_progressBar = GUIStation.CreateUIProgressBar(_subUIRoot.gameObject, "Progress Bar_Build", Vector3.zero, depth,
-        //                                            SpriteName.SLICE_LOADING_BAR_FG,
-        //                                            SpriteName.SLICE_LOADING_BAR_BG,
-        //                                            1535, 91);
-
         _progressBar = GUIStation.CreateUISlider(_subUIRoot.gameObject, "LoadingBar", Vector3.zero, depth,
             NGUISpriteData.SLICE_LOADING_BAR_FG,
             NGUISpriteData.SLICE_LOADING_BAR_BG,
@@ -62,11 +57,8 @@ public class SubUI_LoadingBar : GUISubFormBase
             Color.white, "0%");
         _progressText.overflowMethod = UILabel.Overflow.ResizeFreely; // fs: 讓文字佔的空間自由地重新配置
         // 讀取條左邊的沙漏圖
-        UISprite sandFilter = UIImageManager.CreateUISprite(_subUIRoot.gameObject, NGUISpriteData.ICON_SANDFILTER);
-        sandFilter.SetEffectSizeParameter(UISprite.Type.Simple, UIWidget.Pivot.Center, 138, 135);
-        sandFilter.depth = depth + 2;
-        sandFilter.name = "LoadingSandFilter";
-        sandFilter.transform.localPosition = Vector3.zero;  // 因為調整pivot會影響localPosition，所以需要再次重設
+        UISprite sandFilter = UIImageManager.CreateUISprite(new GORelativeInfo(_subUIRoot.gameObject, "LoadingSandFilter"),
+            new UISpriteInfo(NGUISpriteData.ICON_SANDFILTER, 138, 135, depth + 2, UISprite.Type.Simple, UIWidget.Pivot.Center));
         // 「讀取進度」文字
         GUIStation.CreateUILabel(_subUIRoot.gameObject, "LoadingProgressText", UIWidget.Pivot.Center, new Vector3(0, -7, 0), depth+3,
             UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.LARGE, FontStyle.Bold),
