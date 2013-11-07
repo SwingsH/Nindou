@@ -225,9 +225,11 @@ public class UI_Battle : GUIFormBase
             NGUISpriteData.ROLE_ICON,  (int)(220 * iconScale), (int)(219*iconScale), null, Color.white, string.Empty);
         tempIconBtn.tweenTarget.name = "Role BG";
         tempIconBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
+        UIButtonScale tempBtnScale = tempIconBtn.gameObject.AddComponent<UIButtonScale>();
+        tempBtnScale.tweenTarget = tempIconBtn.transform;
         tempIconBtn.onClick.Add(new EventDelegate(this, "IconBtnClick"));
         _iconBtns.Add(tempIconBtn);
-        SubUI_HPBar tempHPBar = new SubUI_HPBar(tempIconBtn.gameObject, "Role_HP_Bar", new Vector3(-104, -74, 0), 2,
+        SubUI_HPBar tempHPBar = new SubUI_HPBar(tempIconBtn.gameObject, "Role_HP_Bar", new Vector3(-104, -93, 0), 2,
             (int)(219 * iconScale), (int)(41 * iconScale));
         tempHPBar.FullSize = new Vector2(205, 28);
         _hpBars.Add(tempHPBar);
