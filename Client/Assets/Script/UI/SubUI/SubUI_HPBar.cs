@@ -221,7 +221,8 @@ public class SubUI_HPBar : GUISubFormBase
         //    }
         //}
     }
-
+    // 限制血條高度
+    const int POS_Y_LIMIT = GUIStation.MANUAL_SCREEN_HEIGHT / 2 - 5;
     /// <summary>
     /// 依據傳入的新跟隨螢幕位置，更新血條位置
     /// </summary>
@@ -231,6 +232,8 @@ public class SubUI_HPBar : GUISubFormBase
         if (_showMode == ShowMode.WITH_AVATAR)
         {
             _followScreenPos = newFollowScreenPos;
+            // 將垂直位置限制在畫面內
+            _followScreenPos.y = Mathf.Clamp(_followScreenPos.y, -POS_Y_LIMIT, POS_Y_LIMIT);
             Vector3 uiScreenPos = GameControl.Instance.GUIStation.GUICamera.ScreenToWorldPoint(_followScreenPos);
             uiScreenPos.z = 0;
             _subUIRoot.transform.position = uiScreenPos;

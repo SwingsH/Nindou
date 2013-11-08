@@ -909,8 +909,8 @@ public class BattleManager : BattleState
 		BattleStart();
         // fs: 切換完畢後，設定UI_Battle資訊
         SetUIBattle(control);
-
-		StartCountDown = 1.5f;
+        // fs: 搭配UI_Battle開始的文字訊息時間，調整為1.8s
+        StartCountDown = 1.8f;
     }
 
     /// <summary>

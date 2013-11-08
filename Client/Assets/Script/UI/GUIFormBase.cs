@@ -126,7 +126,7 @@ public abstract class GUIFormBase : MonoBehaviour
         AddShowOrHideFinishedDelegate(true, new EventDelegate(this, "EnableEventReceiver"), true); //  加入「開啟事件接收」的delegate
         if (_hasShowOrHideTween)
         {
-            _uiPlayTween.tweenGroup = GLOBALCONST.UI_ShowOrHide_TweenGroup; // 避免有人中途拿去播其他tween
+            _uiPlayTween.SetForShowOrHideTween(); // 避免有人中途拿去播其他tween
             // 讓播完Tween之後，只呼叫對應的delegate
             _uiPlayTween.onFinished.Clear();
             _uiPlayTween.onFinished.AddRange(_onShowFinished);            
@@ -150,7 +150,7 @@ public abstract class GUIFormBase : MonoBehaviour
         AddShowOrHideFinishedDelegate(false, new EventDelegate(this, "EnableEventReceiver"), true); //  加入「開啟事件接收」的delegate
         if (_hasShowOrHideTween)
         {
-            _uiPlayTween.tweenGroup = GLOBALCONST.UI_ShowOrHide_TweenGroup; // 避免有人中途拿去播其他tween
+            _uiPlayTween.SetForShowOrHideTween(); // 避免有人中途拿去播其他tween
             // 讓播完Tween之後，只呼叫對應的delegate
             _uiPlayTween.onFinished.Clear();
             _uiPlayTween.onFinished.AddRange(_onHideFinished);
@@ -183,10 +183,10 @@ public abstract class GUIFormBase : MonoBehaviour
     /// <param name="isShow">是顯示還是隱藏Tween之後的動作</param>
     /// <param name="finishedDelegate">要執行的EventDelegate</param>
     /// <param name="fromFirst">是否從開頭插入</param>
-    public void AddShowOrHideFinishedDelegate(bool isShow, EventDelegate finishedDelegate, bool fromFirst = false)
+    /// <param name="oneShot">是否為OneShot，預設是，免得多次到該介面時可能會重複添加</param>
+    public void AddShowOrHideFinishedDelegate(bool isShow, EventDelegate finishedDelegate, bool fromFirst = false, bool oneShot = true)
     {
-        // 每個顯示/隱藏結束的delegate必須是OneShot，否則會重複添加
-        finishedDelegate.oneShot = true;
+        finishedDelegate.oneShot = oneShot;
         List<EventDelegate> temp = (isShow) ? _onShowFinished : _onHideFinished;
         if (fromFirst) { temp.Insert(0, finishedDelegate); }
         else { temp.Add(finishedDelegate); }

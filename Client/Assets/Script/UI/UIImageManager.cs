@@ -155,6 +155,8 @@ public static class UIImageManager
     /// <returns>建出的UISprite</returns>
     public static UISprite CreateUISprite(GORelativeInfo goInfo, UISpriteInfo spriteInfo)
     {
+        // 如果NGUISpriteData為None，則表示不應該產生UISprite，回傳null
+        if (spriteInfo.SpriteResourceData == NGUISpriteData.NONE) { return null; }
         bool dataIsOK = true;
         CheckInputUISpriteData(spriteInfo.SpriteResourceData, ref dataIsOK);
         if (!dataIsOK) { return null; }

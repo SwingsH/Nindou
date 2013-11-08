@@ -9,6 +9,11 @@ public class UI_Battle : GUIFormBase
     const int ROLE_ICON_PLATE_BG_WIDTH = GUIStation.MANUAL_SCREEN_WIDTH;
     const int ROLE_ICON_PLATE_BG_HEIGHT = 248;
 
+    readonly Color START_TEXT_COLOR = CommonFunction.Color256Bit(255, 226, 0, 255);
+
+    UILabel _readyText; // 準備文字
+    UILabel _goText; // 開始文字
+
     UISprite _bossPic; // Boss示意圖
     UILabel _bossNameText; // Boss 名稱
     UISlider _bossHPBar; // Boss HP 血條
@@ -29,6 +34,48 @@ public class UI_Battle : GUIFormBase
         anchor.uiCamera = _guistation.GUICamera;
 
         UIPanel panel = NGUITools.AddChild<UIPanel>(anchor.gameObject);
+        // "Ready..." 文字
+        _readyText = GUIStation.CreateUILabel(new GORelativeInfo(panel.gameObject, "ReadyText"),
+            UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.UI_BATTLE_START, FontStyle.Bold),
+            START_TEXT_COLOR, GLOBAL_STRING.READY_TEXT,
+            0, UIWidget.Pivot.Center);
+        _readyText.effectDistance = new Vector2(5, 5);
+        _readyText.transform.localScale = Vector3.forward; // 先隱藏
+        // "Ready..." 一開始的放大效果
+        TweenScale readyScale = _readyText.gameObject.AddComponent<TweenScale>();
+        readyScale.from = Vector3.forward;
+        readyScale.to = Vector3.one;
+        readyScale.duration = 0.5f;
+        readyScale.tweenGroup = GLOBALCONST.UI_Battle_Start_TweenGroup;
+        // "Ready..." 接著的移動效果
+        TweenPosition readyPos = _readyText.gameObject.AddComponent<TweenPosition>();
+        readyPos.from = Vector3.zero;
+        readyPos.to = new Vector3(-1186, 0, 0);
+        readyPos.duration = 0.5f;
+        readyPos.delay = 0.6f;
+        readyPos.tweenGroup = GLOBALCONST.UI_Battle_Start_TweenGroup;
+        // "GO!!!!" 文字
+        _goText = GUIStation.CreateUILabel(new GORelativeInfo(panel.gameObject, "GoText"),
+            UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.UI_BATTLE_START, FontStyle.Bold),
+            START_TEXT_COLOR, GLOBAL_STRING.GO_TEXT,
+            0, UIWidget.Pivot.Center);
+        _goText.effectDistance = new Vector2(5, 5);
+        _goText.transform.localScale = Vector3.forward; // 先隱藏
+        // "GO!!!!" 一開始的放大效果
+        TweenScale goScale = _goText.gameObject.AddComponent<TweenScale>();
+        goScale.from = Vector3.forward;
+        goScale.to = Vector3.one;
+        goScale.duration = 0.5f;
+        goScale.delay = 0.7f;
+        goScale.tweenGroup = GLOBALCONST.UI_Battle_Start_TweenGroup;
+        // "GO!!!!" 接著的移動效果
+        TweenPosition goPos = _goText.gameObject.AddComponent<TweenPosition>();
+        goPos.from = Vector3.zero;
+        goPos.to = new Vector3(-1186, 0, 0);
+        goPos.duration = 0.5f;
+        goPos.delay = 1.3f;
+        goPos.tweenGroup = GLOBALCONST.UI_Battle_Start_TweenGroup;
+
         // BOSS 圖片
         _bossPic = UIImageManager.CreateUISprite(new GORelativeInfo(panel.gameObject, new Vector3(-400, 440, 0), "Boss Pic"),
             new UISpriteInfo(NGUISpriteData.BOSS_PIC, BOSS_ICON_WIDTH, BOSS_ICON_HEIGHT, 3));
@@ -60,6 +107,8 @@ public class UI_Battle : GUIFormBase
         {
             AddPlayerIcon(_iconBackground.gameObject);
         }
+
+        AddShowOrHideFinishedDelegate(true, new EventDelegate(this, "ShowStart"), oneShot:false);
     }
      #endregion
     #region 固定函式
@@ -77,6 +126,10 @@ public class UI_Battle : GUIFormBase
 
     protected override void OnDestroy()
     {
+        NGUITools.Destroy(_readyText);
+        _readyText = null;
+        NGUITools.Destroy(_goText);
+        _goText = null;
         foreach (SubUI_RoleIcon roleIcon in _playerRoleIcons)
         {
             roleIcon.Dispose();
@@ -100,6 +153,13 @@ public class UI_Battle : GUIFormBase
         base.OnDestroy();
     }
     #endregion
+
+    void ShowStart()
+    {
+        _uiPlayTween.tweenGroup = GLOBALCONST.UI_Battle_Start_TweenGroup;
+        _uiPlayTween.resetIfDisabled = true; // disable時要重設tween
+        _uiPlayTween.Play(true);
+    }
 
     #region 按下按鈕的反應函式
     /// <summary>

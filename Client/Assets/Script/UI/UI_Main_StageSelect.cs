@@ -43,6 +43,11 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
                 UIDragPanelContents tempDPC = _subUIRoot.gameObject.AddComponent<UIDragPanelContents>();
                 tempDPC.draggablePanel = parentDraggablePanel;
             }
+            // 底圖邊框
+            UISprite stageFrame = UIImageManager.CreateUISprite(new GORelativeInfo(_subUIRoot, "StageFrame"),
+                new UISpriteInfo(NGUISpriteData.STAGE_FRAME, 3382, 408, depth + 1, UISprite.Type.Sliced));
+            stageFrame.transform.localScale = new Vector3(0.5f, 0.5f, 1.0f);
+
             // 底圖＆按鈕
             _stageBtn = GUIComponents.StageWideButton(_subUIRoot, depth);
 			_stageBtnBG = _stageBtn.tweenTarget.GetComponent<UISprite>();
@@ -181,7 +186,6 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
             if (maxExploreProgress.HasValue) { _maxExploreProgress = maxExploreProgress.Value; }
             if (_exploreProgressText != null) { _exploreProgressText.text = string.Format(GLOBAL_STRING.STAGE_EXPLORE_PROGRESS_TEXT, _currentExploreProgress, _maxExploreProgress); }
         }
-
     }
 
     const int STAGE_TITLE_BG_WIDTH = 1044;
@@ -202,6 +206,8 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
     private UIGrid _stageSelectGrid; // 關卡選擇所在的Grid
     private List<SubUI_Stage> _allSubStage = new List<SubUI_Stage>();
     #endregion
+    bool mFirstReposition = false;
+
     #region 繼承自GUIFormBase的method
     protected override void CreateAllComponent()
     {
@@ -257,7 +263,7 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         UIPanel stageSelectPanel = NGUITools.AddChild<UIPanel>(_stageSelectBackground.gameObject);
         stageSelectPanel.name = "StageSelect";
         stageSelectPanel.clipping = UIDrawCall.Clipping.SoftClip;
-        stageSelectPanel.clipRange = new Vector4(35.3f, -66, 1623, 675);
+        stageSelectPanel.clipRange = new Vector4(0, -66, 1824, 636);
         stageSelectPanel.clipSoftness = new Vector2(10, 10);
         
         _stageSelectDraggablePanel = stageSelectPanel.gameObject.AddComponent<UIDraggablePanel>();
@@ -268,29 +274,33 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         _stageSelectGrid.cellHeight = 210;
         _stageSelectGrid.sorted = true;
         _stageSelectGrid.hideInactive = true;
-        _stageSelectGrid.transform.localPosition = new Vector3(0, 200, 0);
-
-        UICenterOnChild tempCOC = _stageSelectGrid.gameObject.AddComponent<UICenterOnChild>();
+        _stageSelectGrid.transform.localPosition = new Vector3(0, 0, 0);
 
         /// for Test
         for (int i = 0; i < 4; ++i)
         {
             AddStageInfo(i != 2, string.Format("靈山 - 山腳下 - {0}", i + 1), i + 1, i * 3 + 2, 25);
         }
-        // 強制將第一個置中
-        tempCOC.Recenter();
     }
     #endregion
     #region 固定函式
     // Use this for initialization
     void Start()
     {
-        
 	}
 	
 	// Update is called once per frame
-	void Update () {
-	
+	void Update () 
+    {
+        if (!mFirstReposition)
+        {
+            if (!_stageSelectGrid.repositionNow)
+            { // fs : 由於UIGrid需等到Start執行完畢之後Reposition動作才會生效，否則只會標記等一下需要做Reposition，
+              //      所以必須等待UIGrid執行完Start，然後再做UICenterOnChild的Recenter才有效果
+                _stageSelectGrid.gameObject.AddComponent<UICenterOnChild>().Recenter();
+                mFirstReposition = true;
+            }
+        }
 	}
 
     protected override void OnDestroy()
@@ -414,7 +424,7 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
     }
 
 
-    #region 關卡子UI相關
+    #region 關卡子介面相關
     /// <summary>
     /// 清除所有關卡資訊
     /// </summary>
@@ -439,11 +449,12 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
     public int AddStageInfo(bool isOpen, string stageName, int cost, int currentExploreProgress, int maxExploreProgress)
     {
         int curStageCount = _allSubStage.Count;
-        _allSubStage.Add(new SubUI_Stage(_stageSelectGrid.gameObject, string.Format("Stage_{0}", curStageCount), 
-              new Vector3(-76, 150 - curStageCount * 25, 0), 5,
+        _allSubStage.Add(new SubUI_Stage(_stageSelectGrid.gameObject, string.Format("Stage_{0:00}", curStageCount), 
+              new Vector3(0, 150 - curStageCount * 210, 0), 5,
                 new EventDelegate(this, "SelectStage"), _stageSelectDraggablePanel));
         
         SetStageInfo(curStageCount, isOpen, stageName, cost, currentExploreProgress, maxExploreProgress);
+        _stageSelectGrid.Reposition();
         return curStageCount;
     }
 
