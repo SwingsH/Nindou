@@ -26,6 +26,7 @@ public enum NGUISpriteData
     [EnumUISpriteConfig("Atlas_Slices", "slice_frame_darkbrown")]   INPUT_NAME_BG, // 輸入名字的背景圖
 
     [EnumUISpriteConfig("Atlas_Slices", "slice_frame")]             STAGE_FRAME, // 關卡選擇外層框
+    [EnumUISpriteConfig("Atlas_Slices", "slice_parchment")]         STAGE_BG, // 關卡選擇背景圖
 
     [EnumUISpriteConfig("Atlas_Icons", "bosspic")]                  BOSS_PIC, // BOSS 圖
     [EnumUISpriteConfig("Atlas_Icons", "bossblood1")]               BOSS_HP_BG, // BOSS HP底圖
@@ -163,7 +164,7 @@ public static class UIImageManager
         CommonFunction.GetAttribute<EnumUISpriteConfig>(spriteInfo.SpriteResourceData, out uiSpriteConfig);
 
         UISprite retUISprite = NGUITools.AddSprite(goInfo.ParentObject, GetUIAtlas(uiSpriteConfig.AtlasName), uiSpriteConfig.SpriteName);
-        retUISprite.name = string.IsNullOrEmpty(goInfo.ObjectName) ? "UISpriteObject" : goInfo.ObjectName;
+        retUISprite.name = string.IsNullOrEmpty(goInfo.ObjectName) ? CommonFunction.GetName<UISprite>() : goInfo.ObjectName;
         retUISprite.depth = spriteInfo.Depth.HasValue ? spriteInfo.Depth.Value : NGUITools.CalculateNextDepth(goInfo.ParentObject);
 
         if (spriteInfo.Type.HasValue) { retUISprite.type = spriteInfo.Type.Value; }

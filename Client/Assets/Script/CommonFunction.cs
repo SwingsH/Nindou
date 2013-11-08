@@ -136,6 +136,16 @@ public static class CommonFunction
         }
         return sb.ToString();
     }
+
+    /// <summary>
+    /// 取得預設名字的輔助函式
+    /// </summary>
+    public static string GetName<T>()
+    {
+        string name = typeof(T).ToString();
+        name = name.Substring(name.LastIndexOf('.') + 1);
+        return string.Format("{0}Object", name);
+    }
     #endregion
 
     #region 列舉相關

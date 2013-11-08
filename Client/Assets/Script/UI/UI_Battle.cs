@@ -15,9 +15,8 @@ public class UI_Battle : GUIFormBase
     UIButton _fastForwardBtn; // 加速鈕
     UIButton _pauseBtn; // 暫停鈕
     UISprite _iconBackground; // 角色icon所在的背景圖
-    List<UIButton> _iconBtns = new List<UIButton>(); // 玩家角色圖像
-    List<SubUI_HPBar> _hpBars = new List<SubUI_HPBar>(); 
-    List<UILabel> _roleNames = new List<UILabel>(); // 玩家角色名字
+
+    List<SubUI_RoleIcon> _playerRoleIcons = new List<SubUI_RoleIcon>(); // 玩家角色Icon
 
     Dictionary<string, SubUI_HPBar> _enemyInfos = new Dictionary<string, SubUI_HPBar>();
 
@@ -78,21 +77,11 @@ public class UI_Battle : GUIFormBase
 
     protected override void OnDestroy()
     {
-        foreach (UILabel roleName in _roleNames)
+        foreach (SubUI_RoleIcon roleIcon in _playerRoleIcons)
         {
-            if (roleName != null) { NGUITools.Destroy(roleName.gameObject); }
+            roleIcon.Dispose();
         }
-        _roleNames = null;
-        foreach (UIButton iconBtn in _iconBtns)
-        {
-            if (iconBtn != null) { NGUITools.Destroy(iconBtn.gameObject); }
-        }
-        _iconBtns = null;
-        foreach (SubUI_HPBar hpBar in _hpBars)
-        {
-            hpBar.Dispose();
-        }
-        _hpBars = null;
+        _playerRoleIcons = null;
         foreach (SubUI_HPBar enemyInfo in _enemyInfos.Values)
         {
             enemyInfo.Dispose();
@@ -145,7 +134,8 @@ public class UI_Battle : GUIFormBase
     {
         CommonFunction.DebugMsgFormat("按下 {0}", UIButton.current.name);
         int iconSelect = -1;
-        string indexStr = UIButton.current.name.Substring(5);
+        string curClickRoleIconName = UIButton.current.transform.parent.name;
+        string indexStr = curClickRoleIconName.Substring(curClickRoleIconName.LastIndexOf('_')+1);
         CommonFunction.DebugMsgFormat("按下的indexStr = =={0}==", indexStr);
         if (!int.TryParse(indexStr, out iconSelect))
         {
@@ -166,6 +156,7 @@ public class UI_Battle : GUIFormBase
         if (currentRole != null) { currentRole.CastExtrimSkill(); }
     }
     #endregion
+
     #region Boss資訊相關
     /// <summary>
     /// 設定Boss訊息是否顯示
@@ -204,10 +195,10 @@ public class UI_Battle : GUIFormBase
     public void SetPlayerIcon(int playerIndex, bool isVisible, float life = 0, uint maxLife = 1)
     {
         // 設定該格資料
-        NGUITools.SetActive(_iconBtns[playerIndex].gameObject, isVisible);
+        _playerRoleIcons[playerIndex].SetVisible(isVisible);
         if (isVisible)
         {
-            _hpBars[playerIndex].SetHP((int)life, (int)maxLife);
+            _playerRoleIcons[playerIndex].SetHP((int)life, (int)maxLife);
         }
     }
 
@@ -217,76 +208,13 @@ public class UI_Battle : GUIFormBase
     /// <param name="parentObj">父物件</param>
     void AddPlayerIcon(GameObject parentObj)
     {
-        float iconScale = 1.5f;
+        int xBase = -656;
         int leftPadding = 432;
-        int playerIndex = _iconBtns.Count;
-        // 角色按鈕兼底圖
-        UIButton tempIconBtn = GUIStation.CreateUIButton(parentObj, string.Format("Icon_{0}", playerIndex), new Vector3(-656 + leftPadding * playerIndex, 12, 0), 1,
-            NGUISpriteData.ROLE_ICON,  (int)(220 * iconScale), (int)(219*iconScale), null, Color.white, string.Empty);
-        tempIconBtn.tweenTarget.name = "Role BG";
-        tempIconBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
-        // 按鈕效果
-        UIButtonScale tempBtnScale = tempIconBtn.gameObject.AddComponent<UIButtonScale>();
-        tempBtnScale.tweenTarget = tempIconBtn.transform;
-        tempIconBtn.onClick.Add(new EventDelegate(this, "IconBtnClick"));
-        _iconBtns.Add(tempIconBtn);
-        // 角色圖示(暫定)
-#region 角色圖示(暫定)
-        SmoothMoves.TextureAtlas atlas = ResourceStation.GetAtlas(InformalDataBase.Instance.playerInfo[playerIndex].spriteNames[(int)GLOBALCONST.eModelPartName.HEAD]);
-        // Root
-        GameObject roleGraphGO = NGUITools.AddChild(tempIconBtn.gameObject);
-        roleGraphGO.name = "Role Graph";
-        roleGraphGO.transform.localPosition = new Vector3(12, -21, 0);
-        // 頭
-        UITexture testHead = NGUITools.AddChild<UITexture>(roleGraphGO);
-        testHead.name = "Head";
-        testHead.material = atlas.material;
-        
-        int headSmoothMoveAtlasIndex = atlas.GetTextureIndex(atlas.GetTextureGUIDFromName(GLOBALCONST.BONE_NAME[(int)GLOBALCONST.eModelPartName.HEAD]));
+        int playerIndex = _playerRoleIcons.Count;
 
-        testHead.uvRect = atlas.uvs[headSmoothMoveAtlasIndex];
-
-        Vector2 headSize = atlas.GetTextureSize(headSmoothMoveAtlasIndex);
-        testHead.width = (int)headSize.x;
-        testHead.height = (int)headSize.y;
-        testHead.depth = 2;
-        // 眼睛
-        UITexture testEye = NGUITools.AddChild<UITexture>(roleGraphGO);
-        testEye.name = "Eye";
-        testEye.material = atlas.material;
-        
-        int eyeSmoothMoveAtlasIndex = atlas.GetTextureIndex(atlas.GetTextureGUIDFromName(GLOBALCONST.BONE_NAME[(int)GLOBALCONST.eModelPartName.EYES]));
-
-        testEye.uvRect = atlas.uvs[eyeSmoothMoveAtlasIndex];
-
-        Vector2 eyeSize = atlas.GetTextureSize(eyeSmoothMoveAtlasIndex);
-        testEye.width = (int)eyeSize.x;
-        testEye.height = (int)eyeSize.y;
-        testEye.depth = 3;
-        // 頭髮
-        UITexture testHair = NGUITools.AddChild<UITexture>(roleGraphGO);
-        testHair.name = "Hair";
-        testHair.material = atlas.material;
-
-        int hairSmoothMoveAtlasIndex = atlas.GetTextureIndex(atlas.GetTextureGUIDFromName(GLOBALCONST.BONE_NAME[(int)GLOBALCONST.eModelPartName.HAIR]));
-
-        testHair.uvRect = atlas.uvs[hairSmoothMoveAtlasIndex];
-
-        Vector2 hairSize = atlas.GetTextureSize(hairSmoothMoveAtlasIndex);
-        testHair.width = (int)hairSize.x;
-        testHair.height = (int)hairSize.y;
-        testHair.depth = 4;
-#endregion
-
-        SubUI_HPBar tempHPBar = new SubUI_HPBar(tempIconBtn.gameObject, "Role_HP_Bar", new Vector3(-104, -93, 0), 5,
-            (int)(219 * iconScale), (int)(41 * iconScale));
-        tempHPBar.FullSize = new Vector2(205, 28);
-        _hpBars.Add(tempHPBar);
-        // 角色名字
-        UILabel tempRoleName = GUIStation.CreateUILabel(tempIconBtn.gameObject, "Role Name", UIWidget.Pivot.Center, new Vector3(107, -57, 0), 5,
-            UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.UI_BATTLE_ROLE_NAME, FontStyle.Bold),
-            Color.red, "玩家一二三四");
-        _roleNames.Add(tempRoleName);
+        _playerRoleIcons.Add(new SubUI_RoleIcon(new GORelativeInfo(parentObj, new Vector3(xBase + leftPadding * playerIndex, 12, 0), string.Format("PlayerRoleIcon_{0}", playerIndex)),
+            ResourceStation.GetAtlas(InformalDataBase.Instance.playerInfo[playerIndex].spriteNames[(int)GLOBALCONST.eModelPartName.HEAD]),
+            new EventDelegate(this, "IconBtnClick"), "玩家一二三四"));
     }
     #endregion
 

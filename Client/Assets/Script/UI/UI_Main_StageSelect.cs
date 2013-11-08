@@ -184,7 +184,6 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
 
     }
 
-
     const int STAGE_TITLE_BG_WIDTH = 1044;
     const int STAGE_TITLE_BG_HEIGHT = 94;
  
@@ -231,7 +230,10 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         TweenPosition stageSelectObjectsTween = GUIComponents.AddShowMoveEffect(backgroundPic.gameObject, new Vector3(0, 1061, 0), Vector3.zero);
         stageSelectObjectsTween.name = "StageSelectObjects";
         // 關卡選擇背景圖
-        _stageSelectBackground = GUIComponents.StageFrame(stageSelectObjectsTween.gameObject);
+        UISprite stageSelectFrame = GUIComponents.StageFrame(stageSelectObjectsTween.gameObject);
+        stageSelectFrame.depth = 2;
+        _stageSelectBackground = UIImageManager.CreateUISprite(new GORelativeInfo(stageSelectFrame.gameObject, "StageSelectBackground"),
+            new UISpriteInfo(NGUISpriteData.STAGE_BG, 1825, 842, 1, UISprite.Type.Sliced));
 
         // 場景名稱、進度的背景圖
         UISprite stageName = UIImageManager.CreateUISprite(new GORelativeInfo(_stageSelectBackground.gameObject, new Vector3(-249, 342, 0), "StageTitle"),
