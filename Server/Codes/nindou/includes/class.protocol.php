@@ -31,7 +31,8 @@ class Protocol
 		// 1 - Login
 		$this->handle_functions[1] = array();
 		$this->handle_functions[1][1] = 'handle_login_1';
-		$this->handle_functions[1][3] = 'handle_login_3';		
+		$this->handle_functions[1][3] = 'handle_login_3';	
+		$this->handle_functions[5][1] = 'handle_item_1';	
 	}
 	
 	public function handle($serial, $mainkind, $subkind, $arr_arguments)
@@ -98,10 +99,12 @@ class Protocol
 		}
 		
 		$row = $db->sql_fetchrow($data_res);
-		if(gettype($row) == 'boolean')
+		if(gettype($row) == 'boolean') //新帳號
+		{
 			$row = array();
+		}
 		$account_data = new AccountData($row);
-		
+				
 		// prepare response data
 		switch( $login_result )
 		{
@@ -122,6 +125,15 @@ class Protocol
 				$pack->PushStr($new_session); // 新的 session
 				$pack->PushStr($account_data->player_name);
 				$pack->PushInt($login_result);
+				
+				//背包卡片資料
+				$num = count($account_data->cards);
+				$pack->PushInt($num);
+				for($i = 0 ; $i < $num ; $i++)
+				{
+					$pack->PushInt($account_data->cards[$i]);
+				}
+				
 				$package_group = new JsonPackageGroup($this->current_serial, $this->current_mainkind, $this->current_subkind);
 				$package_group->AddPackage($pack);
 				
@@ -157,7 +169,7 @@ class Protocol
 		$num_fields = $db->sql_numrows($result_check_exist);
 		
 		if($num_fields >= 1) // 不正常, 註冊帳號已存在
-			die(STR_ERROR);
+			die(STR_ERROR  . "2");
 		
 		//todo: init account data
 		$inherited_id = get_inherited_id($deviceid);
@@ -175,12 +187,85 @@ class Protocol
 			$register_result = 1;
 		else
 			$register_result = 2;
-			
+		
+		//又是 1-1 協定, 待整理
+		$query_fetch_account = db_get_account($deviceid);
+		if(IS_DEBUG)
+		{
+			$db->sql_query( db_insert_log($query_fetch_account) );
+		}
+		$data_fetch_account = $db->sql_query( $query_fetch_account );
+		$row = $db->sql_fetchrow($data_fetch_account);
+		$account_data = new AccountData($row);
+		//又是 1-1 協定, 待整理 end
+						
 		$pack = new JsonPackage($this->current_mainkind, $this->current_subkind);
 		$pack->PushInt($register_result);
+		
+		//背包卡片資料
+		$num = count($account_data->cards);
+		$pack->PushInt($num);
+		for($i = 0 ; $i < $num ; $i++)
+		{
+			$pack->PushInt($account_data->cards[$i]);
+		}
+				
 		$package_group = new JsonPackageGroup($this->current_serial, $this->current_mainkind, $this->current_subkind);
 		$package_group->AddPackage($pack);
 				
+		echo json_encode($package_group);
+		exit;
+	}
+	
+	// C: 5-1 玩家要求合成, s1: 裝置ID, i1: 被合成的 card index, i2: 素材 card index, i3: 被合成的 Item ID 卡牌 ID , i4: 素材 Item ID 卡牌 ID
+	// S: 5-1 合成結果, i1:合成結果(1=成功, 2=失敗), i2:合成後的 item id
+	private function handle_item_1()
+	{
+		global $db;
+				
+		$deviceid 				= $this->pop_string();
+		$main_item_index 		= $this->pop_integer();
+		$material_item_index 	= $this->pop_integer();
+		$main_item_id	 		= $this->pop_integer();
+		$material_item_id	 	= $this->pop_integer();
+		
+		$query_fetch_account = db_get_account($deviceid);
+		if(IS_DEBUG)
+		{
+			$db->sql_query( db_insert_log($query_fetch_account) );
+		}
+		$data_fetch_account = $db->sql_query( $query_fetch_account );
+		$row = $db->sql_fetchrow($data_fetch_account);
+		$account_data = new AccountData($row);
+		if($account_data->cards[ $main_item_index - 1 ] != $main_item_id)
+		{
+			die(" Main index 欄位與 Main item id 不符合");
+		}
+		if($account_data->cards[ $material_item_index - 1 ] != $material_item_id)
+		{
+			die(" Material index 欄位與 Material item id 不符合");
+		}
+		
+		$item_data = get_item_data($main_item_id);
+		$upgrade_result_item_id = $item_data[ 'UpgradeResult' ] ;
+		$change_set = array( $material_item_index => 0 , $main_item_index => $upgrade_result_item_id );
+		$update_query = db_update_account_item_box($deviceid, $change_set);
+		
+		$db->sql_query($update_query);
+		$success = $db->sql_affectedrows() == 1 ? true : false;
+		
+		if($success == true)
+			$result_kind = 1;
+		else
+			$result_kind = 2;
+		
+		$pack = new JsonPackage($this->current_mainkind, $this->current_subkind);
+		$pack->PushInt($result_kind);
+		$pack->PushInt($upgrade_result_item_id);
+		
+		$package_group = new JsonPackageGroup($this->current_serial, $this->current_mainkind, $this->current_subkind);
+		$package_group->AddPackage($pack);
+		
 		echo json_encode($package_group);
 		exit;
 	}
@@ -226,6 +311,41 @@ class Protocol
 		$result = $this->current_arguments[$name];
 		$this->index_args_str++;
 		return strval($result);
+	}
+	
+	public function Test()
+	{
+		global $db;
+		
+		$query = "ALTER TABLE `player_account` 
+		ADD `role_2_card_id` INT( 11 ) NOT NULL COMMENT '第 2 個角色' AFTER `role_1_passiveskill_2_exp` ,
+		ADD `role_2_card_exp` INT( 11 ) NOT NULL COMMENT '第 2 個角色的 exp' AFTER `role_2_card_id` ,
+		ADD `role_2_card_team` INT( 11 ) NOT NULL COMMENT '第 2 個角色卡片的隊伍編排: 1=第一位,2=第二位, 0=未上場' AFTER `role_2_card_exp` ,
+		ADD `role_2_ultraskill_card_id` INT( 11 ) NOT NULL COMMENT '第 2 個角色卡片的 武器技能' AFTER `role_2_card_team` ,
+		ADD `role_2_ultraskill_exp` INT( 11 ) NOT NULL COMMENT '第 2 個角色卡片的 武器技能 exp ' AFTER `role_2_ultraskill_card_id` ,
+		ADD `role_2_skill_1_card_id` INT( 11 ) NOT NULL COMMENT '第 2 個角色卡片的 第 1 個技能 ' AFTER `role_2_ultraskill_exp` ,
+		ADD `role_2_skill_1_exp` INT( 11 ) NOT NULL COMMENT '第 2 個角色卡片的  第 1 個技能  exp ' AFTER `role_2_skill_1_card_id` ,
+		ADD `role_2_skill_2_card_id` INT( 11 ) NOT NULL COMMENT '第 2 個角色卡片的 第 2 個技能 ' AFTER `role_2_skill_1_exp` ,
+		ADD `role_2_skill_2_exp` INT( 11 ) NOT NULL COMMENT '第 2 個角色卡片的  第 2 個技能  exp ' AFTER `role_2_skill_2_card_id` ,
+		ADD `role_2_passiveskill_1_card_id` INT( 11 ) NOT NULL COMMENT '第 2 個角色卡片的 第 1 個 [被動] 技能 ' AFTER `role_2_skill_2_exp` ,
+		ADD `role_2_passiveskill_1_exp` INT( 11 ) NOT NULL COMMENT '第 2 個角色卡片的  第 1 個 [被動] 技能  exp ' AFTER `role_2_passiveskill_1_card_id` ,
+		ADD `role_2_passiveskill_2_card_id` INT( 11 ) NOT NULL COMMENT '第 2 個角色卡片的 第 2 個 [被動] 技能 ' AFTER `role_2_passiveskill_1_exp` ,
+		ADD `role_2_passiveskill_2_exp` INT( 11 ) NOT NULL COMMENT '第 2 個角色卡片的  第 2 個 [被動] 技能  exp ' AFTER `role_2_passiveskill_2_card_id` ,
+		ADD `role_3_card_id` INT( 11 ) NOT NULL COMMENT '第 3 個角色' AFTER `role_2_passiveskill_2_exp` ,
+		ADD `role_3_card_exp` INT( 11 ) NOT NULL COMMENT '第 3 個角色的 exp' AFTER `role_3_card_id` ,
+		ADD `role_3_card_team` INT( 11 ) NOT NULL COMMENT '第 3 個角色卡片的隊伍編排: 1=第一位,2=第二位, 0=未上場' AFTER `role_3_card_exp` ,
+		ADD `role_3_ultraskill_card_id` INT( 11 ) NOT NULL COMMENT '第 3 個角色卡片的 武器技能' AFTER `role_3_card_team` ,
+		ADD `role_3_ultraskill_exp` INT( 11 ) NOT NULL COMMENT '第 3 個角色卡片的 武器技能 exp ' AFTER `role_3_ultraskill_card_id` ,
+		ADD `role_3_skill_1_card_id` INT( 11 ) NOT NULL COMMENT '第 3 個角色卡片的 第 1 個技能 ' AFTER `role_3_ultraskill_exp` ,
+		ADD `role_3_skill_1_exp` INT( 11 ) NOT NULL COMMENT '第 3 個角色卡片的  第 1 個技能  exp ' AFTER `role_3_skill_1_card_id` ,
+		ADD `role_3_skill_2_card_id` INT( 11 ) NOT NULL COMMENT '第 3 個角色卡片的 第 2 個技能 ' AFTER `role_3_skill_1_exp` ,
+		ADD `role_3_skill_2_exp` INT( 11 ) NOT NULL COMMENT '第 3 個角色卡片的  第 2 個技能  exp ' AFTER `role_3_skill_2_card_id` ,
+		ADD `role_3_passiveskill_1_card_id` INT( 11 ) NOT NULL COMMENT '第 3 個角色卡片的 第 1 個 [被動] 技能 ' AFTER `role_3_skill_2_exp` ,
+		ADD `role_3_passiveskill_1_exp` INT( 11 ) NOT NULL COMMENT '第 3 個角色卡片的  第 1 個 [被動] 技能  exp ' AFTER `role_3_passiveskill_1_card_id` ,
+		ADD `role_3_passiveskill_2_card_id` INT( 11 ) NOT NULL COMMENT '第 3 個角色卡片的 第 2 個 [被動] 技能 ' AFTER `role_3_passiveskill_1_exp` ,
+		ADD `role_3_passiveskill_2_exp` INT( 11 ) NOT NULL COMMENT '第 3 個角色卡片的  第 2 個 [被動] 技能  exp ' AFTER `role_3_passiveskill_2_card_id` ;"	;
+		
+		$data_res = $db->sql_query( $query );
 	}
 }
 

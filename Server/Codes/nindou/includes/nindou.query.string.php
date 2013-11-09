@@ -40,15 +40,15 @@ function db_get_account( $device_id )
  //新增玩家帳號
 function db_insert_account( $device_id, $session, $inherit_id, $player_name )
  {
- 	$query = ' SELECT * FROM player_account WHERE unique_device = ' . $device_id ;
- 	
  	$generator 	= new QueryGenerator( 'player_account' );
+ 	
+ 	$arr_card_box = init_new_register_account_cardbox(); //array array_merge();
  	
  	// 玩家尚未索取 引繼 password 時先不處理 ?
 	$query 		= $generator->insert(	
-		array( 'unique_device' , 'current_login_session' , 'current_inherit_id' , 'current_inherit_password', 'player_name' ) , 
-		array( $device_id , $session , $inherit_id ,  '', $player_name  ),
-		array( true , true , true , true, true  ));
+		array_merge( array( 'unique_device' , 'current_login_session' , 'current_inherit_id' , 'current_inherit_password', 'player_name' ),  array_keys($arr_card_box)), 
+		array_merge( array( $device_id , $session , $inherit_id ,  '', $player_name  ),  array_values($arr_card_box) ),
+		array_merge( array( true , true , true , true, true  ),  array_fill(0, count($arr_card_box), false ) ));
 										
  	return  $query ;
 }
@@ -63,6 +63,40 @@ function db_update_account( $device_id, $session )
 										
  	return  $query ;
 }
+
+function db_update_account_item_box( $device_id, $arr_change_sets ) // array : slot -> id
+{
+	// UPDATE player_account SET cardbox_4_card_id = 0, cardbox_1_card_id = 11 
+	// WHERE unique_device = "a36ec54e961ee79e8d92247f8a081b47a4c52e55" 
+	
+	$arr_col_data = array();
+	$column_name_pattern = "cardbox_%d_card_id" ;
+	$column_name = "";
+	foreach( $arr_change_sets as $index => $item_id)
+	{
+		$column_name = sprintf($column_name_pattern, $index);
+		$arr_col_data[$column_name] = $item_id;
+	}
+						
+	$generator = new QueryGenerator( 'player_account' ) ;
+	$query = $generator->update( $arr_col_data , 
+					array( false , false ) ,  
+						'  WHERE unique_device = "' . $device_id . '"  ' );	
+	return $query;
+}
+
+//創帳號時候的 cardbox 初始資料
+function init_new_register_account_cardbox()
+{
+	$row = array();
+	$row['cardbox_1_card_id'] = 1;
+	$row['cardbox_2_card_id'] = 2;
+	$row['cardbox_3_card_id'] = 23;
+	$row['cardbox_4_card_id'] = 24;
+	
+	return $row;
+}
+
 
 class AccountData
 {
@@ -82,6 +116,16 @@ class AccountData
 			$this->max_action_point = $row['max_action_point'];
 		if(isset($row['current_action_point']))
 			$this->current_action_point = $row['current_action_point'];
+			
+		$this->cards = array();
+		for($i = 1 ; $i <= MAX_CARDBOX_NUMS ; $i++)
+		{
+			$column_name = sprintf("cardbox_%d_card_id", $i);
+			if(isset($row[$column_name]))
+			{
+				array_push( $this->cards, $row[$column_name]);
+			}
+		}
 	}
 }
 

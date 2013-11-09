@@ -20,10 +20,12 @@ define('POST_PARAMETER_DEVICE_ID','deviceid');
 define('POST_PARAMETER_PROTOCOL_SERIAL','serial');
 define('POST_PARAMETER_STRING','s%d');
 define('POST_PARAMETER_INTEGER','i%d');
+define('MAX_CARDBOX_NUMS',30);
 
 define('IS_DEBUG', true) ;
 
 define('STR_ERROR', 'No Data in this Page ! 請由正常管道進入'); //todo: 改成制式 "連線錯誤訊息,回主選單訊息"
+define('JSON_FILE_ITEM_DATA', "./json/itemdata.json");
 
 require_once( INCLUDE_PATH . 'class.json.package.php');
 require_once( INCLUDE_PATH . 'class.protocol.php');

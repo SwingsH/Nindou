@@ -18,6 +18,18 @@ function get_current_time_session($device_id)
 	return sha1($seed);
 }
 
+function get_item_data( $item_id )
+{
+	$json = json_decode(file_get_contents(JSON_FILE_ITEM_DATA), true);
+	foreach( $json as $row )
+	{
+		if($row['ID'] == $item_id)
+		{
+			return $row;	
+		}
+	}
+}
+
 // todo: 取得引繼 id
 function get_inherited_id($device_id)
 {
