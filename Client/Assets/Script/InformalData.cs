@@ -23,8 +23,11 @@ public class InformalDataBase{
 	Dictionary<uint, NPCData> NpcDataBase;
 	Dictionary<uint, List<Battle>> BattleDatas;
 	Dictionary<uint, SpecialEffect> SPEffectDatas;
+    Dictionary<uint, ItemData> ItemDataBase; // todo, 移到 table manager  sh131108
+
 	public InformalDataBase()
 	{
+        ItemDataBase = LoadData<uint, ItemData>(GLOBALCONST.FILENAME_ITEM, "ID");
 		SkillDataBase = LoadData<uint, SkillData>(GLOBALCONST.FILENAME_SKILL, "ID");
 		//SkillDataBase[5].Range = 1;
 		//SkillDataBase[5].RangeMode = 3;
@@ -105,6 +108,16 @@ public class InformalDataBase{
 		#endregion
 
 	}
+    // todo, 移到 table manager  sh131108
+    public ItemData GetItemData(uint ItemID)
+    {
+        ItemData result;
+        if (ItemDataBase == null)
+            return null;
+        ItemDataBase.TryGetValue(ItemID, out result);
+        return result;
+    }
+
 	public SkillData GetSkillData(uint SkillID)
 	{
 		SkillData result;

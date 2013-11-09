@@ -195,11 +195,11 @@ public class EnumClassValue : System.Attribute
 public struct AccountData
 {
     public string PlayerName;           // 玩家名稱
-    public ushort MaxActionPoint;       // max行動點數
-    public ushort CurrentActionPoint;   // 目前行動點數
-    public ushort MaxCardSlot;          //目前卡片背包最大格數
+    public uint MaxActionPoint;       // max行動點數
+    public uint CurrentActionPoint;   // 目前行動點數
+    public uint MaxCardSlot;          //目前卡片背包最大格數
     public uint[] Cards;                //目前持有卡片
-    public ushort MaxFriendSlot;        //目前朋友最大格數
+    public uint MaxFriendSlot;        //目前朋友最大格數
     public uint[] Friends;              //目前持有卡片
 }
 
@@ -238,20 +238,20 @@ public class HTTPResponse
 {
     public int MainKind;
     public int SubKind;
-    public List<int> Ints;
+    public List<uint> Ints;
     public List<string> Strs;
 
     /// <summary>
     /// 協定資料 - 解出一個 integer
     /// </summary>
-    public int PopInteger()
+    public uint PopUInteger()
     {
         if(Ints.Count == 0)
         {
             CommonFunction.DebugMsg( string.Format(" PopInteger null. {0},{1}", MainKind, SubKind) );
             return 0;
         }
-        int result = Ints[0];
+        uint result = Ints[0];
         Ints.RemoveAt(0);
         return result;
     }
@@ -390,6 +390,33 @@ enum AreaType : byte
 {
     Normal = 1, // 一般關卡
     Activity = 2 //活動關卡
+}
+
+/// <summary>
+/// 物品表
+/// </summary>
+[StructLayout(LayoutKind.Sequential)]
+public class ItemData
+{
+    public uint ID;                 // 物品編號
+    public string Name;               // 物品名稱
+    public uint IconNumber;         // 物品圖示 編號
+    public uint Kind;               // 物品類型 1.武器卡 2.主動技能卡 3.被動技能卡 4.素材
+    public uint Grade;              // 階數
+    public uint UpgradeResult;      // 升級後之物品
+    public uint UpgradeMaterialID;  // 升級素材 id
+    public uint[] ItemSkills = new uint[5];       // 技能效果
+    public string Description;      // 物品說明
+}
+
+// 物品類型, 1.武器卡 2.主動技能卡 3.被動技能卡 4.素材
+public enum ItemKind
+{
+    None = 0,
+    Weapon = 1,
+    Skill = 2,
+    PassiveSkill = 3,
+    Material = 4
 }
 
 #region NPC相關

@@ -51,8 +51,11 @@ public class NetworkInterface
     public const byte PROTOCOL_KIND_UNKNOW = 101;
 
     public const int HTTP_PORT = 80;
+#if LOCAL_SERVER
+    public const string HTTP_IP = "127.0.0.1";
+#else
     public const string HTTP_IP = "122.116.24.125";
-    //public const string HTTP_IP = "127.0.0.1";
+#endif
     private const int SOCKET_PORT = 17480;
     private const string HTTP_HEAD = "http";
     private const string HTTP_PROTOCOL_PAGE = "{0}://{1}/nindou/protocol.php";
@@ -96,6 +99,7 @@ public class NetworkInterface
         //S: 1-1 登入
         AddHTTPProtocol(PROTOCOL_KIND_LOGIN, 1, HTTPHandling_Login_1, HTTPResponse_Login_1);
         AddHTTPProtocol(PROTOCOL_KIND_LOGIN, 3, HTTPHandling_DEFAULT, HTTPResponse_Login_3);
+        AddHTTPProtocol(PROTOCOL_KIND_ITEM, 1, HTTPHandling_DEFAULT, HTTPResponse_Item_1);
     }
 
     /// <summary>
@@ -414,10 +418,17 @@ public class NetworkInterface
     private void HTTPResponse_Login_1(HTTPResponse responsePack)
     {
         string session = responsePack.PopString();
-        int kind = responsePack.PopInteger();
+        uint kind = responsePack.PopUInteger();
 
         AccountData accountData = new AccountData();
         accountData.PlayerName = responsePack.PopString();
+
+        accountData.MaxCardSlot = responsePack.PopUInteger();
+        accountData.Cards = new uint[ accountData.MaxCardSlot ];
+        for (int i = 0; i < accountData.MaxCardSlot; i++)
+        {
+            accountData.Cards[i] = responsePack.PopUInteger();
+        }
 
         AccountValidStatus status;
         switch (kind)
@@ -441,11 +452,19 @@ public class NetworkInterface
     //S: 1-3 帳號註冊結果, i1:註冊結果(1=成功, 2=失敗)
     private void HTTPResponse_Login_3(HTTPResponse responsePack)
     {
-        int kind = responsePack.PopInteger();
+        uint kind = responsePack.PopUInteger();
         CommonFunction.DebugMsg(string.Format("註冊結果 : {0} ", kind) );
 
         AccountData accountData = new AccountData();
         accountData.PlayerName = _control.GUIStation.Form<UI_Start_CreatePlayer>().CurrentInputAccountName;
+        
+        accountData.MaxCardSlot = responsePack.PopUInteger();
+        accountData.Cards = new uint[accountData.MaxCardSlot];
+        for (int i = 0; i < accountData.MaxCardSlot; i++)
+        {
+            accountData.Cards[i] = responsePack.PopUInteger();
+        }
+        
         _control.SetAccountData(AccountValidStatus.Valid, accountData);
 
         switch (kind)
@@ -462,6 +481,31 @@ public class NetworkInterface
                             GLOBAL_STRING.DIALOG_NETWORK_UNKNOW, null);
                 break;
         }
+    }
+
+    // C: 5-1 玩家要求合成, s1: 裝置ID, i1: 被合成的 card index, i2: 素材 card index, i3: 被合成的 Item ID 卡牌 ID , i4: 素材 Item ID 卡牌 ID
+	// S: 5-1 合成結果, i1:合成結果(1=成功, 2=失敗), i2:合成後的 item id
+    private void HTTPResponse_Item_1(HTTPResponse responsePack)
+    {
+        uint kind               = responsePack.PopUInteger();
+        uint upgradeResultID    = responsePack.PopUInteger();
+
+        //todo: 目前作假, 後續重新傳送 1-1 accountData
+        UI_ItemBag myForm = _control.GUIStation.Form<UI_ItemBag>();
+        UIButton mainItem     = myForm.ClickIDEachState[BagOperateState.ReadyBlend][0];
+        UIButton materialItem = myForm.ClickIDEachState[BagOperateState.ChoosedBlend][0];
+
+        uint mainItemIndex      = myForm.GetItemIndexFromButton(mainItem);
+        uint materialItemIndex  = myForm.GetItemIndexFromButton(materialItem);
+        uint mainItemID         = myForm.GetItemIDFromButton(mainItem);
+        uint materialItemID     = myForm.GetItemIDFromButton(materialItem);
+        _control.Account.Cards[mainItemIndex - 1]       = upgradeResultID;
+        _control.Account.Cards[materialItemIndex - 1]   = 0;
+        myForm.ClickIDEachState[BagOperateState.ReadyBlend].Clear();
+        myForm.ClickIDEachState[BagOperateState.ChoosedBlend].Clear();
+        //todo: 目前作假, 後續重新傳送 1-1 accountData  end
+        
+        _control.GUIStation.Form<UI_ItemBag>().UpdateItems();
     }
 
     #endregion
