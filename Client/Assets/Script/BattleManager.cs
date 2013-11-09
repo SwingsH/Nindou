@@ -430,6 +430,15 @@ public class BattleManager : BattleState
 				GameObject.Destroy(unit.Entity);
 		}
 	}
+
+	public static void Play_ExtrimSkillPreEffect(Unit unit)
+	{
+		if (Instance != null)
+		{
+			Instance.postEffectManager.ExtrimSkillEffectStart(unit);
+		}
+	}
+
 	void AllDeadEvent(eGroup group)
 	{
 		switch (group)
@@ -537,13 +546,13 @@ public class BattleManager : BattleState
 	{
 		if (Instance == null)
 			return new List<GridPos>();
-		return Instance.BattleGridInfo.Get_AreaEmptyGrid(1, pos, eDirection.Left, 1);
+		return Instance.BattleGridInfo.Get_AreaEmptyGrid(1, pos, eDirection.Both, 1);
 	}
 	public static List<GridPos> Get_SurroundGrid(GridPos pos)
 	{
 		if (Instance == null)
 			return new List<GridPos>();
-		return Instance.BattleGridInfo.Get_AreaGridPos(1, pos, eDirection.Left, 1);
+		return Instance.BattleGridInfo.Get_AreaGridPos(1, pos, eDirection.Both, 1);
 	}
 	public static List<GridPos> Get_Grids(int mode, GridPos pos, eDirection dir, int range)
 	{
@@ -602,7 +611,7 @@ public class BattleManager : BattleState
 		switch (selfGroup)
 		{
 			case eGroup.Player:
-				return Instance.Enemys;
+				return new List<Unit>(Instance.Enemys);
 			case eGroup.Enemy:
 				return new List<Unit>(Instance.Players);
 			default:
@@ -852,7 +861,7 @@ public class BattleManager : BattleState
 		{
 			if (info != null && attackee != null)
 			{
-				long callerID = ((long)info.GetHashCode() >> 32) ^ (long)attackee.GetHashCode();
+				long callerID = ((long)info.GetHashCode() << 32) ^ (long)attackee.GetHashCode();
 				Instance.hudManager.ShowDamageGroupText(callerID, value, displayPosition);
 			}
 		}
@@ -884,7 +893,7 @@ public class BattleManager : BattleState
 			UnitCamera.transform.rotation = Camera.main.transform.rotation;
 		}
 		UnitCamera.orthographic = true;
-		UnitCamera.cullingMask = ~(1 << GLOBALCONST.GameSetting.LAYER_BACKGROUND);
+		UnitCamera.cullingMask = ~(1 << GLOBALCONST.GameSetting.LAYER_BACKGROUND | 1<<GLOBALCONST.GameSetting.LAYER_EXTRAEFFECT);
 		UnitCamera.clearFlags = CameraClearFlags.Depth;
 		UnitCamera.orthographicSize = GLOBALCONST.GameSetting.UNIT_CAMERA_SIZE;
 
@@ -967,6 +976,19 @@ public class BattleManager : BattleState
 		}
 		else
 			return null;
+	}
+	public void DrawRealUnitGrid()
+	{
+
+		int gx = BattleGridInfo.Cols;
+		int gy = BattleGridInfo.Rows;
+		Gizmos.color = Color.black;
+		for (int i = 0; i <= gx; i++)
+			Gizmos.DrawLine(Get_RealWorldPos(BattleGridInfo.StartPoint + new Vector3(i * BattleGridInfo.GridSize.x, 0, 0)),
+							Get_RealWorldPos(BattleGridInfo.StartPoint + new Vector3(i * BattleGridInfo.GridSize.x, 0, gy * BattleGridInfo.GridSize.y)));
+		for (int i = 0; i <= gy; i++)
+			Gizmos.DrawLine(Get_RealWorldPos(BattleGridInfo.StartPoint + new Vector3(0, 0, i * BattleGridInfo.GridSize.y)),
+							Get_RealWorldPos(BattleGridInfo.StartPoint + new Vector3(gx * BattleGridInfo.GridSize.x, 0, i * BattleGridInfo.GridSize.y)));
 	}
 	public void DrawAllGrid()
 	{

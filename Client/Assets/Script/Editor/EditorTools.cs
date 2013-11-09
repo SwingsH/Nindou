@@ -66,21 +66,74 @@ public static class EditorTools {
     {
         if (Selection.activeObject is Texture2D)
         {
-            Texture2D t2d = Selection.activeObject as Texture2D;
-            TextureImporter ti = TextureImporter.GetAtPath(AssetDatabase.GetAssetPath(t2d)) as TextureImporter;
+            Texture2D ot2d = Selection.activeObject as Texture2D;
+			Texture2D t2d = new Texture2D(ot2d.width, ot2d.height);
+			TextureImporter ti = TextureImporter.GetAtPath(AssetDatabase.GetAssetPath(ot2d)) as TextureImporter;
             if (ti)
             {
                 ti.isReadable = true;
-                AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(t2d));
+				ti.textureFormat = TextureImporterFormat.ARGB32;
+				AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(ot2d));
             }
-            Color[] colors = t2d.GetPixels();
-            for (int i = 0; i < colors.Length; i++)
-                if (colors[i].grayscale == 1)
-                    colors[i].a = 0;
+			Color[] colors = ot2d.GetPixels();
+
+			for (int i = 0; i < colors.Length; i++)
+			{
+				if (Mathf.Approximately(colors[i].grayscale, 1f))
+				{
+					colors[i].a = 0;
+				}
+				else
+					colors[i].a = 1 - colors[i].grayscale;
+			}
             t2d.SetPixels(colors);
+			t2d.Apply();
+			string nPath = AssetDatabase.GenerateUniqueAssetPath(AssetDatabase.GetAssetPath(ot2d));
+			nPath = Path.ChangeExtension(nPath, ".png");
+			nPath = Application.dataPath.Replace("Assets", nPath);
+			Debug.Log(nPath);
+			FileStream fs = new FileStream(nPath, FileMode.Create);
+			byte[] tb = t2d.EncodeToPNG();
+			fs.Write(tb, 0, tb.Length);
+			fs.Close();
+			AssetDatabase.Refresh();
         }
+		
     }
 
+	[MenuItem("Tools/HalfAlpha")]
+	public static void HalfAlpha()
+	{
+		if (Selection.activeObject is Texture2D)
+		{
+			Texture2D ot2d = Selection.activeObject as Texture2D;
+			Texture2D t2d = new Texture2D(ot2d.width, ot2d.height);
+			TextureImporter ti = TextureImporter.GetAtPath(AssetDatabase.GetAssetPath(ot2d)) as TextureImporter;
+			if (ti)
+			{
+				ti.isReadable = true;
+				ti.textureFormat = TextureImporterFormat.ARGB32;
+				AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(ot2d));
+			}
+			Color[] colors = ot2d.GetPixels();
+
+			for (int i = 0; i < colors.Length; i++)
+			{
+				colors[i].a *= 0.5f;
+			}
+			t2d.SetPixels(colors);
+			t2d.Apply();
+			string nPath = AssetDatabase.GenerateUniqueAssetPath(AssetDatabase.GetAssetPath(ot2d));
+			nPath = Path.ChangeExtension(nPath, ".png");
+			nPath = Application.dataPath.Replace("Assets", nPath);
+			Debug.Log(nPath);
+			FileStream fs = new FileStream(nPath, FileMode.Create);
+			byte[] tb = t2d.EncodeToPNG();
+			fs.Write(tb, 0, tb.Length);
+			fs.Close();
+			AssetDatabase.Refresh();
+		}
+	}
 
 	public static Vector3 TranslateCamera(Camera current, Vector3 currentPos, Camera targetCam)
 	{
@@ -148,8 +201,20 @@ public static class EditorTools {
 
 	//因為particle system不會讀scale，據說可以改shader來處理，不過還沒研究，目前先放大參數的來做比較快
 	//注意直事項：emission有兩種模式，當模式是distance的時候，放大之後要把這個值縮小同樣的比例，不過我找不到模式的參數，所以只好手動改了
-	[MenuItem("Tools/Enlarge Particle")]
-	public static void Enlarge_Particle()
+	[MenuItem("Tools/Enlarge Particle 2")]
+	public static void Enlarge_Particle_2()
+	{
+		if (Selection.activeGameObject)
+		{
+			foreach (ParticleSystem ps in Selection.activeGameObject.GetComponentsInChildren<ParticleSystem>(true))
+			{
+				ps.startSize *= 2;
+				ps.startSpeed *= 2;
+			}
+		}
+	}
+	[MenuItem("Tools/Enlarge Particle 100")]
+	public static void Enlarge_Particle_100()
 	{
 		if (Selection.activeGameObject)
 		{
@@ -161,8 +226,33 @@ public static class EditorTools {
 			}
 		}
 	}
-		[MenuItem("Tools/Narrow Particle")]
-	public static void Narrow_Particle()
+	[MenuItem("Tools/Enlarge Particle 200")]
+	public static void Enlarge_Particle_200()
+	{
+		if (Selection.activeGameObject)
+		{
+			Debug.Log(Selection.activeGameObject.GetComponentsInChildren<ParticleSystem>(true).Length);
+			foreach (ParticleSystem ps in Selection.activeGameObject.GetComponentsInChildren<ParticleSystem>(true))
+			{
+				ps.startSize *= 200;
+				ps.startSpeed *= 200;
+			}
+		}
+	}
+	[MenuItem("Tools/Narrow Particle 2")]
+	public static void Narrow_Particle_2()
+	{
+		if (Selection.activeGameObject)
+		{
+			foreach (ParticleSystem ps in Selection.activeGameObject.GetComponentsInChildren<ParticleSystem>())
+			{
+				ps.startSize /= 2;
+				ps.startSpeed /= 2;
+			}
+		}
+	}
+	[MenuItem("Tools/Narrow Particle 100")]
+	public static void Narrow_Particle_100()
 	{
 		if (Selection.activeGameObject)
 		{
@@ -170,6 +260,30 @@ public static class EditorTools {
 			{
 				ps.startSize /= 100;
 				ps.startSpeed /= 100;
+			}
+		}
+	}
+	[MenuItem("Tools/Narrow Particle 200")]
+	public static void Narrow_Particle_200()
+	{
+		if (Selection.activeGameObject)
+		{
+			foreach (ParticleSystem ps in Selection.activeGameObject.GetComponentsInChildren<ParticleSystem>())
+			{
+				ps.startSize /= 200;
+				ps.startSpeed /= 200;
+			}
+		}
+	}
+
+	[MenuItem("Tools/Remove Particle AutoDestroyComponent")]
+	public static void Remove_AutoDestroy()
+	{
+		foreach(GameObject go in Selection.gameObjects)
+		{
+			foreach (CFX_AutoDestructShuriken adi in go.GetComponentsInChildren<CFX_AutoDestructShuriken>(true))
+			{
+				GameObject.DestroyImmediate(adi, true);
 			}
 		}
 	}
@@ -268,7 +382,8 @@ public static class EditorTools {
 	[MenuItem("Tools/QuickTest")]
 	public static void QuickTest()
 	{
-		ProjectileAttack.LaunchProjectile_ForTest(new GridPos(1, 1), new GridPos(5, 5), "IceBallA", "IceHitA", 2);
+		LinkedList<int> ll = new LinkedList<int>();
+		Debug.Log(ll.First);
 	}
 
 	[MenuItem("Tools/QuickTest1")]

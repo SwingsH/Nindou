@@ -18,6 +18,7 @@ public class ParticleManager : MonoBehaviour {
 	 */
 	static Dictionary<Transform, List<ParticleSystem>> mountedParticle = new Dictionary<Transform, List<ParticleSystem>>();
 
+	static Dictionary<ParticleSystem, float> continuedParticle = new Dictionary<ParticleSystem, float>();
 	float mountedCheckTime = 0;
 	List<ParticleSystem> actingParticleSystem = new List<ParticleSystem>();
 #if UNITY_EDITOR
@@ -78,6 +79,7 @@ public class ParticleManager : MonoBehaviour {
 						removeKey.Add(kvp.Key);
 						foreach (ParticleSystem ps in kvp.Value)
 						{
+							Debug.Log(ps);
 							if(ps!=null)
 								Recycle(ps);
 						}
@@ -90,6 +92,27 @@ public class ParticleManager : MonoBehaviour {
 				}
 			}
 		}
+		if(continuedParticle.Count > 0)
+		{
+			List<ParticleSystem> removedPSkey = null;
+			foreach (KeyValuePair<ParticleSystem, float> kvp in continuedParticle)
+			{
+				if (kvp.Value < Time.time)
+				{
+					if (removedPSkey == null)
+						removedPSkey = new List<ParticleSystem>();
+					removedPSkey.Add(kvp.Key);
+				}
+			}
+			if (removedPSkey != null)
+				foreach (ParticleSystem psi in removedPSkey)
+				{
+					if(psi != null)
+						psi.Stop(true);//停止，等粒子都播完之後就會回收了
+					continuedParticle.Remove(psi);
+				}
+		}
+
 #if UNITY_EDITOR
 		displayingArray = actingParticleSystem.ToArray();
 #endif
@@ -101,20 +124,47 @@ public class ParticleManager : MonoBehaviour {
 			actingParticleSystem.Add(particle);
 	}
 
-	public static void Emit(string particleName, Vector3 worldPos, Vector3 direction)
+	public static void Emit(string particleName, Vector3 worldPos, Vector3? direction)
 	{
 		if (string.IsNullOrEmpty(particleName))
 			return;
 		ParticleSystem ps = GetParticle(particleName);
 		if (ps)
 		{
-			ps.transform.forward = direction;
+			if(direction != null)
+				ps.transform.forward = direction.Value;
 			ps.transform.position = worldPos;
 			ps.Play();
 		}
 	}
+	/// <summary>
+	/// 連續播放一個光影 n 秒
+	/// </summary>
+	//ParticleSystem的Duration不能改，據說可以用動畫來改參數，還沒試過，先自己計算時間
+	public static void Emit_Continue(string particleName, Vector3 worldPos, Vector3? direction, float Duration)
+	{
+		if (string.IsNullOrEmpty(particleName))
+			return;
+		ParticleSystem ps = GetParticle(particleName);
+		if (ps)
+		{
+			if (direction != null)
+				ps.transform.forward = direction.Value;
+			ps.transform.position = worldPos;
+			ps.loop = true;
+			ps.Play();
+			//這個應該是不會發生，不過還是檢查一下
+			if (continuedParticle.ContainsKey(ps))
+				continuedParticle[ps] = Time.time + Duration;
+			else
+				continuedParticle.Add(ps, Time.time + Duration);
+		}
 
-	
+	}
+	public static void MountParticle(Transform trans, string particleName)
+	{
+		MountParticle(trans, particleName, null);
+	}
 	/*
 	 * 掛載持續播放的particle
 	 * 需要手動呼叫才會停止
@@ -124,7 +174,7 @@ public class ParticleManager : MonoBehaviour {
 	/// 掛載持續播放的particle
 	/// </summary>
 	/// <param name="trans">欲掛載的Transform</param>
-	public static void MountParticle(Transform trans, string particleName)
+	public static void MountParticle(Transform trans, string particleName , Vector3? worldDirection)
 	{
 		if (string.IsNullOrEmpty(particleName))
 			return;
@@ -151,7 +201,10 @@ public class ParticleManager : MonoBehaviour {
 			particle.gameObject.SetActive(false);
 			particle.transform.parent = trans;
 			particle.transform.localPosition = Vector3.zero;
-			particle.transform.localRotation = Quaternion.identity;
+			if (worldDirection == null)
+				particle.transform.localRotation = Quaternion.identity;
+			else
+				particle.transform.forward = worldDirection.Value;
 			particle.gameObject.SetActive(true);
 			particle.Play(true);
 
@@ -209,6 +262,11 @@ public class ParticleManager : MonoBehaviour {
 		tempList.Clear();
 	}
 
+	/// <summary>
+	/// 取得一個實體化的ParticleSystem
+	/// 回傳的ParticleSystem會同時被加到監視行列，如果沒有任何顯示的粒子，會被回收
+	/// 所以如果取得之後沒有play他，下個update就會被回收
+	/// </summary>
 	static ParticleSystem GetParticle(string name)
 	{
 		List<ParticleSystem> tempList;
@@ -227,7 +285,8 @@ public class ParticleManager : MonoBehaviour {
 			{
 				tempps = tempList[0];
 				tempList.RemoveAt(0);
-			}
+			}else
+				tempps = ResourceStation.GetParticle(name);
 		}
 		if(tempps != null)
 		{

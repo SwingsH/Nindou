@@ -14,13 +14,15 @@ public static class GLOBALCONST
 		public const float UNIT_CAMERA_SIZE = 768;
 		public const int LAYER_UNIT = 8;
 		public const int LAYER_BACKGROUND = 9;
+		public const int LAYER_EXTRAUNIT = 10;
+		public const int LAYER_EXTRAEFFECT = 11;
 
 		public const float TELEPORT_DELAY = 3.5f;
 		public static readonly Vector2 GRID_SIZE = new Vector2(8, 6);
 		public const int GRID_COUNT_W = 9;
 		public const int GRID_COUNT_L = 5;
 
-		public const int ENEMY_MAX_NUMBER = 3;
+		public const int ENEMY_MAX_NUMBER = 5;
 	}
 	public static class BattleSettingValue
 	{

@@ -82,7 +82,12 @@ public abstract class Unit
 	}
 	public Vector3 WorldDirection
 	{
-		get { return Direction == eDirection.Left ? Vector3.left : Vector3.right; }
+		get { 
+			if(Entity != null)
+				return Direction == eDirection.Left ? -Entity.transform.right : Entity.transform.right;
+			else
+				return Direction == eDirection.Left ? Vector3.left : Vector3.right; 
+		}
 	}
 	public Vector3 WorldPos;
 	public Vector3 ScreenPos
@@ -90,6 +95,26 @@ public abstract class Unit
 		get { return BattleManager.Get_RealWorldPos(WorldPos); }
 	}
 	public virtual Vector3 WorldCenter
+	{
+		get
+		{
+			if (Entity != null)
+				return Entity.transform.position;
+			else
+				return WorldPos;
+		}
+	}
+	public virtual Vector3 WorldUpperLeft
+	{
+		get
+		{
+			if (Entity != null)
+				return Entity.transform.position;
+			else
+				return WorldPos;
+		}
+	}
+	public virtual Vector3 WorldUpperRight
 	{
 		get
 		{
@@ -272,6 +297,27 @@ public class AnimUnit : Unit
 				return WorldPos;
 		}
 	}
+
+	public override Vector3 WorldUpperLeft
+	{
+		get
+		{
+			if(Entity != null)
+				return Entity.transform.TransformPoint(SpriteBounds.center + new Vector3(-SpriteBounds.extents.x, SpriteBounds.extents.y, -BOUND_ZOFFSET));
+			else
+				return WorldPos;
+		}
+	}
+	public override Vector3 WorldUpperRight
+	{
+		get
+		{
+			if (Entity != null)
+				return Entity.transform.TransformPoint(SpriteBounds.center + new Vector3(SpriteBounds.extents.x, SpriteBounds.extents.y, -BOUND_ZOFFSET));
+			else
+				return WorldPos;
+		}
+	}
 	public virtual BoneAnimation Anim
 	{
 		get;
@@ -372,7 +418,8 @@ public class AnimUnit : Unit
 			//跳血跟受擊效果
 			if (Entity)
 			{
-				ParticleManager.Emit(info.HitParticle, WorldCenter + Vector3.back, WorldDirection);
+
+				ParticleManager.Emit(info.HitParticle, WorldCenter, Entity.transform.up);
 
 				switch (info.TargetType)
 				{
@@ -561,11 +608,15 @@ public class ActionUnit : AnimUnit
 			{
 				if (value.Type == SkillType.Weapon)
 				{
-					foreach (SpecialEffect spe in value.SPEffect)
-						if (spe.EffectType == (byte)SPEffectType.ExtrimSkill)
-						{
-							ExtrimSkill = new MainSkill(InformalDataBase.Instance.GetSkillData(spe.EffectPower));
-						}
+					if(value.SPEffectID.Length >=10 && value.SPEffectID[9] != 0)
+					{
+						ExtrimSkill = new MainSkill(value.SPEffectID[9]);
+					}
+					//foreach (SpecialEffect spe in value.SPEffect)
+					//    if (spe.EffectType == (byte)SPEffectType.ExtrimSkill)
+					//    {
+					//        ExtrimSkill = new MainSkill(InformalDataBase.Instance.GetSkillData(spe.EffectPower));
+					//    }
 					_normalAttack = value;
 				}
 				else
@@ -644,14 +695,14 @@ public class ActionUnit : AnimUnit
 	public StateInfo State = new StateInfo();
 
 	//施展中技能
-	Queue<MainSkill> CastQueue = new Queue<MainSkill>();
+	LinkedList<MainSkill> CastQueue = new LinkedList<MainSkill>();
 	public MainSkill CurrentCast
 	{
 		get
 		{
 			if (CastQueue.Count == 0)
 				return null;
-			return CastQueue.Peek();
+			return CastQueue.First.Value;
 		}
 	}
 	CastInfo CurrentCasting;
@@ -681,7 +732,7 @@ public class ActionUnit : AnimUnit
 		{
 			if (CastQueue.Count > 0)
 			{
-				MainSkill temp = CastQueue.Peek();
+				MainSkill temp = CastQueue.First.Value;
 				if (temp != null)
 				{
 					return temp.rangeMode;
@@ -699,7 +750,7 @@ public class ActionUnit : AnimUnit
 		{
 			if (CastQueue.Count > 0)
 			{
-				MainSkill temp = CastQueue.Peek();
+				MainSkill temp = CastQueue.First.Value;
 				if (temp != null)
 				{
 					return temp.range;
@@ -835,9 +886,9 @@ public class ActionUnit : AnimUnit
 	{
 		if (IsCasting)
 			return;
-		while (CastQueue.Count > 0 && (!CastQueue.Peek().Castable || !TargetApprochable(CastQueue.Peek())))
+		while (CastQueue.Count > 0 && (!CastQueue.First.Value.Castable || !TargetApprochable(CastQueue.First.Value)))
 		{
-			CastQueue.Dequeue();
+			CastQueue.RemoveFirst();
 		}
 		if (CastQueue.Count == 0)
 		{
@@ -851,9 +902,9 @@ public class ActionUnit : AnimUnit
 			if (randomList.Count > 0)
 				randomSkill = randomList[Random.Range(0, randomList.Count)];
 			if (randomSkill != null)
-				CastQueue.Enqueue(randomSkill);
+				CastQueue.AddLast(randomSkill);
 			else if (NormalAttack.Castable)
-				CastQueue.Enqueue(NormalAttack);
+				CastQueue.AddLast(NormalAttack);
 		}
 	}
 
@@ -893,7 +944,6 @@ public class ActionUnit : AnimUnit
 			CastInfo info = new CastInfo(skill);
 			info.DMGInfo = skill.GenerateDamageInfo(this);
 			CurrentCasting = info;
-			CurrentCasting.Target = target;
 			skill.CastableTime = Time.time + skill.CoolDown;
 			PlayAnim(info.skill.GenerateAnimInfo());
 		}
@@ -904,6 +954,9 @@ public class ActionUnit : AnimUnit
 	{
 		if (TargetUnit == null)
 			return false;
+		//極限技為全畫面
+		if (skill.Type == SkillType.Extrim)
+			return true;
 		//先判斷是不是已經在範圍中了
 		//不先判斷這個，接下來判斷是否有空格可以達到會有誤判的情況
 		if(BattleManager.CheckInRange(skill.rangeMode,BasePos,eDirection.Both,skill.range,TargetUnit.BasePos))
@@ -914,7 +967,9 @@ public class ActionUnit : AnimUnit
 
 	public void CastCurrentSkill()
 	{
-		CastSkill(CastQueue.Dequeue());
+		
+		CastSkill(CastQueue.First.Value);
+		CastQueue.RemoveFirst();
 	}
 	//void StartCast()
 	//{
@@ -944,7 +999,13 @@ public class ActionUnit : AnimUnit
 		if(ExtrimSkill == null || !ExtrimSkill.Castable)
 			return;
 		if (!CastQueue.Contains(ExtrimSkill))
-			CastQueue.Enqueue(ExtrimSkill);
+		{
+			//沒有在施法中就加到最前面，優先施放
+			if (IsCasting)
+				CastQueue.AddLast(ExtrimSkill);
+			else
+				CastQueue.AddFirst(ExtrimSkill);
+		}
 	}
 	void StopAllCast()
 	{
@@ -963,10 +1024,16 @@ public class ActionUnit : AnimUnit
 		switch(skill.TargetType)
 		{
 			case SkillTargetType.Enemy:
-				units = BattleManager.Get_EnemyUnitsInRange(this, skill.rangeMode, Direction, skill.range);
+				if (skill.Type == SkillType.Extrim)
+					units = BattleManager.Get_AllEnemyUnits(Group);
+				else
+					units = BattleManager.Get_EnemyUnitsInRange(this, skill.rangeMode, Direction, skill.range);
 				break;
 			case SkillTargetType.Friend:
-				units = BattleManager.Get_FriendUnitsInRange(this, skill.rangeMode, Direction, skill.range);
+				if (skill.Type == SkillType.Extrim)
+					units = BattleManager.Get_AllFriendUnits(Group);
+				else
+					units = BattleManager.Get_FriendUnitsInRange(this, skill.rangeMode, Direction, skill.range);
 				break;
 			case SkillTargetType.Self:
 				units = new List<Unit>();
@@ -979,7 +1046,7 @@ public class ActionUnit : AnimUnit
 		if (units.Count == 0)
 			return units;
 		//單體目標技能，如現目標在範圍內用現在目標，不然用list裡第一個當目標
-		if (skill.rangeMode <= GLOBALCONST.BattleSettingValue.AllInRangeModeGroup)
+		if (skill.Type != SkillType.Extrim && skill.rangeMode <= GLOBALCONST.BattleSettingValue.AllInRangeModeGroup)
 		{
 			Unit singleUnit = null;
 			if (units.Contains(TargetUnit))
@@ -1000,19 +1067,22 @@ public class ActionUnit : AnimUnit
 			if (triggerEvent.animationName != info.skill.AnimClipName)
 				return;
 
-			switch (triggerEvent.tag)
+			switch (triggerEvent.tag.ToLower())
 			{
 				case AnimationSetting.HIT_TAG:
-					if (info.Target != null && info.DMGInfo.Attacker == this)
+					List<Unit> Target = GetTarget(info.skill);
+					if (Target != null && info.DMGInfo.Attacker == this)
 					{
 						if (info.skill.ProjectileTime <= 0) //瞬發攻擊
 						{
-							foreach (Unit u in info.Target)
+							foreach (Unit u in Target)
 								u.Damaged(info.DMGInfo);
+							//for (int i = 0; i < info.Target.Count; i++ )
+							//    info.Target[i].Damaged(info.DMGInfo);
 						}
 						else
 						{
-							foreach (Unit u in info.Target)
+							foreach (Unit u in Target)
 							{
 								float flyTime = info.skill.ProjectileTime;
 								if(info.skill.range > 0)
@@ -1024,22 +1094,43 @@ public class ActionUnit : AnimUnit
 					break;
 				case AnimationSetting.ATKSTART_TAG:
 					ParticleManager.Emit(info.skill.ParticleAttackStart, triggerEvent.boneTransform.position - BattleManager.UnitCamera.transform.forward * BOUND_ZOFFSET, WorldDirection);
+					if (info.skill.Type == SkillType.Extrim)
+					{
+						float playTime = info.skill.CastTime - triggerEvent.time;
+						ParticleManager.Emit_Continue(info.skill.ParticleWholeScene, BattleManager.Get_RealWorldPos(Vector3.zero), null, playTime);
+					}
 					break;
 				case AnimationSetting.ATKEND_TAG:
 					ParticleManager.Emit(info.skill.ParticleAttackEnd, triggerEvent.boneTransform.position - BattleManager.UnitCamera.transform.forward * BOUND_ZOFFSET, WorldDirection);
 					break;
 				case AnimationSetting.END_TAG:
 					info.EndCount--;
-					if(!IsCasting)
+					if (!info.Casting)
+					{
 						CurrentCasting = null;
+						if (Entity != null && !string.IsNullOrEmpty(info.skill.AuraParticle))
+							ParticleManager.UnmountParticle(Entity.transform, info.skill.AuraParticle);
+					}
 					break;
 				case AnimationSetting.START_TAG:
 					if (info.StartCount == 0)
 					{
 						if (info.skill.Type == SkillType.Extrim)
-							TimeMachine.ChangeTimeScale(0.1f,0.5f);
+							BattleManager.Play_ExtrimSkillPreEffect(this);
 					}
 					info.StartCount++;
+					break;
+				case AnimationSetting.AURA_TAG:
+					//start tag 理論上會綁在第一個骨架的第一個keyframe，所以就算訂在第一個的話，他應該也會在aura之前
+					//所以startcount等於1的話就等於是第一次收到aurastart
+					if (info.StartCount == 1)
+					{
+						if(Entity != null)
+						{
+							//float auraTime = info.skill.CastTime - triggerEvent.time;
+							ParticleManager.MountParticle(Entity.transform, info.skill.AuraParticle,Entity.transform.up);
+						}
+					}
 					break;
 			}
 		}
@@ -1125,7 +1216,7 @@ public class CastInfo
 	{
 		get { return EndCount > 0; }
 	}
-	public List<Unit> Target;
+	//public List<Unit> Target;
 	public int StartCount;
 	public int EndCount;
 	public CastInfo(MainSkill sk)

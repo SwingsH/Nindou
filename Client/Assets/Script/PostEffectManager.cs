@@ -8,16 +8,34 @@ public class PostEffectManager : MonoBehaviour {
 	
 	public Shader Shader_AddColor = Shader.Find("Custom/MaskEffect");
 	public Shader Shader_GrayScaleColor = Shader.Find("Custom/GrayScaleColorEffect");
+	public Shader Shader_GrayScaleTexSpot = Shader.Find("Custom/GrayScaleTexSpot");
+	const string EXTRIM_SKILL_EFFECT_BORDER_MATERIAL = "ExtrimSkillBorder";
 	const string EFFECT_COLOR_PROPERTY = "_EffectColor";
 
 	List<PostEffectInfo> EffectStack = new List<PostEffectInfo>();
 	Dictionary<int, PostEffectInfo> CallerList = new Dictionary<int, PostEffectInfo>();
-	
+
+	//大絕特效
+	Camera ExtraCamera;
+	Renderer ExtraRenderer;
+	const float PART2_STARTTIME = 0.2f;
+	const float EXTRIM_TIME = 1f;
+	readonly Vector3 EXTRIM_RENDERER_BORDER_START_POS = new Vector3(-600, -85, 60);
+	readonly Vector3 EXTRIM_RENDERER_BORDER_END_POS = new Vector3(0, -85, 60);
+	bool isPlayingExtrimeSkill = false;
+	Vector3 Extrim_StartPos;
+	Vector3 Extrim_EndPos;
+	Unit Extrim_TargetUnit;
+
+	float ExtrimEffect_StartTime;
+	AnimationCurve Extrim_AnimCurve = new AnimationCurve(new Keyframe(0.00f, 0.00f, 3.15f, 3.15f), new Keyframe(0.90f, 1.00f, 0f, 0f));
+
 	//存現在最大是幾號，新增號碼時用
 	public int currentMaxNumber = -1;
 
 	public Renderer GrabRenderer;
 	public Camera TargetCamera;
+	
 	void Start()
 	{
 		
@@ -41,6 +59,9 @@ public class PostEffectManager : MonoBehaviour {
 			else
 				ClearEffect();
 		}
+
+		if (isPlayingExtrimeSkill)
+			ExtrimSkillEffect();
 	}
 	/// <summary>
 	/// 預設效果一
@@ -61,7 +82,12 @@ public class PostEffectManager : MonoBehaviour {
 	}
 	public void SetDefaultEffect_2(object Caller, float Duration)
 	{
-		SetPostEffect(Caller, Shader_AddColor, Color.red, Duration);
+		SetPostEffect(Caller, Shader_AddColor, Color.gray, Duration);
+	}
+	public void SetDefaultEffect_3(object Caller)
+	{
+		Vector3 v3 = TargetCamera.ScreenToWorldPoint(Vector3.zero);
+		SetPostEffect(Caller, Shader_GrayScaleTexSpot, Color.clear, new KeyValuePair<string, object>("_SpotCenter", v3), new KeyValuePair<string, object>("_SpotSize", 100));
 	}
 	/// <summary>
 	/// 全畫面效果，永久型，記得不用要手動取消
@@ -114,7 +140,7 @@ public class PostEffectManager : MonoBehaviour {
 		if (GrabRenderer == null)
 		{
 			GameObject quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
-			quad.transform.localScale = new Vector3(3000, 1550, 1);
+			quad.transform.localScale = new Vector3(3000, 3000, 1);
 			quad.renderer.castShadows = false;
 			quad.renderer.receiveShadows = false;
 			Destroy(quad.collider);
@@ -149,14 +175,23 @@ public class PostEffectManager : MonoBehaviour {
 			{
 				foreach (KeyValuePair<string, object> setting in shaderSetting)
 				{
+					Debug.Log(setting.Key);
+					Debug.Log(setting.Value);
+					Debug.Log(setting.Value.GetType());
 					if (m.HasProperty(setting.Key))
 					{
-						if (setting.Value is float)
+						Debug.Log("HasProperty");
+						if (setting.Value is float || setting.Value is int)
 							m.SetFloat(setting.Key, (float)setting.Value);
 						else if (setting.Value is Color)
 							m.SetColor(setting.Key, (Color)setting.Value);
 						else if (setting.Value is Vector4)
 							m.SetVector(setting.Key, (Vector4)setting.Value);
+						else if (setting.Value is Vector3)
+						{
+							Vector3 v3 = (Vector3)setting.Value;
+							m.SetVector(setting.Key, new Vector4(v3.x,v3.y,v3.z));
+						}
 						else if (setting.Value is Matrix4x4)
 							m.SetMatrix(setting.Key, (Matrix4x4)setting.Value);
 						else if (setting.Value is Texture)
@@ -171,6 +206,91 @@ public class PostEffectManager : MonoBehaviour {
 		SetGrabEffect(s, Color.white);
 	}
 
+
+	/// <summary>
+	/// 開始播放施放大絕前的效果
+	/// </summary>
+	public void ExtrimSkillEffectStart(Unit targetUnit)
+	{
+		if (isPlayingExtrimeSkill)
+			return;
+		if(TargetCamera == null)
+			return;
+		TimeMachine.ChangeTimeScale(0.001f, EXTRIM_TIME);
+
+		if (ExtraCamera == null)
+		{
+			ExtraCamera = new GameObject("ExtraCamera").AddComponent<Camera>();
+			ExtraCamera.clearFlags = CameraClearFlags.Depth;
+			ExtraCamera.cullingMask = 1 << GLOBALCONST.GameSetting.LAYER_EXTRAEFFECT | 1 << GLOBALCONST.GameSetting.LAYER_EXTRAUNIT;
+			ExtraCamera.depth = 10;
+			ExtraCamera.transform.rotation = TargetCamera.transform.rotation;
+			ExtraCamera.orthographic = true;
+			ExtraCamera.orthographicSize = 150;
+			ExtraCamera.nearClipPlane = 0.3f;
+			ExtraCamera.farClipPlane = 70;
+		}
+		if (ExtraRenderer == null)
+		{
+			GameObject quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
+			quad.transform.localScale = new Vector3(3000, 3000, 1);
+			quad.renderer.castShadows = false;
+			quad.renderer.receiveShadows = false;
+			Destroy(quad.collider);
+			ExtraRenderer = quad.renderer;
+			ExtraRenderer.gameObject.layer = GLOBALCONST.GameSetting.LAYER_EXTRAEFFECT;
+			ExtraRenderer.sharedMaterial = Resources.Load("Materials/" + EXTRIM_SKILL_EFFECT_BORDER_MATERIAL) as Material;
+			ExtraRenderer.transform.parent = ExtraCamera.transform;
+			ExtraRenderer.transform.localRotation = Quaternion.identity;
+			ExtraRenderer.transform.localPosition = new Vector3(0, 0, 0);
+			ExtraRenderer.transform.localScale = new Vector3(600, 1100, 1);
+		}
+		if(targetUnit == null)
+			return;
+		Extrim_TargetUnit = targetUnit;
+		if (Extrim_TargetUnit.Entity != null)
+		{
+			NGUITools.SetLayer(Extrim_TargetUnit.Entity, GLOBALCONST.GameSetting.LAYER_EXTRAUNIT);
+			//特殊需求，大小要回到1
+			Extrim_TargetUnit.Entity.transform.localScale = Vector3.one;
+		}
+		Vector3 inTopRightPos = Extrim_TargetUnit.WorldUpperLeft;
+		Vector3 outTopRightPos = Extrim_TargetUnit.WorldUpperRight;
+		ExtraCamera.gameObject.SetActive(true);
+		Extrim_StartPos = ExtraCamera.transform.position + inTopRightPos - ExtraCamera.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, 0));
+		Extrim_EndPos = ExtraCamera.transform.position + outTopRightPos - ExtraCamera.ScreenToWorldPoint(new Vector3(Screen.width + 60, Screen.height, 0));//+60是目前的模型右邊留白太多，先做一點位移
+		Extrim_StartPos.z += ExtraCamera.transform.forward.z * -30;
+		Extrim_EndPos.z = Extrim_StartPos.z;
+
+		ExtrimEffect_StartTime = Time.realtimeSinceStartup;
+
+
+
+		isPlayingExtrimeSkill = true;
+	}
+	void ExtrimSkillEffect()
+	{
+		if (Time.realtimeSinceStartup > ExtrimEffect_StartTime + EXTRIM_TIME)
+		{
+			isPlayingExtrimeSkill = false;
+			ExtraCamera.gameObject.SetActive(false);
+			if (Extrim_TargetUnit.Entity != null)
+			{
+				//還原大小跟方向
+				eDirection orginDirection = Extrim_TargetUnit.Direction;
+				Extrim_TargetUnit.Direction = eDirection.Both;
+				Extrim_TargetUnit.Direction = orginDirection;
+				NGUITools.SetLayer(Extrim_TargetUnit.Entity, GLOBALCONST.GameSetting.LAYER_UNIT);
+			}
+			return;
+		}
+
+		float part1Time = Mathf.Clamp(Time.realtimeSinceStartup - ExtrimEffect_StartTime, 0, PART2_STARTTIME) / PART2_STARTTIME;
+		float part2Time = Mathf.Clamp(Time.realtimeSinceStartup - ExtrimEffect_StartTime - PART2_STARTTIME, 0, EXTRIM_TIME - PART2_STARTTIME) / (EXTRIM_TIME - PART2_STARTTIME);
+		
+		ExtraRenderer.transform.localPosition = Vector3.Lerp(EXTRIM_RENDERER_BORDER_START_POS, EXTRIM_RENDERER_BORDER_END_POS, Extrim_AnimCurve.Evaluate(part1Time));
+		ExtraCamera.transform.position = Vector3.Lerp(Extrim_StartPos, Extrim_EndPos, Extrim_AnimCurve.Evaluate(part2Time));
+	}
 
 	void OnDestroy()
 	{

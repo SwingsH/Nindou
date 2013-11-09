@@ -107,7 +107,9 @@ public class ProjectileAttack : MonoBehaviour
 		}
 		else
 		{
-			transform.forward = (TargetWorldPos - transform.position).normalized;
+			Vector3 forward = TargetWorldPos - transform.position;
+			if(forward.sqrMagnitude != 0)
+				transform.forward = (forward).normalized;
 			transform.position = Vector3.Lerp(transform.position, TargetWorldPos, Time.deltaTime / lastTime);
 		}
 	}

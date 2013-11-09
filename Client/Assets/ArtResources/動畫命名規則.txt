@@ -1,0 +1,33 @@
+使用smooth move 套件
+
+因為動畫沒辦法無視大小寫，所以一定要是對的
+
+Idle 閒置動作
+Walk 移動
+
+
+攻擊動作名稱都要附hit點，看起來比較清楚一點
+
+Attack_A_1 攻擊動作A hit點 1 個
+Attack_A_2 攻擊動作A hit點 2 個
+應該是不會需要有攻擊動作 A hit點 1 個在兩個不點的地方的需求，暫時先這樣
+
+另外遊戲中的hit點是實際算的，上面那個只是看跟套用的時候比較清楚
+
+--animation event --
+hit點之類的事件使用 User Trigger Tag來做
+每個骨架的每個keyframe都可以設一個也只能設一個 User Trigger Tag
+tag可以不管大小寫
+
+現有tag
+	aurastart 只要start就好了，整個動作播完會一起結束
+	hit
+	attackstart 
+	attackend
+	start
+	end
+
+為了方便放光影attackstart 跟attackend盡量放在攻擊動作的那隻手上
+hit放在攻擊動作的那隻武器上
+其他的盡量放在身體上
+目前放錯了也不會差太多，怕以後找不到哪裡有tag先做的保護措拖

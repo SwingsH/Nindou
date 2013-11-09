@@ -80,12 +80,16 @@ public struct AnimInfo
 
 public struct AnimationSetting
 {
+	//因為沒辦法無視大小寫，所以一定要是對的
 	public const string IDLE_ANIM = "Idle";
 	public const string WALK_ANIM = "Walk";
 
-	public const string HIT_TAG = "Damage";
-	public const string ATKSTART_TAG = "AttackStart";
-	public const string ATKEND_TAG = "AttackEnd";
-	public const string START_TAG = "Start";
-	public const string END_TAG = "End";
+	//animation event
+	//只要start就好了，整個動作播完會自動消除
+	public const string AURA_TAG = "aurastart";
+	public const string HIT_TAG = "hit";
+	public const string ATKSTART_TAG = "attackstart";
+	public const string ATKEND_TAG = "attackend";
+	public const string START_TAG = "start";
+	public const string END_TAG = "end";
 }

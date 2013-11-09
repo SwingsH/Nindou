@@ -509,8 +509,10 @@ public class SkillData
 	public ushort CastTime;
 	public ushort ProjectileTime;
 	public string ProjectileParticle = "";
+	public string AuraParticle = "";
 	public string ParticleAttackStart = "";
 	public string ParticleAttackEnd = "";
+	public string ParticleWholeScene = "";
 	public string ParticleHit = "";
 }
 

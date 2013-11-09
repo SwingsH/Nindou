@@ -57,7 +57,7 @@ public class InformalDataBase{
 		int tempIndex = 0;
 		playerInfo[tempIndex] = new UnitInfo();
 		playerInfo[tempIndex].AttackID = 0;
-		playerInfo[tempIndex].SkillID = new ushort[] { 1, 5 };
+		playerInfo[tempIndex].SkillID = new ushort[] { 1001, 1003 };
 		playerInfo[tempIndex].MaxLife = 300;
 		playerInfo[tempIndex].MoveMode = 1;
 		playerInfo[tempIndex].MoveSpeed = 3;
@@ -65,11 +65,11 @@ public class InformalDataBase{
 		playerInfo[tempIndex].spriteNames = new string[GLOBALCONST.TOTAL_BONE_NUMBER];
 		for (int i = 0; i < playerInfo[tempIndex].spriteNames.Length; i++)
 			playerInfo[tempIndex].spriteNames[i] = InformalDataBase.TestPlayAtlasName[1];
-
+		playerInfo[tempIndex].spriteNames[(int)GLOBALCONST.eModelPartName.WEAPON_RIGHT] = "";
 		tempIndex = 1;
 		playerInfo[tempIndex] = new UnitInfo();
-		playerInfo[tempIndex].AttackID = 6;
-		playerInfo[tempIndex].SkillID = new ushort[] { 1, 5 };
+		playerInfo[tempIndex].AttackID = 1;
+		playerInfo[tempIndex].SkillID = new ushort[] { 1002, 1003 };
 		playerInfo[tempIndex].MaxLife = 250;
 		playerInfo[tempIndex].MoveMode = 1;
 		playerInfo[tempIndex].MoveSpeed = 3;
@@ -80,8 +80,8 @@ public class InformalDataBase{
 		playerInfo[tempIndex].spriteNames[1] = InformalDataBase.TestPlayAtlasName[1];
 		tempIndex = 2;
 		playerInfo[tempIndex] = new UnitInfo();
-		playerInfo[tempIndex].AttackID = 6;
-		playerInfo[tempIndex].SkillID = new ushort[] { 9, 10 };
+		playerInfo[tempIndex].AttackID = 2;
+		playerInfo[tempIndex].SkillID = new ushort[] { 3006, 3007 };
 		playerInfo[tempIndex].MaxLife = 200;
 		playerInfo[tempIndex].MoveMode = 1;
 		playerInfo[tempIndex].MoveSpeed = 3;
@@ -90,10 +90,11 @@ public class InformalDataBase{
 		for (int i = 0; i < playerInfo[tempIndex].spriteNames.Length; i++)
 			playerInfo[tempIndex].spriteNames[i] = InformalDataBase.TestPlayAtlasName[1];
 		playerInfo[tempIndex].spriteNames[1] = InformalDataBase.TestPlayAtlasName[1];
+		playerInfo[tempIndex].spriteNames[(int)GLOBALCONST.eModelPartName.WEAPON_RIGHT] = "";
 		tempIndex = 3;
 		playerInfo[tempIndex] = new UnitInfo();
-		playerInfo[tempIndex].AttackID = 6;
-		playerInfo[tempIndex].SkillID = new ushort[] { 11,12 };
+		playerInfo[tempIndex].AttackID = 2;
+		playerInfo[tempIndex].SkillID = new ushort[] { 3013, 3014 };
 		playerInfo[tempIndex].MaxLife = 200;
 		playerInfo[tempIndex].MoveMode = 1;
 		playerInfo[tempIndex].MoveSpeed = 3;
@@ -101,10 +102,11 @@ public class InformalDataBase{
 		playerInfo[tempIndex].spriteNames = new string[GLOBALCONST.TOTAL_BONE_NUMBER];
 		for (int i = 0; i <= (int)GLOBALCONST.eModelPartName.HEADDRESS; i++)
 			playerInfo[tempIndex].spriteNames[i] = InformalDataBase.TestPlayAtlasName[1];
-		for (int i =(int)GLOBALCONST.eModelPartName.BODY; i < playerInfo[tempIndex].spriteNames.Length; i++)
+		for (int i = (int)GLOBALCONST.eModelPartName.BODY; i < playerInfo[tempIndex].spriteNames.Length; i++)
 			playerInfo[tempIndex].spriteNames[i] = InformalDataBase.TestPlayAtlasName[2];
-
 		playerInfo[tempIndex].spriteNames[1] = InformalDataBase.TestPlayAtlasName[1];
+		playerInfo[tempIndex].spriteNames[(int)GLOBALCONST.eModelPartName.WEAPON_RIGHT] ="";
+
 		#endregion
 
 	}

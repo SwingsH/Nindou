@@ -67,6 +67,12 @@ public class TimeMachine : MonoBehaviour {
 		if (_instance == null || Time.realtimeSinceStartup > _instance.stopTime)
 			Time.timeScale = TimeScaleSetting;
 	}
+
+	/// <summary>
+	/// 暫時變更TimeScale一小段時間
+	/// </summary>
+	/// <param name="scale"></param>
+	/// <param name="duration"></param>
 	public static void ChangeTimeScale(float scale, float duration)
 	{
 		Instance.enabled = true;

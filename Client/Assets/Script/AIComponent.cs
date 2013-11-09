@@ -63,7 +63,7 @@ public class NinDoAttackComponent : ActionComponent
 			return;
 		
 		//判斷攻擊範圍
-		if (BattleManager.CheckInRange(unit.AttackRangeMode, unit, unit.Direction, unit.AttackRange, Target))
+		if (unit.CurrentCast.Type == SkillType.Extrim || BattleManager.CheckInRange(unit.AttackRangeMode, unit, unit.Direction, unit.AttackRange, Target))
 		{
 			unit.CastCurrentSkill();
 		}
@@ -77,7 +77,9 @@ public class NinDoAttackComponent : ActionComponent
 				return ActionState.Unavailable;
 			if (unit.IsCasting)
 				return ActionState.Busy;
-			if (unit.CurrentCast == null || !unit.CurrentCast.Castable || !BattleManager.CheckInRange(unit.AttackRangeMode, unit, eDirection.Both, unit.AttackRange, Target))
+			if (unit.CurrentCast == null || !unit.CurrentCast.Castable)
+				return ActionState.Unavailable;
+			if(unit.CurrentCast.Type != SkillType.Extrim && !BattleManager.CheckInRange(unit.AttackRangeMode, unit, eDirection.Both, unit.AttackRange, Target))
 				return ActionState.Unavailable;
 			return ActionState.Idle; 
 		}
@@ -173,17 +175,14 @@ public class SimpleMoveComponent : ActionComponent
 	protected virtual List<GridPos> Get_CanMoveGrid()
 	{
 		List<GridPos> result = new List<GridPos>();
-		foreach (GridPos selfPos in unit.Pos)
+		foreach (GridPos gp in BattleManager.Get_SurroundGrid(unit.BasePos))
 		{
-			foreach (GridPos gp in BattleManager.Get_SurroundEmptyGrid(selfPos))
+			if (gp == unit.BasePos)
+				continue;
+			if (BattleManager.Movable(unit, gp))
 			{
-				if (gp == unit.BasePos)
-					continue;
-				if (BattleManager.Movable(unit, gp))
-				{
-					if(!result.Contains(gp))
-						result.Add(gp);
-				}
+				if(!result.Contains(gp))
+					result.Add(gp);
 			}
 		}
 		return result;
@@ -489,7 +488,7 @@ public class TeleportInRangeComponent : TracingComponent
 		if (unit == null)
 			return new List<GridPos>();
 		List<GridPos> result = new List<GridPos>();
-		foreach (GridPos gp in BattleManager.Get_EmptyGrid(0, unit.BasePos, eDirection.Both, unit.MoveSpeed))
+		foreach (GridPos gp in BattleManager.Get_Grids(0, unit.BasePos, eDirection.Both, unit.MoveSpeed))
 		{
 			if (gp == unit.BasePos)
 				continue;

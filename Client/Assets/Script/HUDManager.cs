@@ -189,9 +189,9 @@ public class HUDManager : MonoBehaviour {
 	{
 		info.PosSeperateXY = true;
 		info.PosStart = position;
-		info.PosEnd = (Vector2)position + new Vector2(ShiftUnit * Random.Range(-2f,2f),ShiftUnit * -Random.Range(1.5f,4f));
-		info.PosXCurve = new AnimationCurve(new Keyframe(0f, 0f, 1f, 1f), new Keyframe(1f, 1f, 1f, 1f));
-		info.PosYCurve = new AnimationCurve(new Keyframe(0f, 0f, -2f, -2f), new Keyframe(1f, 1f, 6f, 6f));
+		info.PosEnd = (Vector2)position + new Vector2(ShiftUnit * Random.Range(-2f,2f),ShiftUnit * Random.Range(3.5f,5.5f));
+		info.PosXCurve = new AnimationCurve(new Keyframe(0.00f, 0.00f, 4.92f, 4.92f), new Keyframe(0.60f, 1.00f, 0.00f, 0.00f));
+		info.PosYCurve = new AnimationCurve(new Keyframe(0.00f, 0.00f, 4.92f, 4.92f), new Keyframe(0.60f, 1.00f, 0.00f, 0.00f));
 		info.Duration = 1;
 
 		info.ColorStart = info.ColorEnd = color;
@@ -205,8 +205,8 @@ public class HUDManager : MonoBehaviour {
 	//多段攻擊的總傷害文字
 	void SetDamageGroupAnim(HUDTextInfo info, Vector3 position)
 	{
-		info.PosStart = position;
-		info.PosEnd = position + new Vector3(0, 1.5f * ShiftUnit);
+		info.PosStart = position + new Vector3(0, 1f * ShiftUnit);
+		info.PosEnd = position + new Vector3(0, 3f * ShiftUnit);
 		info.PosXCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 		info.PosYCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 		info.Duration = 1.5f;
@@ -263,6 +263,7 @@ public class HUDManager : MonoBehaviour {
 		textinfo.PosEnd = localPosition + moveDirection.normalized * ShiftUnit * 3;
 		textinfo.Text = text;
 		textinfo.Play();
+
 		DisplayText.Add(textinfo);
 	}
 
@@ -309,8 +310,8 @@ public class HUDManager : MonoBehaviour {
 	public void ShowDamageGroupText(long callerID, int value, Vector3 position)
 	{
 		Vector3 localPosition = transform.InverseTransformPoint(position);
-		//一樣跳單次的
-		ShowDamageText(value, localPosition);
+		
+		//ShowDamageText(value, localPosition);
 
 		HUDTextInfo text;
 		if (!GroupText.TryGetValue(callerID, out text))
@@ -505,6 +506,10 @@ public class HUDTextInfo
 			normalTimeScale = 1 / Duration;
 		PosOffset = PosEnd - PosStart;
 		ScaleOffset = ScaleEnd - ScaleStart;
+
+		textComponent.transform.localPosition = PosStart;
+		textComponent.color = ColorStart;
+		textComponent.transform.localScale = new Vector3(ScaleStart.x, ScaleStart.y, textComponent.transform.localScale.z);
 	}
 
 	public void Hide()

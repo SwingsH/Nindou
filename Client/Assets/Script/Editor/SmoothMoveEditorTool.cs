@@ -302,6 +302,26 @@ public class SmoothMoveEditorTool {
 			}
 		}
 	}
+
+	[MenuItem("Assets/AnimationData/Rename Tag")]
+	public static void RenameTag()
+	{
+		BoneAnimationData baData = Selection.activeObject as BoneAnimationData;
+		if (baData)
+		{
+			foreach (AnimationClipSM acsm in baData.animationClips)
+			{
+				foreach (AnimationClipBone acbi in acsm.bones)
+				{
+					foreach (KeyframeSM kf in acbi.keyframes)
+					{
+						if (kf.userTriggerTag.ToLower() == "damage")
+							kf.userTriggerTag = AnimationSetting.HIT_TAG;
+					}
+				}
+			}
+		}
+	}
 	#endregion
 
 	

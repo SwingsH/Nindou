@@ -25,7 +25,7 @@ public class MainSkill
 		_speffect = new SpecialEffect[0];
 	}
 
-	public MainSkill(ushort SkillID)
+	public MainSkill(uint SkillID)
 	{
 		SkillData = InformalDataBase.Instance.GetSkillData(SkillID);
 		_speffect = new SpecialEffect[SkillData.SPEffect.Length];
@@ -36,7 +36,11 @@ public class MainSkill
 	}
 	public MainSkill(SkillData skillData)
 	{
-		SkillData = skillData;
+		if (skillData != null)
+			SkillData = skillData;
+		else
+			SkillData = InformalDataBase.Instance.GetSkillData(GLOBALCONST.BattleSettingValue.DEFAULT_NORMAL_ATTACK); 
+		
 		_speffect = new SpecialEffect[SkillData.SPEffect.Length];
 		for (int i = 0; i < SkillData.SPEffect.Length; i++)
 			_speffect[i] = InformalDataBase.Instance.GetSPEffect(SkillData.SPEffect[i]);
@@ -106,7 +110,10 @@ public class MainSkill
 
 	public int rangeMode
 	{
-		get { return SkillData.RangeType; }
+		get
+		{
+			return SkillData.RangeType; 
+		}
 	}
 
 	public float CoolDown
@@ -131,6 +138,10 @@ public class MainSkill
 		get { return Time.time > CastableTime; }
 	}
 
+	public uint[] SPEffectID
+	{
+		get { return SkillData.SPEffect; }
+	}
 	SpecialEffect[] _speffect = new SpecialEffect[0];
 	public SpecialEffect[] SPEffect
 	{
@@ -145,6 +156,11 @@ public class MainSkill
 	{
 		get { return SkillData.ProjectileParticle; }
 	}
+	public string AuraParticle
+	{
+		get { return SkillData.AuraParticle; }
+	}
+
 	public string ParticleAttackStart
 	{
 		get { return SkillData.ParticleAttackStart; }
@@ -153,6 +169,11 @@ public class MainSkill
 	{
 		get { return SkillData.ParticleAttackEnd; }
 	}
+	public string ParticleWholeScene
+	{
+		get { return SkillData.ParticleWholeScene; }
+	}
+
 	public string ParticleHit
 	{
 		get { return SkillData.ParticleHit; }
@@ -182,8 +203,6 @@ public class MainSkill
 			DamageTimes *= AnimPlayTimes;
 		if (DamageTimes != 0)
 			di.Power = (uint)Mathf.Clamp(Power / DamageTimes, 1, int.MaxValue);
-		Debug.Log(DamageTimes);
-		Debug.Log(Name);
 		di.MultiHit = DamageTimes > 1;
 		return di;
 	}
