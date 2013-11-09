@@ -232,8 +232,8 @@ public class SubUI_HPBar : GUISubFormBase
         if (_showMode == ShowMode.WITH_AVATAR)
         {
             _followScreenPos = newFollowScreenPos;
-            // 將垂直位置限制在畫面內
-            _followScreenPos.y = Mathf.Clamp(_followScreenPos.y, -POS_Y_LIMIT, POS_Y_LIMIT);
+            // 將垂直位置限制在畫面內(似乎壓制的位置很奇怪 先註解)
+            //_followScreenPos.y = Mathf.Clamp(_followScreenPos.y, -POS_Y_LIMIT, POS_Y_LIMIT);
             Vector3 uiScreenPos = GameControl.Instance.GUIStation.GUICamera.ScreenToWorldPoint(_followScreenPos);
             uiScreenPos.z = 0;
             _subUIRoot.transform.position = uiScreenPos;

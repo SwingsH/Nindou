@@ -28,7 +28,11 @@ public class GameEmpty : IGameState
     }
     public void Update(GameControl control)
     {
+#if KOREAN_GSTAR
+        control.ChangeGameState(GameStageSelect.Instance);
+#else
         control.ChangeGameState(GameDetectUpdate.Instance); //尚未連線狀態
+#endif
     }
     public static GameEmpty Instance
     {

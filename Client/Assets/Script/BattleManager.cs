@@ -909,8 +909,8 @@ public class BattleManager : BattleState
 		BattleStart();
         // fs: 切換完畢後，設定UI_Battle資訊
         SetUIBattle(control);
-        // fs: 搭配UI_Battle開始的文字訊息時間，調整為1.8s
-        StartCountDown = 1.8f;
+        
+        StartCountDown = GLOBALCONST.BATTLE_START_COOL_DOWN;
     }
 
     /// <summary>
@@ -1721,39 +1721,41 @@ public class BattleLeaving :BattleState
 		{
 			ChangeTime = Time.realtimeSinceStartup + 5;
 			DisplayResult = true;
-			#region 臨時顯示結果文字
+
+            control.GUIStation.Form<UI_Battle>().ShowEnd(BattleResult == eBattleResult.Win);
+            #region 臨時顯示結果文字
 			//產生顯示結果的TextMesh
-			TextMesh tm = new GameObject("HUDText").AddComponent<TextMesh>();
-            UIFont uifont = UIFontManager.GetUIDynamicFont(UIFontName.MSJH);
-			if (uifont != null)
-				tm.font = uifont.dynamicFont;
-			else
-			{
-				Object[] obj = Resources.FindObjectsOfTypeAll(typeof(Font));
-				if (obj.Length > 0)
-					tm.font = obj[0] as Font;
-				else
-					CommonFunction.DebugError("找不到可用的font");
-			}
-			tm.fontSize = 100;
-			tm.characterSize = 80;
-			tm.lineSpacing = 0.8f;
-			if(tm.font != null)
-				tm.renderer.sharedMaterial = tm.font.material;
-			tm.anchor = TextAnchor.LowerCenter;
-			tm.text = BattleState.BattleResult.ToString();
-			if (BattleManager.UnitCamera != null)
-			{
-				tm.gameObject.layer = GLOBALCONST.GameSetting.LAYER_UNIT;
-				tm.transform.position =BattleManager.UnitCamera.transform.InverseTransformPoint(BattleManager.UnitCamera.transform.forward * (BattleManager.UnitCamera.nearClipPlane + 0.1f));
-				tm.transform.rotation = BattleManager.UnitCamera.transform.rotation;
-			}
+            //TextMesh tm = new GameObject("HUDText").AddComponent<TextMesh>();
+            //UIFont uifont = UIFontManager.GetUIDynamicFont(UIFontName.MSJH);
+            //if (uifont != null)
+            //    tm.font = uifont.dynamicFont;
+            //else
+            //{
+            //    Object[] obj = Resources.FindObjectsOfTypeAll(typeof(Font));
+            //    if (obj.Length > 0)
+            //        tm.font = obj[0] as Font;
+            //    else
+            //        CommonFunction.DebugError("找不到可用的font");
+            //}
+            //tm.fontSize = 100;
+            //tm.characterSize = 80;
+            //tm.lineSpacing = 0.8f;
+            //if(tm.font != null)
+            //    tm.renderer.sharedMaterial = tm.font.material;
+            //tm.anchor = TextAnchor.LowerCenter;
+            //tm.text = BattleState.BattleResult.ToString();
+            //if (BattleManager.UnitCamera != null)
+            //{
+            //    tm.gameObject.layer = GLOBALCONST.GameSetting.LAYER_UNIT;
+            //    tm.transform.position =BattleManager.UnitCamera.transform.InverseTransformPoint(BattleManager.UnitCamera.transform.forward * (BattleManager.UnitCamera.nearClipPlane + 0.1f));
+            //    tm.transform.rotation = BattleManager.UnitCamera.transform.rotation;
+            //}
 
 
-			TextMesh tm1 = GameObject.Instantiate(tm) as TextMesh;
-			tm1.characterSize = 10;
-			tm1.text = "Tab To Continue";
-			tm1.anchor = TextAnchor.UpperLeft;
+            //TextMesh tm1 = GameObject.Instantiate(tm) as TextMesh;
+            //tm1.characterSize = 10;
+            //tm1.text = "Tab To Continue";
+            //tm1.anchor = TextAnchor.UpperLeft;
 
 			#endregion
 		}

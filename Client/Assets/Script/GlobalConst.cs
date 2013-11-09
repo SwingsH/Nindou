@@ -97,6 +97,8 @@ public static class GLOBALCONST
     public const int MAX_BATTLE_ROLE_COUNT = 4; // 戰鬥時的角色數量上限
     public const int MAX_EQUIP_COUNT = 5; // 角色最大裝備上限
 
+    public const float BATTLE_START_COOL_DOWN = 3.6f; // 戰鬥開場的停止時間
+
     #region UI相關設定
     public const int LAYER_UI_BASE = 31; // 基本ui layer
     public const int UI_ShowOrHide_TweenGroup = 1; // 顯示/消失的Tween的Group （自動生成的tween (EX:按鈕變色）的group會是0，故設定為1，若有其他要設定的請避開。）

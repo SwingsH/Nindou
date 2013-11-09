@@ -77,7 +77,7 @@ public class SubUI_RoleIcon : GUISubFormBase
         _roleHPBar.FullSize = new Vector2(205, 28);
         _roleHPBar.SetVisible(showHPBar);
         // 角色名字
-        _roleName = GUIStation.CreateUILabel(_roleIconBtn.gameObject, "Role Name", UIWidget.Pivot.Center, new Vector3(107, -57, 0), 5,
+        _roleName = GUIStation.CreateUILabel(_roleIconBtn.gameObject, "Role Name", UIWidget.Pivot.Center, new Vector3(3, 129, 0), 5,
             UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.UI_BATTLE_ROLE_NAME, FontStyle.Bold),
             Color.red, roleName);
     }

@@ -1014,6 +1014,17 @@ public class UILabelInfo
         Outline = outline;
     }
 
+    /// <summary>
+    /// 建構式(文字顏色預設為白色)
+    /// </summary>
+    /// <param name="font">使用字型</param>
+    /// <param name="labelFontName">使用字型名稱</param>
+    /// <param name="labelFontSize">使用字型大小</param>
+    /// <param name="labelFontStyle">使用字型style</param>
+    /// <param name="labelText">文字內容</param>
+    /// <param name="depth">深度，若為null，產生UISprite時套用NGUITools.CalculateNextDepth()來取得深度</param>
+    /// <param name="pivot">錨點</param>
+    /// <param name="outline">是否需要描邊</param>
     public UILabelInfo(UIFontName labelFontName, UIFontSize labelFontSize = UIFontSize.MEDIUM, FontStyle labelFontStyle = FontStyle.Bold,
         string labelText = null, int? depth = null, UIWidget.Pivot pivot = UIWidget.Pivot.Center, bool outline = true) :
         this(labelFontName, Color.white, labelFontSize, labelFontStyle,labelText,depth,pivot,outline)

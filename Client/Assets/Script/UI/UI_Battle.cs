@@ -13,6 +13,8 @@ public class UI_Battle : GUIFormBase
 
     UILabel _readyText; // 準備文字
     UILabel _goText; // 開始文字
+    UILabel _winOrLoseText; // 勝敗文字
+    UILabel _tapToContinueText; // "Tap To Continue"文字
 
     UISprite _bossPic; // Boss示意圖
     UILabel _bossNameText; // Boss 名稱
@@ -26,7 +28,7 @@ public class UI_Battle : GUIFormBase
     Dictionary<string, SubUI_HPBar> _enemyInfos = new Dictionary<string, SubUI_HPBar>();
 
     bool isPause = false;
-
+    bool isBattleEnd; // 戰鬥是否已經結束，用來控制按鈕是否有效的flag
      #region 繼承自GUIFormBase的method
     protected override void CreateAllComponent()
     {
@@ -36,9 +38,8 @@ public class UI_Battle : GUIFormBase
         UIPanel panel = NGUITools.AddChild<UIPanel>(anchor.gameObject);
         // "Ready..." 文字
         _readyText = GUIStation.CreateUILabel(new GORelativeInfo(panel.gameObject, "ReadyText"),
-            UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.UI_BATTLE_START, FontStyle.Bold),
-            START_TEXT_COLOR, GLOBAL_STRING.READY_TEXT,
-            0, UIWidget.Pivot.Center);
+            new UILabelInfo(UIFontName.MSJH, START_TEXT_COLOR, UIFontSize.UI_BATTLE_START, FontStyle.Bold, GLOBAL_STRING.READY_TEXT));
+
         _readyText.effectDistance = new Vector2(5, 5);
         _readyText.transform.localScale = Vector3.forward; // 先隱藏
         // "Ready..." 一開始的放大效果
@@ -56,9 +57,8 @@ public class UI_Battle : GUIFormBase
         readyPos.tweenGroup = GLOBALCONST.UI_Battle_Start_TweenGroup;
         // "GO!!!!" 文字
         _goText = GUIStation.CreateUILabel(new GORelativeInfo(panel.gameObject, "GoText"),
-            UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.UI_BATTLE_START, FontStyle.Bold),
-            START_TEXT_COLOR, GLOBAL_STRING.GO_TEXT,
-            0, UIWidget.Pivot.Center);
+            new UILabelInfo(UIFontName.MSJH, START_TEXT_COLOR, UIFontSize.UI_BATTLE_START, FontStyle.Bold, GLOBAL_STRING.GO_TEXT));
+        
         _goText.effectDistance = new Vector2(5, 5);
         _goText.transform.localScale = Vector3.forward; // 先隱藏
         // "GO!!!!" 一開始的放大效果
@@ -75,7 +75,15 @@ public class UI_Battle : GUIFormBase
         goPos.duration = 0.5f;
         goPos.delay = 1.3f;
         goPos.tweenGroup = GLOBALCONST.UI_Battle_Start_TweenGroup;
+        // 勝敗文字
+        _winOrLoseText = GUIStation.CreateUILabel(new GORelativeInfo(panel.gameObject, new Vector3(-660, 393, 0), "WinOrLoseText"),
+            new UILabelInfo(UIFontName.MSJH, START_TEXT_COLOR, UIFontSize.UI_BATTLE_END_WIN_OR_LOSE, FontStyle.Bold, pivot: UIWidget.Pivot.TopLeft));
+        _winOrLoseText.effectDistance = new Vector2(2, 2);
+        //// "Tab To Continue" 文字
+        _tapToContinueText = GUIStation.CreateUILabel(new GORelativeInfo(_winOrLoseText.gameObject, new Vector3(99, -104, 0), "TapToContinue"),
+            new UILabelInfo(UIFontName.MSJH, START_TEXT_COLOR, UIFontSize.UI_BATTLE_END_TAP, FontStyle.Bold, GLOBAL_STRING.TAP_TO_CONTINUE_TEXT, pivot: UIWidget.Pivot.TopLeft));
 
+        NGUITools.SetActive(_winOrLoseText.gameObject, false); // 先隱藏勝敗&Tab To Continue文字
         // BOSS 圖片
         _bossPic = UIImageManager.CreateUISprite(new GORelativeInfo(panel.gameObject, new Vector3(-400, 440, 0), "Boss Pic"),
             new UISpriteInfo(NGUISpriteData.BOSS_PIC, BOSS_ICON_WIDTH, BOSS_ICON_HEIGHT, 3));
@@ -130,6 +138,10 @@ public class UI_Battle : GUIFormBase
         _readyText = null;
         NGUITools.Destroy(_goText);
         _goText = null;
+        NGUITools.Destroy(_winOrLoseText);
+        _winOrLoseText = null;
+        NGUITools.Destroy(_tapToContinueText);
+        _tapToContinueText = null;
         foreach (SubUI_RoleIcon roleIcon in _playerRoleIcons)
         {
             roleIcon.Dispose();
@@ -156,9 +168,21 @@ public class UI_Battle : GUIFormBase
 
     void ShowStart()
     {
+        isBattleEnd = false;
+        NGUITools.SetActive(_winOrLoseText.gameObject, false);
         _uiPlayTween.tweenGroup = GLOBALCONST.UI_Battle_Start_TweenGroup;
         _uiPlayTween.resetIfDisabled = true; // disable時要重設tween
         _uiPlayTween.Play(true);
+    }
+
+    public void ShowEnd(bool isWin)
+    {
+        isBattleEnd = true;
+        _winOrLoseText.text = (isWin) ? GLOBAL_STRING.WIN_TEXT : GLOBAL_STRING.LOSE_TEXT;
+        NGUITools.SetActive(_winOrLoseText.gameObject, true);
+        // 更動UILabel的文字時，會重設localScale = 1，所以需要重設
+        // 由於UIFont文字大小最大設定為128，畫面上還是很小@@，所以調整scale 
+        _winOrLoseText.transform.localScale = new Vector3(4, 4, 1);
     }
 
     #region 按下按鈕的反應函式
@@ -168,6 +192,11 @@ public class UI_Battle : GUIFormBase
     void FastForwardBtnClick()
     {
         CommonFunction.DebugMsg("按下「加速鈕」");
+        if (isBattleEnd) 
+        {
+            CommonFunction.DebugMsg("Battle End");
+            return; 
+        }
         if (!isPause) { TimeMachine.FastForward(); }
     }
 
@@ -177,6 +206,11 @@ public class UI_Battle : GUIFormBase
     void PauseBtnClick()
     {
         CommonFunction.DebugMsg("按下「暫停鈕」");
+        if (isBattleEnd)
+        {
+            CommonFunction.DebugMsg("Battle End");
+            return;
+        }
         isPause = !isPause;
 
         UISprite playAndPauseSprite = _pauseBtn.GetComponentInChildren<UISprite>();
@@ -193,6 +227,11 @@ public class UI_Battle : GUIFormBase
     void IconBtnClick()
     {
         CommonFunction.DebugMsgFormat("按下 {0}", UIButton.current.name);
+        if (isBattleEnd)
+        {
+            CommonFunction.DebugMsg("Battle End");
+            return;
+        }
         int iconSelect = -1;
         string curClickRoleIconName = UIButton.current.transform.parent.name;
         string indexStr = curClickRoleIconName.Substring(curClickRoleIconName.LastIndexOf('_')+1);

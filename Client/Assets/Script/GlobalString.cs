@@ -42,6 +42,12 @@ public static class GLOBAL_STRING
     #region UI_Battle
     public const string READY_TEXT = "Ready...";
     public const string GO_TEXT = "Go!!!!";
+    public const string TAP_TO_CONTINUE_TEXT = "Tab To Continue";
+    public const string WIN_TEXT = "Win";
+    public const string LOSE_TEXT = "Lose";
+    #endregion
+    #region SubUI_LoadingBar
+    public const string LOADING_PROGRESS_TEXT = "讀取進度";
     #endregion
     #region HUD String
     public const string HUD_MISS = "miss";
