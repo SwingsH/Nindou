@@ -70,6 +70,19 @@ public class GameControl{
         _networkInterface.Send(1, 3);
     }
 
+    // C: 5-1 玩家要求合成, s1: 裝置ID, i1: 被合成的 card index, i2: 素材 card index, i3: 被合成的 Item ID 卡牌 ID , i4: 素材 Item ID 卡牌 ID
+    // S: 5-1 合成結果, i1:合成結果(1=成功, 2=失敗), i2:合成後的 item id
+    public void DoItemBlend(uint mainCardIndex, uint materialCardIndex, uint mainItemID, uint materialItemID)
+    {
+        string playerName = _guiStation.Form<UI_Start_CreatePlayer>().CurrentInputAccountName;
+        _networkInterface.PushString(5, 1, _deviceID);
+        _networkInterface.PushInteger(5, 1, (int) mainCardIndex);
+        _networkInterface.PushInteger(5, 1, (int) materialCardIndex);
+        _networkInterface.PushInteger(5, 1, (int) mainItemID);
+        _networkInterface.PushInteger(5, 1, (int) materialItemID);
+        _networkInterface.Send(5, 1);
+    }
+
     public void ChangeGameState(IGameState newState)
     {
         if (newState == CurrentGameState)

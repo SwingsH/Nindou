@@ -54,7 +54,11 @@ public enum NGUISpriteData
     [EnumUISpriteConfig("UI_Main_Atlas", "title")]                  STAGE_TITLE_BG, // 關卡標題背景圖
     [EnumUISpriteConfig("Atlas_Icons", "complete")]                 EXPLORE_PROGRESS_BG, // 選擇子關卡的探索度
 
-
+    [EnumUISpriteConfig("Atlas_Slices", "slice_bgcbase")]           SLICE_BAG_FRAME_BG, // 背包物品圖的底框
+    [EnumUISpriteConfig("Atlas_Slices", "slice_select")]            SLICE_BAG_ITEM_SELECT, // 背包物品圖選擇後的底框
+    [EnumUISpriteConfig("Atlas_Icons", "icon_confirm")]             BTN_CONFIRM,            // 確認圖示型按鈕
+    [EnumUISpriteConfig("Atlas_Icons", "icon_previous")]            BTN_PREVIOUS,           // 返回圖示型按鈕
+    [EnumUISpriteConfig("Atlas_Slices", "slice_frame_darkbrown")]   SLICE_BAG_TITLE,        // 選關卡的底圖(關卡關閉)
 
     [EnumUISpriteConfig("Atlas_Slices", "slice_button_grey")]       BTN_GENERIC_BG, // 一般的按鈕底圖
     [EnumUISpriteConfig("UI_Main_Atlas", "close")]                  BTN_CLOSE, // 關閉按鈕圖
@@ -89,7 +93,14 @@ public enum NGUISpriteData
 /// </summary>
 public static class UIImageManager
 {
+    private const string ATLAS_CARD_MATERIAL    = "Atlas_CardIconMaterials";    // 合成材料圖's Atlas
+    private const string ATLAS_CARD_WEAPONS     = "Atlas_CardIconWeapons";      // 武器圖's Atlas
+
+    private const string ICON_CARD_MATERIAL = "cardicon_material_{0:000}";  // 合成材料圖
+    private const string ICON_CARD_WEAPONS  = "cardicon_weapon_{0:000}";    // 武器圖
+
     private static Dictionary<string, UIAtlas> _uiAtlases = new Dictionary<string, UIAtlas>();
+
     /// <summary>
     /// 取得指定的UIAtlas，若_uiAtlas中沒有會嘗試從Resource取
     /// </summary>
@@ -176,6 +187,41 @@ public static class UIImageManager
         if (spriteInfo.Height > 0) { retUISprite.height = spriteInfo.Height; }
         retUISprite.transform.localPosition = goInfo.LocalPosition; // 修改pivot會更動localPosition，故在修改後才改
 
+        return retUISprite;
+    }
+	
+    // 取得 武器圖 icon
+    public static UISprite CreateWeaponIconSprite(GameObject parentObj, int id)
+    {
+        UIAtlas atlas = GetUIAtlas(ATLAS_CARD_WEAPONS);
+        string name = string.Format(ICON_CARD_WEAPONS, id);
+
+        if (atlas == null)
+        {
+            CommonFunction.DebugError(" CreateWeaponIconSprite. atlas null.");
+            return null;
+        }
+
+        UISprite retUISprite = NGUITools.AddSprite(parentObj, atlas, name);
+
+        if (atlas == null)
+        {
+            CommonFunction.DebugError(" CreateWeaponIconSprite. image null.");
+            return null;
+        }
+
+        retUISprite.MakePixelPerfect();
+        return retUISprite;
+    }
+	
+    // 取得 合成材料圖 icon
+    public static UISprite CreateMaterialIconSprite(GameObject parentObj, int id)
+    {
+        UIAtlas atlas = GetUIAtlas(ATLAS_CARD_MATERIAL);
+        string name = string.Format(ICON_CARD_MATERIAL, id);
+
+        UISprite retUISprite = NGUITools.AddSprite(parentObj, atlas, name);
+        retUISprite.MakePixelPerfect();
         return retUISprite;
     }
 

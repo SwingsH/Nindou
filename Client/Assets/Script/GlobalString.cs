@@ -22,6 +22,8 @@ public static class GLOBAL_STRING
     public const string UI_INPUT_HINT_1 = "點選此處輸入名稱";
 
     public const string UI_LABEL_PLAYER_NAME = "玩家名稱 : {0}";
+    public const string UI_LABEL_BAG_TITLE = "卡片";
+    public const string UI_LABEL_DISABLE_SELECT = "無法選取";
 
     #region UI_Main （主介面共通）
     public const string CHARACTER_BTN_TEXT = "人物";

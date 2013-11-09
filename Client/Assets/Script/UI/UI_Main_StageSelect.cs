@@ -345,10 +345,13 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
     /// </summary>
     void BagBtnClick()
     {
-        CommonFunction.DebugMsg("按下「背包」按鈕");
+        _guistation.ShowAndHideOther(typeof(UI_ItemBag));
+
+        //CommonFunction.DebugMsg("按下「背包」按鈕");
+
         // test :
-        _allSubStage[2].StageOpen = true;
-        CommonFunction.DebugMsg("開啟第三關");
+        //_allSubStage[2].StageOpen = true;
+        //CommonFunction.DebugMsg("開啟第三關");
     }
     /// <summary>
     /// 按下「商店」按鈕的反應函式

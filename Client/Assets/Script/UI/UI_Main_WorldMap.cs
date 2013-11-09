@@ -214,11 +214,13 @@ public class UI_Main_WorldMap : GUIFormBase
     /// </summary>
     void BagBtnClick()
     {
-        CommonFunction.DebugMsg("按下「背包」按鈕");
+        _guistation.ShowAndHideOther(typeof(UI_ItemBag));
+
+        //CommonFunction.DebugMsg("按下「背包」按鈕");
         // test : 顯示警告提示
         //NGUITools.SetActive(_warningText.gameObject, true);
-        NGUITools.SetActive(_warning.gameObject, true);
-        CommonFunction.DebugMsg("顯示警告提示");
+        //NGUITools.SetActive(_warning.gameObject, true);
+        //CommonFunction.DebugMsg("顯示警告提示");
     }
     /// <summary>
     /// 按下「商店」按鈕的反應函式

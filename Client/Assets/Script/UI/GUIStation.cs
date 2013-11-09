@@ -141,6 +141,11 @@ public class GUIStation
         get { return _gameControl.Account; }
     }
 
+    public GameControl Control
+    {
+        get { return _gameControl; }
+    }
+
     /// <summary>
     /// 重新設定場景上所有攝影機，將其cullingMask避開NGUI使用的layer（目前是GLOBALCONST.LAYER_UI_BASE）
     /// 並且重設看UI用的Camera的深度，使UI在最上層

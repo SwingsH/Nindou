@@ -145,7 +145,9 @@ public class UI_Main : GUIFormBase
     /// </summary>
     void BagBtnClick()
     {
-        CommonFunction.DebugMsg("按下「背包」按鈕");
+        //CommonFunction.DebugMsg("按下「背包」按鈕");
+
+        _guistation.ShowAndHideOther(typeof(UI_ItemBag));
     }
     /// <summary>
     /// 按下「商店」按鈕的反應函式

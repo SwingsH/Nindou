@@ -123,6 +123,7 @@ public static class GLOBALCONST
     public const string FILENAME_STORY = "Story";           // 劇情資料
     public const string FILENAME_BATTLE = "Battle";           // 戰鬥配置資料
 	public const string FILENAME_SKILLEFFECT = "SkillExtraEffect"; //技能附加效果
+    public const string FILENAME_ITEM = "ItemData";             //物品(卡片)
 
     #endregion
     #region 副檔名相關常數
@@ -155,7 +156,6 @@ public static class GLOBALCONST
     #endregion
     public enum DataLoadTag
     {
-        // for test
         [EnumClassValue(typeof(SceneData), FILENAME_SCENE)]				Scene = 0, // 場景
 		[EnumClassValue(typeof(SkillData), FILENAME_SKILL)]				Skill,       // 技能
 		[EnumClassValue(typeof(NPCData), FILENAME_NPC)]					NPC,         // NpcData
@@ -164,7 +164,7 @@ public static class GLOBALCONST
         [EnumClassValue(typeof(Story), FILENAME_STORY)]					Story,       // 劇情
         [EnumClassValue(typeof(Battle), FILENAME_BATTLE)]				Battle,       // 戰鬥配置表      
  		[EnumClassValue(typeof(SpecialEffect), FILENAME_SKILLEFFECT)]	SPEffect,       // 特殊狀態表
-        
+        [EnumClassValue(typeof(ItemData), FILENAME_ITEM)]	            Item,           // 物品表
     };
 }
 
