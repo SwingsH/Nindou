@@ -20,6 +20,7 @@ public enum UIFontSize
     SMALL = 16,
     MEDIUM = 30,
     LARGE = 50,
+    VERY_LARGE = 70,
     HUD = 30,
     UI_BATTLE_BOSS_NAME = 40, // 戰鬥UI中，boss名字的文字大小
     UI_BATTLE_ROLE_NAME = 38, // 戰鬥UI中，我方角色名字的文字大小

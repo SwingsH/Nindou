@@ -30,9 +30,9 @@ public class UI_Start : GUIFormBase
             GUIStation.MANUAL_SCREEN_WIDTH, GUIStation.MANUAL_SCREEN_HEIGHT, null, Color.white, string.Empty);
         _loginBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         // 登入文字
-        _loginHint = GUIStation.CreateUILabel(panel.gameObject, "LoginHint", UIWidget.Pivot.Center, new Vector3(0, -106, 0), 7,
-            UIFontManager.GetUIDynamicFont(UIFontName.MSJH,fontStyle:FontStyle.Bold),
-            new Color(1.0f, 0.2f, 0.3f), GLOBAL_STRING.UI_START_HINT_1);
+        _loginHint = GUIStation.CreateUILabel(panel.gameObject, "LoginHint", UIWidget.Pivot.Center, new Vector3(0, -60, 0), 7,
+            UIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontSizeEnum: UIFontSize.VERY_LARGE, fontStyle: FontStyle.Bold),
+            Color.white, GLOBAL_STRING.UI_START_HINT_1);
         // 加上event
         _loginBtn.onClick.Add(new EventDelegate(this, "LoginClick"));
         // 繼承按鈕
