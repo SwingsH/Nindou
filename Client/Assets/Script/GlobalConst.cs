@@ -102,6 +102,7 @@ public static class GLOBALCONST
     public const int UI_ShowOrHide_TweenGroup = 1; // 顯示/消失的Tween的Group （自動生成的tween (EX:按鈕變色）的group會是0，故設定為1，若有其他要設定的請避開。）
     public const int UI_Battle_Start_TweenGroup = 2;
 
+    public const int MAX_LAYER_OF_SUBUI_HP = 5; // HP Layer數最大值
 
     public const string DIR_RESOURCES_DATA = "Data/";
     public const string DIR_RESOURCES_PARTICLE = "Particle/";

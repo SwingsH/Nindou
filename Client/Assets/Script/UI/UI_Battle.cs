@@ -289,10 +289,11 @@ public class UI_Battle : GUIFormBase
     }
     //=================================
 
-    public void AddEnemyInfoUI(string enemyName, Vector3 relativePos, int curHP, int maxHP, GameAttribute ga = GameAttribute.NONE)
+    public void AddEnemyInfoUI(string enemyName, Vector3 relativePos, int curHP, int maxHP, int layerNum = 1, GameAttribute ga = GameAttribute.NONE)
     {
         SubUI_HPBar tempHPBar = new SubUI_HPBar(_bossPic.transform.parent.gameObject, string.Format("Enemy_{0}_HP", enemyName), Vector3.zero,
             1, (int)(219 * GUIStation.RESOLUTION_SCALE_BETWEEN_ART_AND_UI * enemyBarScale), (int)(41 * GUIStation.RESOLUTION_SCALE_BETWEEN_ART_AND_UI * enemyBarScale),
+            layerNum,
             ga, 
             SubUI_HPBar.ShowMode.WITH_AVATAR);
         tempHPBar.FullSize = new Vector2(205 * enemyBarScale, 28 * enemyBarScale);
@@ -309,8 +310,9 @@ public class UI_Battle : GUIFormBase
         {
             if (!_enemyInfos.ContainsKey(enemyUnit.Name))
             {
-                AddEnemyInfoUI(enemyUnit.Name, BattleManager.UnitCamera.WorldToScreenPoint(enemyUnit.WorldUpperCenter), (int)enemyUnit.Life, (int)enemyUnit.MaxLife,
-                    getTestGA()); // TODO: 改由enemyUnit內資訊取得
+                AddEnemyInfoUI(enemyUnit.Name, BattleManager.UnitCamera.WorldToScreenPoint(enemyUnit.WorldUpperCenter), 
+                    (int)enemyUnit.Life, (int)enemyUnit.MaxLife, 1, 
+                    getTestGA()); // TODO: 改由enemyUnit內資訊取得血條layer數和遊戲屬性
             }
             else
             {

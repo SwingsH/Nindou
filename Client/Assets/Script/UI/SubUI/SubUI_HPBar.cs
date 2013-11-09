@@ -59,7 +59,7 @@ public class SubUI_HPBar : GUISubFormBase
             if (value <= 0) { CommonFunction.DebugErrorFormat("LayerNum值({0})給予錯誤，不做修改", value); }
             else
             {
-                _layerNum = Mathf.Clamp(value, 1, GLOBALCONST.MAX_LAYER_OF_SUBUI_HP);
+                _layerNum = Mathf.Clamp(value, 1, barColors.Length);
                 _oneLayerMaxHP = _maxHP / _layerNum;
             }
         }

@@ -427,16 +427,53 @@ public class GUIStation
     public static UILabel CreateUILabel(GameObject parentObj, string labelName, UIWidget.Pivot pivot, Vector3 relativePos, int depth,
         UIFont font, Color labelColor, string labelText, bool outline = true)
     {
-        UILabel retLabel = NGUITools.AddWidget<UILabel>(parentObj);
+        //UILabel retLabel = NGUITools.AddWidget<UILabel>(parentObj);
+        //retLabel.pivot = pivot;
+        //retLabel.transform.localPosition = relativePos;
+        //retLabel.name = labelName;
+        //retLabel.depth = depth;
+        //retLabel.font = font;
+        //retLabel.text = labelText;
+        //retLabel.color = labelColor;
+        //retLabel.effectStyle = (outline) ? UILabel.Effect.Outline : UILabel.Effect.None;
+        //retLabel.MakePixelPerfect();
+        //return retLabel;
+        return CreateUILabel(new GORelativeInfo(parentObj, relativePos, labelName),
+            font, labelColor, labelText, depth, pivot, outline);
+    }
+
+    public static UILabel CreateUILabel(GORelativeInfo goInfo, UIFont font, Color labelColor, string labelText, int depth, UIWidget.Pivot pivot,
+        bool outline = true)
+    {
+        UILabel retLabel = NGUITools.AddWidget<UILabel>(goInfo.ParentObject);
+        retLabel.name = string.IsNullOrEmpty(goInfo.ObjectName) ? CommonFunction.GetName<UILabel>() : goInfo.ObjectName;
+
         retLabel.pivot = pivot;
-        retLabel.transform.localPosition = relativePos;
-        retLabel.name = labelName;
+        retLabel.transform.localPosition = goInfo.LocalPosition; // 修改pivot會更動localPosition，故在修改後才改
         retLabel.depth = depth;
         retLabel.font = font;
         retLabel.text = labelText;
         retLabel.color = labelColor;
         retLabel.effectStyle = (outline) ? UILabel.Effect.Outline : UILabel.Effect.None;
         retLabel.MakePixelPerfect();
+
+        return retLabel;
+    }
+
+    public static UILabel CreateUILabel(GORelativeInfo goInfo, UILabelInfo labelInfo)
+    {
+        UILabel retLabel = NGUITools.AddWidget<UILabel>(goInfo.ParentObject);
+        retLabel.name = string.IsNullOrEmpty(goInfo.ObjectName) ? CommonFunction.GetName<UILabel>() : goInfo.ObjectName;
+
+        retLabel.pivot = labelInfo.Pivot;
+        retLabel.transform.localPosition = goInfo.LocalPosition; // 修改pivot會更動localPosition，故在修改後才改
+        retLabel.depth = (labelInfo.Depth.HasValue) ? labelInfo.Depth.Value : NGUITools.CalculateNextDepth(goInfo.ParentObject);
+        retLabel.font = UIFontManager.GetUIDynamicFont(labelInfo.LabelFontName, labelInfo.LabelFontSize, labelInfo.LabelFontStyle);
+        retLabel.text = labelInfo.LabelText;
+        retLabel.color = labelInfo.LabelColor;
+        retLabel.effectStyle = labelInfo.Outline ? UILabel.Effect.Outline : UILabel.Effect.None;
+        retLabel.MakePixelPerfect();
+
         return retLabel;
     }
 
@@ -882,4 +919,122 @@ public class UISpriteInfo
         return sb.ToString();
     }
 }
+/// <summary>
+/// UILabel建立時需要的資訊
+/// </summary>
+public class UILabelInfo
+{
+    /// <summary>
+    /// 使用的字型名稱
+    /// </summary>
+    public UIFontName LabelFontName
+    {
+        get;
+        protected set;
+    }
+    /// <summary>
+    /// 使用的字型大小
+    /// </summary>
+    public UIFontSize LabelFontSize
+    {
+        get;
+        protected set;
+    }
+    /// <summary>
+    /// 使用的字型Style
+    /// </summary>
+    public FontStyle LabelFontStyle
+    {
+        get;
+        protected set;
+    }
+    /// <summary>
+    /// Label文字顏色
+    /// </summary>
+    public Color LabelColor
+    {
+        get;
+        protected set;
+    }
+    /// <summary>
+    /// Label文字內容
+    /// </summary>
+    public string LabelText
+    {
+        get;
+        protected set;
+    }
+    /// <summary>
+    /// 深度，若為null，產生UISprite時套用NGUITools.CalculateNextDepth()來取得深度
+    /// </summary>
+    public int? Depth
+    {
+        get;
+        protected set;
+    }
+    /// <summary>
+    /// 錨點
+    /// </summary>
+    public UISprite.Pivot Pivot
+    {
+        get;
+        protected set;
+    }
+    /// <summary>
+    /// 是否需要描邊
+    /// </summary>
+    public bool Outline
+    {
+        get;
+        protected set;
+    }
+
+    /// <summary>
+    /// 建構式
+    /// </summary>
+    /// <param name="font">使用字型</param>
+    /// <param name="labelFontName">使用字型名稱</param>
+    /// <param name="labelFontSize">使用字型大小</param>
+    /// <param name="labelFontStyle">使用字型style</param>
+    /// <param name="labelColor">文字顏色</param>
+    /// <param name="labelText">文字內容</param>
+    /// <param name="depth">深度，若為null，產生UISprite時套用NGUITools.CalculateNextDepth()來取得深度</param>
+    /// <param name="pivot">錨點</param>
+    /// <param name="outline">是否需要描邊</param>
+    public UILabelInfo(UIFontName labelFontName, Color labelColor, UIFontSize labelFontSize = UIFontSize.MEDIUM, FontStyle labelFontStyle = FontStyle.Bold,
+        string labelText = null, int? depth = null, UIWidget.Pivot pivot = UIWidget.Pivot.Center, bool outline = true)
+    {
+        LabelFontName = labelFontName;
+        LabelFontSize = labelFontSize;
+        LabelFontStyle = labelFontStyle;
+        LabelColor = labelColor;
+        LabelText = labelText;
+        Depth = depth;
+        Pivot = pivot;
+        Outline = outline;
+    }
+
+    public UILabelInfo(UIFontName labelFontName, UIFontSize labelFontSize = UIFontSize.MEDIUM, FontStyle labelFontStyle = FontStyle.Bold,
+        string labelText = null, int? depth = null, UIWidget.Pivot pivot = UIWidget.Pivot.Center, bool outline = true) :
+        this(labelFontName, Color.white, labelFontSize, labelFontStyle,labelText,depth,pivot,outline)
+    {
+    }
+    
+    ~UILabelInfo()
+    {
+        LabelText = null;
+    }
+
+    public override string ToString()
+    {
+        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+        sb.AppendFormat("Font Name = {0} size = {1} style = {2}", LabelFontName, LabelFontSize, LabelFontStyle);
+        sb.AppendFormat("LabelColor = {0} LabelText = {1}", LabelColor, LabelText);
+        sb.AppendFormat("Depth = {0}\n", Depth.HasValue ? Depth.Value.ToString() : "[null]");
+        sb.AppendFormat("Pivot = {0}\n", Pivot);
+        sb.AppendFormat("Outline = {0}", Outline);
+        return sb.ToString();
+    }
+}
+
 #endregion
