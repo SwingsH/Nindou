@@ -259,7 +259,9 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
             100, 100, null, Color.white, string.Empty);
         _returnPreviousUIBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _returnPreviousUIBtn.onClick.Add(new EventDelegate(this, "ReturnPreviousUI"));
-
+#if KOREAN_GSTAR
+        NGUITools.SetActive(_returnPreviousUIBtn.gameObject, false);
+#endif
         UIPanel stageSelectPanel = NGUITools.AddChild<UIPanel>(_stageSelectBackground.gameObject);
         stageSelectPanel.name = "StageSelect";
         stageSelectPanel.clipping = UIDrawCall.Clipping.SoftClip;

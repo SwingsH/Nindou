@@ -52,8 +52,8 @@ public class UI_Battle : GUIFormBase
         TweenPosition readyPos = _readyText.gameObject.AddComponent<TweenPosition>();
         readyPos.from = Vector3.zero;
         readyPos.to = new Vector3(-1186, 0, 0);
-        readyPos.duration = 0.5f;
-        readyPos.delay = 0.6f;
+        readyPos.duration = 1f;
+        readyPos.delay = 1.2f;
         readyPos.tweenGroup = GLOBALCONST.UI_Battle_Start_TweenGroup;
         // "GO!!!!" 文字
         _goText = GUIStation.CreateUILabel(new GORelativeInfo(panel.gameObject, "GoText"),
@@ -66,14 +66,14 @@ public class UI_Battle : GUIFormBase
         goScale.from = Vector3.forward;
         goScale.to = Vector3.one;
         goScale.duration = 0.5f;
-        goScale.delay = 0.7f;
+        goScale.delay = 1.4f;
         goScale.tweenGroup = GLOBALCONST.UI_Battle_Start_TweenGroup;
         // "GO!!!!" 接著的移動效果
         TweenPosition goPos = _goText.gameObject.AddComponent<TweenPosition>();
         goPos.from = Vector3.zero;
         goPos.to = new Vector3(-1186, 0, 0);
-        goPos.duration = 0.5f;
-        goPos.delay = 1.3f;
+        goPos.duration = 1f;
+        goPos.delay = 2.6f;
         goPos.tweenGroup = GLOBALCONST.UI_Battle_Start_TweenGroup;
         // 勝敗文字
         _winOrLoseText = GUIStation.CreateUILabel(new GORelativeInfo(panel.gameObject, new Vector3(-660, 393, 0), "WinOrLoseText"),
