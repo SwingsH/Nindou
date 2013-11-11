@@ -152,17 +152,20 @@ public class GUIStation
     /// </summary>
     public void ResetAllCamera()
     {
-        float depth = -1f;
+        //float depth = -1f;
         int mask = 1 << GLOBALCONST.LAYER_UI_BASE;
 
         Camera[] allCamera = GameObject.FindObjectsOfType(typeof(Camera)) as Camera[];
         foreach (Camera c in allCamera)
         {
-            depth = Mathf.Max(depth, c.depth);
+            //depth = Mathf.Max(depth, c.depth);
             // 並非只是看UI的攝影機，去掉看ui那層layer
             if (c.cullingMask != mask) { c.cullingMask = c.cullingMask & ~mask; }
         }
-        UICameraDepth = depth + 1;   
+
+        //UICameraDepth = depth + 1;
+        // 將UICamera深度調成固定值
+        UICameraDepth = GLOBALCONST.UI_CAMERA_DEPTH;
     }
 
     #region UI取得相關
@@ -331,6 +334,7 @@ public class GUIStation
             lbl.font = font;
             lbl.text = btnLabelText;
             lbl.color = btnLabelColor;
+            lbl.effectStyle = UILabel.Effect.Outline;
             lbl.MakePixelPerfect();
         }
         // Add a Collider

@@ -108,6 +108,8 @@ public static class GLOBALCONST
 
     public const int MAX_LAYER_OF_SUBUI_HP = 5; // HP Layer數最大值
 
+    public const int UI_CAMERA_DEPTH = 7; // UI_Camera預設深度
+
     public const string DIR_RESOURCES_DATA = "Data/";
     public const string DIR_RESOURCES_PARTICLE = "Particle/";
     public const string DIR_RESOURCES_ATLAS = "Atlas/";

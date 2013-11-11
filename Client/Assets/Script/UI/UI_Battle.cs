@@ -28,7 +28,7 @@ public class UI_Battle : GUIFormBase
     Dictionary<string, SubUI_HPBar> _enemyInfos = new Dictionary<string, SubUI_HPBar>();
 
     bool isPause = false;
-    bool isBattleEnd; // 戰鬥是否已經結束，用來控制按鈕是否有效的flag
+    bool _isBattleEnd; // 戰鬥是否已經結束，用來控制按鈕是否有效的flag
      #region 繼承自GUIFormBase的method
     protected override void CreateAllComponent()
     {
@@ -129,7 +129,6 @@ public class UI_Battle : GUIFormBase
     // Update is called once per frame
     void Update() 
     {
-
     }
 
     protected override void OnDestroy()
@@ -168,8 +167,14 @@ public class UI_Battle : GUIFormBase
 
     void ShowStart()
     {
-        isBattleEnd = false;
+        _isBattleEnd = false;
         NGUITools.SetActive(_winOrLoseText.gameObject, false);
+        foreach (SubUI_RoleIcon ri in _playerRoleIcons)
+        {
+            ri.StopCDTweenColor();
+            ri.UpdateCD(0);
+        }
+
         _uiPlayTween.tweenGroup = GLOBALCONST.UI_Battle_Start_TweenGroup;
         _uiPlayTween.resetIfDisabled = true; // disable時要重設tween
         _uiPlayTween.Play(true);
@@ -177,7 +182,7 @@ public class UI_Battle : GUIFormBase
 
     public void ShowEnd(bool isWin)
     {
-        isBattleEnd = true;
+        _isBattleEnd = true;
         _winOrLoseText.text = (isWin) ? GLOBAL_STRING.WIN_TEXT : GLOBAL_STRING.LOSE_TEXT;
         NGUITools.SetActive(_winOrLoseText.gameObject, true);
         // 更動UILabel的文字時，會重設localScale = 1，所以需要重設
@@ -192,7 +197,7 @@ public class UI_Battle : GUIFormBase
     void FastForwardBtnClick()
     {
         CommonFunction.DebugMsg("按下「加速鈕」");
-        if (isBattleEnd) 
+        if (_isBattleEnd) 
         {
             CommonFunction.DebugMsg("Battle End");
             return; 
@@ -206,7 +211,7 @@ public class UI_Battle : GUIFormBase
     void PauseBtnClick()
     {
         CommonFunction.DebugMsg("按下「暫停鈕」");
-        if (isBattleEnd)
+        if (_isBattleEnd)
         {
             CommonFunction.DebugMsg("Battle End");
             return;
@@ -227,7 +232,7 @@ public class UI_Battle : GUIFormBase
     void IconBtnClick()
     {
         CommonFunction.DebugMsgFormat("按下 {0}", UIButton.current.name);
-        if (isBattleEnd)
+        if (_isBattleEnd)
         {
             CommonFunction.DebugMsg("Battle End");
             return;
@@ -250,9 +255,18 @@ public class UI_Battle : GUIFormBase
         {
             CommonFunction.DebugMsgFormat("現在按下的icon為：{0}，index有誤，請檢查", UIButton.current.name);
         }
+        // 如果CD時間還沒到，則不能施展（TODO:應該之後要把按鈕disable
+        if (!_playerRoleIcons[iconSelect].IsCDTimeUp) 
+        {
+            CommonFunction.DebugMsgFormat("CD時間尚未到，不能使用");
+            return; 
+        }
+
         // 施展技能
         ActionUnit currentRole = BattleManager.Instance.Players[iconSelect] as ActionUnit;
         if (currentRole != null) { currentRole.CastExtrimSkill(); }
+        _playerRoleIcons[iconSelect].StopCDTweenColor();
+        _playerRoleIcons[iconSelect].UpdateCD(0);
     }
     #endregion
 
@@ -313,7 +327,40 @@ public class UI_Battle : GUIFormBase
 
         _playerRoleIcons.Add(new SubUI_RoleIcon(new GORelativeInfo(parentObj, new Vector3(xBase + leftPadding * playerIndex, 12, 0), string.Format("PlayerRoleIcon_{0}", playerIndex)),
             ResourceStation.GetAtlas(InformalDataBase.Instance.playerInfo[playerIndex].spriteNames[(int)GLOBALCONST.eModelPartName.HEAD]),
-            new EventDelegate(this, "IconBtnClick"), "玩家一二三四"));
+            new EventDelegate(this, "IconBtnClick"), "桃太郎"));
+        _playerRoleIcons[playerIndex].UpdateCD(0, Random.Range(1.0f, 3.0f));
+    }
+
+    /// <summary>
+    /// 初始化角色CD時間
+    /// </summary>
+    public void InitPlayerRoleCD(IList<Unit> allPlayers)
+    {
+        for (int index = 0; index < allPlayers.Count; ++index)
+        {
+            if (index < _playerRoleIcons.Count)
+            {
+                ActionUnit au = allPlayers[index] as ActionUnit;
+                _playerRoleIcons[index].StopCDTweenColor();
+                if (au.ExtrimSkill != null) { _playerRoleIcons[index].UpdateCD(0, au.ExtrimSkill.CoolDown); }
+                else { _playerRoleIcons[index].UpdateCD(0, 0); }
+            }
+        }
+    }
+
+    /// <summary>
+    /// 更新角色顯示CD時間的slider
+    /// </summary>
+    /// <param name="deltaTime">經過多少時間</param>
+    public void UpdatePlayerRoleCD(float deltaTime)
+    {
+        foreach (SubUI_RoleIcon ri in _playerRoleIcons)
+        {
+            if (!ri.IsCDTimeUp )
+            {
+                ri.UpdateCD(ri.CurCD + deltaTime);
+            }
+        }
     }
     #endregion
 
@@ -337,7 +384,7 @@ public class UI_Battle : GUIFormBase
             SubUI_HPBar.ShowMode.WITH_AVATAR);
         tempHPBar.FullSize = new Vector2(205 * enemyBarScale, 28 * enemyBarScale);
         tempHPBar.ForegroundPos = new Vector3(14, 2, 0);
-        tempHPBar.ShiftPos = new Vector2(-71, -12);
+        tempHPBar.ShiftPos = new Vector2(-71, 20);
         tempHPBar.SetHP(curHP, maxHP);
         _enemyInfos.Add(enemyName, tempHPBar);
         _enemyInfos[enemyName].UpdatePos(relativePos);

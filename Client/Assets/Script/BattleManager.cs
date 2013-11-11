@@ -945,12 +945,12 @@ public class BattleManager : BattleState
 
 	public override void Update(GameControl control)
 	{
-
 		if (StartCountDown > 0)
 		{
 			StartCountDown -= Time.deltaTime;
 			return;
 		}
+        UpdateUICDTime(Time.deltaTime);
 		UnitRun();
         UpdateUnits();
 	}
@@ -1025,12 +1025,14 @@ public class BattleManager : BattleState
             control.GUIStation.Form<UI_Battle>().AddEnemyInfoUI(enemyUnit.Name, BattleManager.UnitCamera.WorldToScreenPoint(enemyUnit.WorldUpperCenter),
                 (int)enemyUnit.Life, (int)enemyUnit.MaxLife); // TODO: 傳入屬性（陰、陽、體、無）資訊
         }
-        // fs : 設定我方血條UI
+        // fs: 設定我方血條UI
         for (int i = 0; i < GLOBALCONST.MAX_BATTLE_ROLE_COUNT; ++i)
         {
             if (i < Players.Length && Players[i] != null) { control.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true, Players[i].Life, Players[i].MaxLife); }
             else { control.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, false); }
         }
+        // fs: 設定我方角色CD時間
+        control.GUIStation.Form<UI_Battle>().InitPlayerRoleCD(Players.ToList().AsReadOnly());
     }
 
     /// <summary>
@@ -1048,6 +1050,15 @@ public class BattleManager : BattleState
             else { GameControl.Instance.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true, Players[i].Life, Players[i].MaxLife); }
         }
 
+    }
+
+    /// <summary>
+    /// 更新各角色的CD時間的UI顯示
+    /// </summary>
+    /// <param name="deltaTime">經過的時間</param>
+    void UpdateUICDTime(float deltaTime)
+    {
+        GameControl.Instance.GUIStation.Form<UI_Battle>().UpdatePlayerRoleCD(deltaTime);
     }
 
     /// <summary>
@@ -1683,6 +1694,10 @@ public class BattleEntering : BattleState
 	{
         //Application.LoadLevel("BattleField");
         control.GUIStation.ShowAndHideOther(typeof(UI_Loading_Before_Battle));
+        // 為了處理最後換場會跑出格線的問題 GSTAR先暫時這樣處理============
+        control.GUIStation.GUICamera.clearFlags = CameraClearFlags.SolidColor;
+        control.GUIStation.GUICamera.backgroundColor = Color.black;
+        // ================================================================
         control.StartCoroutine(LoadBattleScene());
         TimeMachine.SetTimeScale(1);
 		BattleResult = eBattleResult.None;
@@ -1703,6 +1718,9 @@ public class BattleEntering : BattleState
             {
                 loadSceneOp = null;
                 control.GUIStation.ResetAllCamera(); // 換場完畢，重設定Camera深度
+                // 為了處理最後換場會跑出格線的問題 GSTAR先暫時這樣處理============
+                control.GUIStation.GUICamera.clearFlags = CameraClearFlags.Depth;
+                // ================================================================
                 control.GUIStation.ShowAndHideOther(typeof(UI_Battle));
                 GameControl.Instance.ChangeGameState(BattleManager.Instance);
             }

@@ -188,9 +188,12 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         }
     }
 
-    const int STAGE_TITLE_BG_WIDTH = 1044;
-    const int STAGE_TITLE_BG_HEIGHT = 94;
- 
+    const int STAGE_TITLE_BG_WIDTH = 1252;
+    const int STAGE_TITLE_BG_HEIGHT = 112;
+
+    readonly Vector3 STAGE_NAME_PROGRESS_BG_POS = new Vector3(-230, 335, 0); // 場景名稱&進度的底圖位置
+    readonly Vector3 STAGE_NAME_TEXT_POS = new Vector3(-312, -30, 0); // 場景名稱位置
+
     #region 每個主介面都會有的部分
     private UIButton _characterBtn; // 「人物」按鈕
     private UIButton _bagBtn; // 「背包」按鈕
@@ -242,17 +245,20 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
             new UISpriteInfo(NGUISpriteData.STAGE_BG, 1825, 842, 1, UISprite.Type.Sliced));
 
         // 場景名稱、進度的背景圖
-        UISprite stageName = UIImageManager.CreateUISprite(new GORelativeInfo(_stageSelectBackground.gameObject, new Vector3(-249, 342, 0), "StageTitle"),
+        UISprite stageName = UIImageManager.CreateUISprite(new GORelativeInfo(_stageSelectBackground.gameObject, STAGE_NAME_PROGRESS_BG_POS, "StageTitle"),
             new UISpriteInfo(NGUISpriteData.STAGE_TITLE_BG, STAGE_TITLE_BG_WIDTH, STAGE_TITLE_BG_HEIGHT, 2));
 
         // 場景名稱
-        _stageNameText = GUIStation.CreateUILabel(stageName.gameObject, "StageNameText", UIWidget.Pivot.Left, new Vector3(-258, -26, 0), 3,
-            UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
+        _stageNameText = GUIStation.CreateUILabel(stageName.gameObject, "StageNameText", UIWidget.Pivot.Left, STAGE_NAME_TEXT_POS, 3,
+            UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.UI_STAGESELECT_TITLE, FontStyle.Bold),
             Color.white, "場景名稱：靈山");
         // 場景進度
         _stageProgress = GUIStation.CreateUILabel(stageName.gameObject, "StageProgress", UIWidget.Pivot.Center, new Vector3(233, -26, 0), 3,
-            UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
+            UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.UI_STAGESELECT_TITLE, FontStyle.Bold),
             Color.white, "探索度：80%");
+#if KOREAN_GSTAR
+        NGUITools.SetActive(_stageProgress.gameObject, false);
+#endif
         // 回到上一層的按鈕
         _returnPreviousUIBtn = GUIStation.CreateUIButton(_stageSelectBackground.gameObject, "X", new Vector3(783, 321, 0), 4,
             NGUISpriteData.BTN_CLOSE,
@@ -281,7 +287,7 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
         /// for Test
         for (int i = 0; i < 4; ++i)
         {
-            AddStageInfo(i != 2, string.Format("靈山 - 山腳下 - {0}", i + 1), i + 1, i * 3 + 2, 25);
+            AddStageInfo(i <= 2, string.Format("靈山 - 山腳下 - {0}", i + 1), i + 1, i * 3 + 2, 25);
         }
     }
     #endregion

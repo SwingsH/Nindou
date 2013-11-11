@@ -22,6 +22,7 @@ public enum UIFontSize
     LARGE = 50,
     VERY_LARGE = 70,
     HUD = 30,
+    UI_STAGESELECT_TITLE = 36, // 選關UI中，場景Title的文字大小
     UI_BATTLE_BOSS_NAME = 40, // 戰鬥UI中，boss名字的文字大小
     UI_BATTLE_ROLE_NAME = 38, // 戰鬥UI中，我方角色名字的文字大小
     UI_BATTLE_START = 120, // 戰鬥UI中，開始文字的文字大小
