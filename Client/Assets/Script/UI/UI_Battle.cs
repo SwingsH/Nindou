@@ -29,7 +29,8 @@ public class UI_Battle : GUIFormBase
 
     bool isPause = false;
     bool _isBattleEnd; // 戰鬥是否已經結束，用來控制按鈕是否有效的flag
-     #region 繼承自GUIFormBase的method
+
+    #region 繼承自GUIFormBase的method
     protected override void CreateAllComponent()
     {
         UIAnchor anchor = NGUITools.AddChild<UIAnchor>(gameObject);
@@ -38,7 +39,7 @@ public class UI_Battle : GUIFormBase
         UIPanel panel = NGUITools.AddChild<UIPanel>(anchor.gameObject);
         // "Ready..." 文字
         _readyText = GUIStation.CreateUILabel(new GORelativeInfo(panel.gameObject, "ReadyText"),
-            new UILabelInfo(UIFontName.MSJH, START_TEXT_COLOR, UIFontSize.UI_BATTLE_START, FontStyle.Bold, GLOBAL_STRING.READY_TEXT));
+            new UILabelInfo(UIFontName.MSJH, START_TEXT_COLOR, UIFontSize.UI_BATTLE_START, FontStyle.Bold, GLOBAL_STRING.READY_TEXT, 20));
 
         _readyText.effectDistance = new Vector2(5, 5);
         _readyText.transform.localScale = Vector3.forward; // 先隱藏
@@ -47,6 +48,7 @@ public class UI_Battle : GUIFormBase
         readyScale.from = Vector3.forward;
         readyScale.to = Vector3.one;
         readyScale.duration = 0.5f;
+        readyScale.ignoreTimeScale = false; // 關閉「無視TimeScale」避免第一次進戰鬥時，動畫直接跑到最後讓玩家看不到
         readyScale.tweenGroup = GLOBALCONST.UI_Battle_Start_TweenGroup;
         // "Ready..." 接著的移動效果
         TweenPosition readyPos = _readyText.gameObject.AddComponent<TweenPosition>();
@@ -54,10 +56,11 @@ public class UI_Battle : GUIFormBase
         readyPos.to = new Vector3(-1186, 0, 0);
         readyPos.duration = 1f;
         readyPos.delay = 1.2f;
+        readyPos.ignoreTimeScale = false; // 關閉「無視TimeScale」避免第一次進戰鬥時，動畫直接跑到最後讓玩家看不到
         readyPos.tweenGroup = GLOBALCONST.UI_Battle_Start_TweenGroup;
         // "GO!!!!" 文字
         _goText = GUIStation.CreateUILabel(new GORelativeInfo(panel.gameObject, "GoText"),
-            new UILabelInfo(UIFontName.MSJH, START_TEXT_COLOR, UIFontSize.UI_BATTLE_START, FontStyle.Bold, GLOBAL_STRING.GO_TEXT));
+            new UILabelInfo(UIFontName.MSJH, START_TEXT_COLOR, UIFontSize.UI_BATTLE_START, FontStyle.Bold, GLOBAL_STRING.GO_TEXT, 20));
         
         _goText.effectDistance = new Vector2(5, 5);
         _goText.transform.localScale = Vector3.forward; // 先隱藏
@@ -67,6 +70,7 @@ public class UI_Battle : GUIFormBase
         goScale.to = Vector3.one;
         goScale.duration = 0.5f;
         goScale.delay = 1.4f;
+        goScale.ignoreTimeScale = false; // 關閉「無視TimeScale」避免第一次進戰鬥時，動畫直接跑到最後讓玩家看不到
         goScale.tweenGroup = GLOBALCONST.UI_Battle_Start_TweenGroup;
         // "GO!!!!" 接著的移動效果
         TweenPosition goPos = _goText.gameObject.AddComponent<TweenPosition>();
@@ -74,6 +78,7 @@ public class UI_Battle : GUIFormBase
         goPos.to = new Vector3(-1186, 0, 0);
         goPos.duration = 1f;
         goPos.delay = 2.6f;
+        goPos.ignoreTimeScale = false; // 關閉「無視TimeScale」避免第一次進戰鬥時，動畫直接跑到最後讓玩家看不到
         goPos.tweenGroup = GLOBALCONST.UI_Battle_Start_TweenGroup;
         // 勝敗文字
         _winOrLoseText = GUIStation.CreateUILabel(new GORelativeInfo(panel.gameObject, new Vector3(-660, 393, 0), "WinOrLoseText"),
@@ -183,6 +188,11 @@ public class UI_Battle : GUIFormBase
     public void ShowEnd(bool isWin)
     {
         _isBattleEnd = true;
+        foreach (SubUI_RoleIcon ri in _playerRoleIcons)
+        {
+            ri.SetBtnEnable(false); // 關閉按鈕接收事件
+            //ri.StopCDTweenColor(); // 關閉CD Tween (真的要關掉嗎？？）
+        }
         _winOrLoseText.text = (isWin) ? GLOBAL_STRING.WIN_TEXT : GLOBAL_STRING.LOSE_TEXT;
         NGUITools.SetActive(_winOrLoseText.gameObject, true);
         // 更動UILabel的文字時，會重設localScale = 1，所以需要重設
@@ -255,7 +265,7 @@ public class UI_Battle : GUIFormBase
         {
             CommonFunction.DebugMsgFormat("現在按下的icon為：{0}，index有誤，請檢查", UIButton.current.name);
         }
-        // 如果CD時間還沒到，則不能施展（TODO:應該之後要把按鈕disable
+        // 如果CD時間還沒到，則不能施展(此時應該不會接收到按下的事件，不過以防萬一多擋）
         if (!_playerRoleIcons[iconSelect].IsCDTimeUp) 
         {
             CommonFunction.DebugMsgFormat("CD時間尚未到，不能使用");
@@ -267,6 +277,7 @@ public class UI_Battle : GUIFormBase
         if (currentRole != null) { currentRole.CastExtrimSkill(); }
         _playerRoleIcons[iconSelect].StopCDTweenColor();
         _playerRoleIcons[iconSelect].UpdateCD(0);
+        _playerRoleIcons[iconSelect].SetBtnEnable(false); // 關閉接收點擊
     }
     #endregion
 
@@ -327,7 +338,8 @@ public class UI_Battle : GUIFormBase
 
         _playerRoleIcons.Add(new SubUI_RoleIcon(new GORelativeInfo(parentObj, new Vector3(xBase + leftPadding * playerIndex, 12, 0), string.Format("PlayerRoleIcon_{0}", playerIndex)),
             ResourceStation.GetAtlas(InformalDataBase.Instance.playerInfo[playerIndex].spriteNames[(int)GLOBALCONST.eModelPartName.HEAD]),
-            new EventDelegate(this, "IconBtnClick"), "桃太郎"));
+            new EventDelegate(this, "IconBtnClick"),
+            "桃太郎", true, (GameAttribute)Random.Range(0, System.Enum.GetValues(typeof(GameAttribute)).Length - 1)));
         _playerRoleIcons[playerIndex].UpdateCD(0, Random.Range(1.0f, 3.0f));
     }
 
@@ -344,6 +356,7 @@ public class UI_Battle : GUIFormBase
                 _playerRoleIcons[index].StopCDTweenColor();
                 if (au.ExtrimSkill != null) { _playerRoleIcons[index].UpdateCD(0, au.ExtrimSkill.CoolDown); }
                 else { _playerRoleIcons[index].UpdateCD(0, 0); }
+                _playerRoleIcons[index].SetBtnEnable(false);
             }
         }
     }
@@ -356,7 +369,7 @@ public class UI_Battle : GUIFormBase
     {
         foreach (SubUI_RoleIcon ri in _playerRoleIcons)
         {
-            if (!ri.IsCDTimeUp )
+            if (!ri.IsCDTimeUp)
             {
                 ri.UpdateCD(ri.CurCD + deltaTime);
             }

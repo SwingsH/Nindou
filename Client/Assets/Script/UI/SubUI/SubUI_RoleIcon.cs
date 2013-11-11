@@ -7,7 +7,7 @@ using System.Collections.Generic;
 /// </summary>
 public class SubUI_RoleIcon : GUISubFormBase
 {
-    readonly Color NormalRoleBtnBGColor = CommonFunction.Color256Bit(0, 126, 202, 255);
+    readonly Color NormalRoleBtnBGColor = Color.white;
     readonly Color DeadRoleBtnBGColor = CommonFunction.Color256Bit(28, 28, 28, 255);
     readonly Color DeadRoleGraphColor = new Color(0.3f, 0.3f, 0.3f);
 
@@ -45,6 +45,16 @@ public class SubUI_RoleIcon : GUISubFormBase
         }
     }
 
+    /// <summary>
+    /// 是否已經死亡，若血條不可見當作不是。
+    /// </summary>
+    bool IsDead
+    {
+        get
+        {
+            return _roleHPBar.Visible ? _roleHPBar.CurHP <= 0 : false;
+        }
+    }
 
     #region 物件建立
     /// <summary>
@@ -55,11 +65,13 @@ public class SubUI_RoleIcon : GUISubFormBase
     /// <param name="roleIconEventDelegte">點擊角色Icon的反應函式</param>
     /// <param name="roleName">角色名字</param>
     /// <param name="showHPBar">是否顯示HP條</param>
+    /// <param name="ga">屬性</param>
     public SubUI_RoleIcon(GORelativeInfo goInfo,
         SmoothMoves.TextureAtlas roleTextureAtlas,
         EventDelegate roleIconEventDelegte,
         string roleName,
-        bool showHPBar = true
+        bool showHPBar = true,
+        GameAttribute gameAttr = GameAttribute.NONE
         ) : base(goInfo.ParentObject, goInfo.ObjectName, goInfo.LocalPosition)
     {
         // 若名字為空，修改為預設名稱
@@ -75,7 +87,7 @@ public class SubUI_RoleIcon : GUISubFormBase
         _roleIconBtn.SetColor(NormalRoleBtnBGColor, NormalRoleBtnBGColor, NormalRoleBtnBGColor, NormalRoleBtnBGColor);
         TweenColor btnTC = _roleIconBtn.tweenTarget.AddComponent<TweenColor>();
         btnTC.from = NormalRoleBtnBGColor;
-        btnTC.to = Color.white;
+        btnTC.to = CommonFunction.Color256Bit(117, 134, 84, 255);
         btnTC.duration = 0.5f;
         btnTC.style = UITweener.Style.PingPong;
         btnTC.enabled = false;
@@ -111,7 +123,7 @@ public class SubUI_RoleIcon : GUISubFormBase
         _roleHPBar = new SubUI_HPBar(_roleIconBtn.gameObject, "Role_HP_Bar", new Vector3(-104, -81, 0), 5,
             (int)(219 * GUIStation.RESOLUTION_SCALE_BETWEEN_ART_AND_UI),
             (int)(41*GUIStation.RESOLUTION_SCALE_BETWEEN_ART_AND_UI),
-            ga : (GameAttribute)Random.Range(0, System.Enum.GetValues(typeof(GameAttribute)).Length-1)            
+            ga : gameAttr
             );
         _roleHPBar.FullSize = new Vector2(205, 28);
         _roleHPBar.SetVisible(showHPBar);
@@ -128,11 +140,11 @@ public class SubUI_RoleIcon : GUISubFormBase
         _roleCD.foreground.localPosition = new Vector3(21, 4, 0);
         _roleCD.fullSize = new Vector2(205, 28);
         UISprite roleCDFG = _roleCD.foreground.GetComponent<UISprite>();
-        roleCDFG.color = new Color(0.0f, 1.0f, 1.0f, 1.0f);
+        roleCDFG.color = CommonFunction.Color256Bit(0.0f, 163.0f, 163.0f, 255.0f);
         // TweenColor 
         TweenColor roleCDTweenColor = roleCDFG.gameObject.AddComponent<TweenColor>();
         roleCDTweenColor.from = roleCDFG.color;
-        roleCDTweenColor.to = CommonFunction.Color256Bit(255.0f, 32.0f, 32.0f, 255.0f);
+        roleCDTweenColor.to = CommonFunction.Color256Bit(148.0f, 255.0f, 255.0f, 255.0f);
         roleCDTweenColor.style = UITweener.Style.PingPong;
         roleCDTweenColor.duration = 0.5f;
         roleCDTweenColor.enabled = false;
@@ -208,13 +220,14 @@ public class SubUI_RoleIcon : GUISubFormBase
     /// <param name="maxHP">最大值，若為null或小於等於0，則不做修改</param>
     public void SetHP(int curHP, int? maxHP = null)
     {
+        bool setBeforeIsDead = IsDead;
         _roleHPBar.SetHP(curHP, maxHP);
-        // 有顯示血條時，按鈕是否有效才會被影響
-        if (_roleHPBar.Visible)
+        
+        // 只有在由生=>死才需要特別設定一次按鈕的enable&Tween
+        if (!setBeforeIsDead && IsDead)
         {
-            SetBtnEnable(_roleHPBar.CurHP > 0);
-            // 角色死亡則關閉顏色Tween
-            if (_roleHPBar.CurHP <= 0) { StopCDTweenColor(); }
+            SetBtnEnable(false);
+            StopCDTweenColor(); // 角色死亡則關閉顏色Tween
         }
     }
 
@@ -222,26 +235,32 @@ public class SubUI_RoleIcon : GUISubFormBase
     /// 設定按鈕失效與否&對應的畫面效果
     /// </summary>
     /// <param name="isEnable">是否enable</param>
-    void SetBtnEnable(bool isEnable)
+    public void SetBtnEnable(bool isEnable)
     {
-        // fs : 如果設為true，則需要立刻更改顏色，否則會有前一場戰鬥死亡變暗，導致下一場該角色會產生由暗變亮的效果
-        if (isEnable) 
+        Color disabledGraphColor;
+        bool finalSetEnable;
+        if (IsDead)
         {
-            _roleIconBtn.disabledColor = NormalRoleBtnBGColor;
-            _roleIconBtn.UpdateColor(true, true); 
-        }
-        else 
-        { 
             _roleIconBtn.disabledColor = DeadRoleBtnBGColor;
             _roleIconBtn.UpdateColor(false, false);
+            finalSetEnable = false; // 死亡時當然enable是關閉狀態
+            disabledGraphColor = DeadRoleGraphColor;
         }
-        _roleIconBtn.enabled = isEnable;
-        _roleIconBtnScale.enabled = isEnable;
+        else
+        {
+            _roleIconBtn.disabledColor = NormalRoleBtnBGColor;
+            _roleIconBtn.UpdateColor(isEnable, true);
+            finalSetEnable = isEnable;
+            disabledGraphColor = Color.white;
+        }
 
-        _roleHead.color = isEnable ? Color.white : DeadRoleGraphColor;
-        _roleEye.color = isEnable ? Color.white : DeadRoleGraphColor;
-        _roleHair.color = isEnable ? Color.white : DeadRoleGraphColor;
+        _roleIconBtn.enabled = finalSetEnable;
+        _roleIconBtnScale.enabled = finalSetEnable;
+        _roleHead.color = disabledGraphColor;
+        _roleEye.color = disabledGraphColor;
+        _roleHair.color = disabledGraphColor;
     }
+
     /// <summary>
     /// 設定角色名字
     /// </summary>
@@ -251,10 +270,14 @@ public class SubUI_RoleIcon : GUISubFormBase
         _roleName.text = newRoleName;
     }
 
-
+    /// <summary>
+    /// 更新CD值和對應顯示
+    /// </summary>
+    /// <param name="curCD">現在已等待時間</param>
+    /// <param name="maxCD">需等待時間（=null則不做更動）</param>
     public void UpdateCD(float curCD, float? maxCD = null)
-    {
-        if (_roleHPBar.CurHP <= 0) { return; } // 角色已經死亡就不更新CD值
+    {        
+        if (IsDead) { return; } // 角色已經死亡就不更新CD值
         if (maxCD.HasValue) { _maxCD = maxCD.Value; }
         // 如果該角色maxCD <= 0，表示不應該顯示slider有值，將其數值設為0
         if (_maxCD <= 0) 
@@ -267,6 +290,7 @@ public class SubUI_RoleIcon : GUISubFormBase
         _roleCD.value = _curCD / _maxCD;
         if (IsCDTimeUp)
         {
+            SetBtnEnable(true); // CD到了，開啟接收事件
             foreach (TweenColor tc in _roleCDTweenColors)
             {
                 if (!tc.enabled)
@@ -276,13 +300,6 @@ public class SubUI_RoleIcon : GUISubFormBase
                 }
             }
         }
-    }
-
-    void SetTweenColor(ref TweenColor tc)
-    {
-        tc.to = CommonFunction.Color256Bit(255.0f, 32.0f, 32.0f, 255.0f);
-        tc.style = UITweener.Style.PingPong;
-        tc.enabled = false;
     }
 
     public void StopCDTweenColor()
