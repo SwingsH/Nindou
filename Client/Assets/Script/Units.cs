@@ -57,7 +57,7 @@ public abstract class Unit
 	}
 	public float EntityScale
 	{
-		get { return 1 + (Size - 1) * 0.8f; }
+		get { return 1 + (Size - 1) * GLOBALCONST.GameSetting.ENTITY_SCALE_RATE; }
 	}
 	private eDirection _direction;
 	public eDirection Direction
@@ -70,10 +70,10 @@ public abstract class Unit
 				switch (value)
 				{
 					case eDirection.Left:
-						Entity.transform.localScale = Vector3.one * (1 + (Size - 1) * 0.8f);
+						Entity.transform.localScale = Vector3.one * EntityScale;
 						break;
 					default:
-						Entity.transform.localScale = new Vector3(-1, 1, 1) * (1 + (Size - 1) * 0.8f);
+						Entity.transform.localScale = new Vector3(-1, 1, 1) * EntityScale;
 						break;
 				}
 			}

@@ -27,15 +27,37 @@ public static class EditorTools {
         [DoubleStringValue("左手掌", "PalmL")]			PALM_LEFT_2,
         [DoubleStringValue("左手", "HandL")]				HAND_LEFT ,
         [DoubleStringValue("右手", "HandR")]			    HAND_RIGHT ,
+		[DoubleStringValue("頭髮", "Hair")]				HAIR ,
         [DoubleStringValue("頭", "Head")]				HEAD ,
+		[DoubleStringValue("臉", "Head")]				FACE,
+		[DoubleStringValue("眼睛", "Eyes")]				Eyes,
         [DoubleStringValue("左腳", "LegL")]				LEG_LEFT ,
         [DoubleStringValue("右腳", "LegR")]				LEG_RIGHT ,
         [DoubleStringValue("身體", "Body")]				BODY ,
         [DoubleStringValue("武器", "WEAPON")]			WEAPON,
-
+		[DoubleStringValue("001-手", "HandR")]			Hand001,
+		[DoubleStringValue("002-手", "HandR")]			Hand002,
+		[DoubleStringValue("003-手", "HandL")]			Hand003,
+		[DoubleStringValue("004-手", "HandL")]			Hand004,
+		[DoubleStringValue("005-手", "HandL")]			Hand005,
+		[DoubleStringValue("004-腳", "LegR")]			Leg004,
+		[DoubleStringValue("005-腳", "LegL")]			Leg005,
     }
 
-	[MenuItem("Tools/RenameModelTexture")]
+	public const string HEAD = "Head";
+	public const string EYES = "Eyes";
+	public const string HAIR = "Hair";
+	public const string HEADDRESS = "HeadDress";
+	public const string LEG_LEFT = "LegL";
+	public const string LEG_RIGHT = "LegR";
+	public const string HAND_LEFT = "HandL";
+	public const string HAND_RIGHT = "HandR";
+	public static readonly string[] HEAD_PART_NAMES = new string[] { HEAD, EYES, HAIR, HEADDRESS };
+	public const string SETS_POSTFIX = "Set";
+	public const string SETS_SEPERATER = "_";
+	public const string DefaultAtlasDir = "Assets/ArtResources/Atlas";
+
+	[MenuItem("Tools/ModelTexture/RenameModelTexture")]
 	public static void RenameModelTexture()
 	{
 		UnityEngine.Object[] objs = Selection.GetFiltered(typeof(Texture), SelectionMode.DeepAssets);
@@ -60,7 +82,291 @@ public static class EditorTools {
             }
         }
 	}
+	//將所選資料夾底下所有的圖建成一個atlas，名稱為該資料夾名稱
+	//Selection.GetFiltered沒辦法只取一層，所以不要建成有多層資料夾的以免發生問題
+	[MenuItem("Tools/ModelTexture/BuildModelAtlas")]
+	public static void BuildModelAtlas()
+	{
+		
+		UnityEngine.Object[] objs = Selection.GetFiltered(typeof(Texture), SelectionMode.DeepAssets);
+		Dictionary<string, List<Texture2D>> GroupTexture = new Dictionary<string, List<Texture2D>>();
+		if (objs.Length != 0)
+		{
+			
+			foreach (Texture2D t2di in objs)
+			{
+				if (t2di == null)
+					continue;
+				//用資料夾名稱來當atlas的名稱，用atlas的名稱分組
+				string atlasName = Path.GetFileNameWithoutExtension(Path.GetDirectoryName(AssetDatabase.GetAssetPath(t2di)));
+				if (GroupTexture.ContainsKey(atlasName))
+					GroupTexture[atlasName].Add(t2di);
+				else
+				{
+					List<Texture2D> tempList = new List<Texture2D>();
+					tempList.Add(t2di);
+					GroupTexture.Add(atlasName, tempList);
+				}
+			}
 
+			foreach (KeyValuePair<string, List<Texture2D>> kvp in GroupTexture)
+			{
+				if (kvp.Value.Count > 0)
+				{
+					BuildAtlas(kvp.Value.ToArray(), kvp.Key, 0, 2048);
+				}
+			}
+		}
+	}
+
+	public static void BuildAtlas(Texture2D[] textures, string atlasName, int padding, int maxSize)
+	{
+		//定位點，下面是一般玩家角色套用的，桃太郎那種是不一樣的值
+		Dictionary<string, Vector2> defaultPivotOffsets = new Dictionary<string, Vector2>();
+		defaultPivotOffsets.Add("HeadDress", new Vector2(-0.06964286f, -0.2276786f));
+		defaultPivotOffsets.Add("Hair", new Vector2(-0.04821428f, -0.2662743f));
+		defaultPivotOffsets.Add("Eyes", new Vector2(-0.07386363f, -0.125f));
+		defaultPivotOffsets.Add("HandR", new Vector2(-0.06964286f, -0.2276786f));
+		defaultPivotOffsets.Add("Head", new Vector2(-0.03214286f, -0.2366883f));
+		defaultPivotOffsets.Add("LegR", new Vector2(-0.075f, -0.3122971f));
+		defaultPivotOffsets.Add("HandL", new Vector2(0f, -0.2465503f));
+		defaultPivotOffsets.Add("Body", new Vector2(0.04821428f, -0.06903409f));
+		defaultPivotOffsets.Add("LegL", new Vector2(-0.02142857f, -0.3188717f));
+
+		if (AssetDatabase.LoadAssetAtPath(DefaultAtlasDir, typeof(Object)) == null)
+			AssetDatabase.CreateFolder("Assets/ArtResources", "Atlas");
+
+		foreach (Texture2D t2di in textures)
+		{
+			if (t2di == null)
+				continue;
+			string iPath = AssetDatabase.GetAssetPath(t2di);
+			TextureImporter ti = AssetImporter.GetAtPath(iPath) as TextureImporter;
+			if (ti)
+			{
+				ti.isReadable = true;
+				AssetDatabase.ImportAsset(iPath);
+			}
+		}
+		if (textures.Length > 0)
+		{
+			TextureAtlas atlas = ScriptableObject.CreateInstance<TextureAtlas>();
+			atlas.padding = padding;
+			atlas.maxAtlasSize = maxSize;
+			atlas.material = new Material(Shader.Find("Particles/Alpha Blended"));
+
+			atlas.textureNames = new List<string>();
+			atlas.texturePaths = new List<string>();
+			atlas.textureGUIDs = new List<string>();
+			atlas.textureSizes = new List<Vector2>();
+
+			atlas.defaultPivotOffsets = new List<Vector2>(new Vector2[textures.Length]);
+			for (int i = 0; i < textures.Length; i++)
+			{
+				atlas.textureNames.Add(textures[i].name);
+				atlas.texturePaths.Add(AssetDatabase.GetAssetPath(textures[i]));
+				atlas.textureGUIDs.Add(AssetDatabase.AssetPathToGUID(atlas.texturePaths[i]));
+				atlas.textureSizes.Add(new Vector2(textures[i].width, textures[i].height));
+				foreach (KeyValuePair<string, Vector2> kvp in defaultPivotOffsets)
+				{
+
+					if (textures[i].name.StartsWith(kvp.Key, true, null))
+					{
+						atlas.defaultPivotOffsets[i] = kvp.Value;
+						continue;
+					}
+				}
+			}
+
+			Texture2D newTex = new Texture2D(atlas.maxAtlasSize, atlas.maxAtlasSize);
+			atlas.uvs = new List<Rect>(newTex.PackTextures(textures, atlas.padding, atlas.maxAtlasSize));
+
+			AssetDatabase.CreateAsset(atlas, DefaultAtlasDir + "/" + atlasName + ".Asset");
+			AssetDatabase.CreateAsset(atlas.material, DefaultAtlasDir + "/" + atlasName + ".Mat");
+
+			string nPath = DefaultAtlasDir + "/" + atlasName + ".png";
+			//Debug.Log(nPath);
+			FileStream fs = new FileStream(Application.dataPath.Replace("Assets", nPath), FileMode.Create);
+			byte[] tb = newTex.EncodeToPNG();
+			fs.Write(tb, 0, tb.Length);
+			fs.Close();
+			AssetDatabase.ImportAsset(nPath);
+
+			newTex = AssetDatabase.LoadAssetAtPath(nPath, typeof(Texture2D)) as Texture2D;
+			atlas.material.mainTexture = newTex;
+		}
+	}
+
+	//頭、頭飾、眼睛（五官）部位，這幾個部份比較獨立，沒有一整組的圖，大部份的時候都是單張，所以atlas建立的時候另外各建一個群組
+	//檔名用固定名稱加編號(部位_X)，每n個編號包成一組
+	//每個部位要先用資料夾分類好，不然會錯
+	[MenuItem("Tools/ModelTexture/RenameHeadPartTexture")]
+	public static void RenameHeadPartTexture()
+	{
+		UnityEngine.Object[] objs = Selection.GetFiltered(typeof(Texture), SelectionMode.DeepAssets);
+
+		foreach (Texture t in objs)
+		{
+			if (t)
+			{
+				string path =AssetDatabase.GetAssetPath(t);
+				string dirName = Path.GetDirectoryName(path);
+				string partName = "";
+				foreach (string defaultPartName in HEAD_PART_NAMES)
+				{
+					if (dirName.EndsWith(defaultPartName, true, null))
+					{
+						Debug.Log(dirName);
+						Debug.Log(defaultPartName);
+						partName = defaultPartName;
+					}
+				}
+				if (string.IsNullOrEmpty(partName))
+					continue;
+				if (!t.name.StartsWith(partName, true, null))
+				{
+					string newpath = AssetDatabase.GenerateUniqueAssetPath(Path.GetDirectoryName(path) + "/" + partName + SETS_SEPERATER + "1" + Path.GetExtension(path));
+					AssetDatabase.MoveAsset(AssetDatabase.GetAssetPath(t), newpath);
+				}
+			}
+		}
+	}
+
+	//特殊用途，把多層資料夾更名減少一層
+	[MenuItem("Tools/ModelTexture/RenameFolder")]
+	public static void RenameFolder()
+	{
+		UnityEngine.Object[] objs = Selection.GetFiltered(typeof(Object), SelectionMode.DeepAssets);
+
+		//先取得選取的所有資料夾
+		List<string> folderNames = new List<string>();
+		foreach (Object obji in objs)
+		{
+			if (obji.GetType().ToString() == "UnityEngine.Object")
+			{
+				folderNames.Add(AssetDatabase.GetAssetPath(obji));
+			}
+		}
+		
+		//再看現有的資料夾中有沒有父資料夾是包含在選取的資料夾中
+		foreach (Object obji in objs)
+		{
+			if (obji.GetType().ToString() == "UnityEngine.Object")
+			{
+				Debug.Log(obji);
+				string fName = Path.GetDirectoryName(AssetDatabase.GetAssetPath(obji));
+				if (folderNames.Contains(fName))
+				{
+					string newPath = AssetDatabase.GenerateUniqueAssetPath(fName + "_1");
+					Debug.Log(AssetDatabase.MoveAsset(AssetDatabase.GetAssetPath(obji), newPath));
+				}
+			}
+		}
+	}
+	[MenuItem("Tools/ModelTexture/CombineSelectTexture")]
+	public static void CombineSelectTexture()
+	{
+		UnityEngine.Object[] objs = Selection.GetFiltered(typeof(Texture2D), SelectionMode.DeepAssets);
+
+		List<Texture2D> textures = new List<Texture2D>();
+		foreach (Texture2D t in objs)
+		{
+			if (t)
+			{
+				textures.Add(t);
+			}
+		}
+		if (textures.Count > 1)
+		{
+			Texture2D t2d = new Texture2D(textures[0].width, textures[0].height);
+			Color[] cols = new Color[t2d.width * t2d.height];
+			foreach (Texture2D t2di in textures)
+			{
+				if (t2d.width != t2di.width || t2d.height != t2di.height)
+					continue;
+				string iPath = AssetDatabase.GetAssetPath(t2di);
+				TextureImporter ti = AssetImporter.GetAtPath(iPath) as TextureImporter;
+				if (ti)
+				{
+					ti.isReadable = true;
+					ti.textureFormat = TextureImporterFormat.ARGB32;
+					AssetDatabase.ImportAsset(iPath);
+				}
+				Color[]  tcols = t2di.GetPixels();
+				for (int i = 0; i < tcols.Length; i++)
+				{
+					cols[i] = Color.Lerp(cols[i], tcols[i], tcols[i].a);
+				}
+			}
+			t2d.SetPixels(cols);
+			t2d.Apply();
+			string nPath = AssetDatabase.GenerateUniqueAssetPath(AssetDatabase.GetAssetPath(textures[0]));
+			nPath = Path.ChangeExtension(nPath, ".png");
+			nPath = Application.dataPath.Replace("Assets", nPath);
+			Debug.Log(nPath);
+			FileStream fs = new FileStream(nPath, FileMode.Create);
+			byte[] tb = t2d.EncodeToPNG();
+			fs.Write(tb, 0, tb.Length);
+			fs.Close();
+			AssetDatabase.Refresh();
+		}
+
+		
+	}
+
+	[MenuItem("Tools/ModelTexture/SwapLeftRight")]
+	public static void SwapLR()
+	{
+		UnityEngine.Object[] objs = Selection.GetFiltered(typeof(Texture), SelectionMode.DeepAssets);
+		List<Texture2D> LTexture = new List<Texture2D>();
+		List<Texture2D> RTexture = new List<Texture2D>();
+		foreach (Texture2D t in objs)
+		{
+			if (t)
+			{
+				switch (t.name)
+				{
+					case HAND_LEFT:
+					case LEG_LEFT:
+						LTexture.Add(t);
+						break;
+					case HAND_RIGHT:
+					case LEG_RIGHT:
+						RTexture.Add(t);
+						break;
+				}
+			}
+		}
+
+		foreach (Texture2D t in LTexture)
+		{
+			AssetDatabase.RenameAsset(AssetDatabase.GetAssetPath(t), t.name+"RR");
+		}
+		foreach (Texture2D t in RTexture)
+		{
+			string newName;
+			switch (t.name)
+			{
+				case HAND_RIGHT:
+					newName = HAND_LEFT;
+					break;
+				case LEG_RIGHT:
+					newName = LEG_LEFT;
+					break;
+				default:
+					continue;
+			}
+			AssetDatabase.RenameAsset(AssetDatabase.GetAssetPath(t), newName);
+		}
+		foreach (Texture2D t in LTexture)
+		{
+			if (t.name.Contains(HAND_LEFT))
+				AssetDatabase.RenameAsset(AssetDatabase.GetAssetPath(t), HAND_RIGHT);
+			else if (t.name.Contains(LEG_LEFT))
+				AssetDatabase.RenameAsset(AssetDatabase.GetAssetPath(t), LEG_RIGHT);
+		}
+
+	}
     [MenuItem("Tools/RemoveWhite")]
     public static void RemoveWhite()
     {
@@ -382,8 +688,22 @@ public static class EditorTools {
 	[MenuItem("Tools/QuickTest")]
 	public static void QuickTest()
 	{
-		LinkedList<int> ll = new LinkedList<int>();
-		Debug.Log(ll.First);
+		TextureAtlas ta = Selection.activeObject as TextureAtlas;
+		Dictionary<string, Vector2> defaultPivotOffsets = new Dictionary<string, Vector2>();
+		if (ta)
+		{
+
+			string copyCode = @"Dictionary<string,Vector2> defaultPivotOffsets = new Dictionary<string,Vector2>();";
+			for (int i = 0; i < ta.textureNames.Count; i++)
+			{
+				copyCode += "\n";
+				copyCode += string.Format("defaultPivotOffsets.Add(\"{0}\",new Vector2({1}f,{2}f));", ta.textureNames[i], ta.defaultPivotOffsets[i].x, ta.defaultPivotOffsets[i].y);
+			}
+			TextEditor te = new TextEditor();
+			te.content = new GUIContent(copyCode);
+			te.SelectAll();
+			te.Copy();
+		}
 	}
 
 	[MenuItem("Tools/QuickTest1")]

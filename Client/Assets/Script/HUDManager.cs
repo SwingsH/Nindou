@@ -205,8 +205,8 @@ public class HUDManager : MonoBehaviour {
 	//多段攻擊的總傷害文字
 	void SetDamageGroupAnim(HUDTextInfo info, Vector3 position)
 	{
-		info.PosStart = position + new Vector3(0, 1f * ShiftUnit);
-		info.PosEnd = position + new Vector3(0, 3f * ShiftUnit);
+		info.PosStart = position + new Vector3(0, 2f * ShiftUnit);
+		info.PosEnd = position + new Vector3(0, 3.5f * ShiftUnit);
 		info.PosXCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 		info.PosYCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 		info.Duration = 1.5f;
@@ -239,6 +239,10 @@ public class HUDManager : MonoBehaviour {
 	}
 
 
+	public void ShowText(string text, Vector3 worldPosition, Vector3 moveDirection, Color color, float Duration)
+	{
+		ShowText(text, worldPosition, moveDirection, color, Duration, DisplayLayer);
+	}
 	/// <summary>
 	/// 一般文字
 	/// </summary>
@@ -247,7 +251,7 @@ public class HUDManager : MonoBehaviour {
 	/// <param name="moveDirection">往哪個方向移動</param>
 	/// <param name="color">顏色</param>
 	/// <param name="Duration">顯示時間</param>
-	public void ShowText(string text, Vector3 worldPosition, Vector3 moveDirection, Color color, float Duration)
+	public void ShowText(string text, Vector3 worldPosition, Vector3 moveDirection, Color color, float Duration,int showlayer)
 	{
 		Vector3 localPosition = transform.InverseTransformPoint(worldPosition);
 		HUDTextInfo textinfo = GetText();
@@ -389,7 +393,22 @@ public class HUDTextInfo
 				textComponent.characterSize = value;
 		}
 	}
+	public int Layer
+	{
+		get
+		{
+			if (textComponent != null)
+				return textComponent.gameObject.layer;
+			else
+				return 0;
+		}
 
+		set
+		{
+			if (textComponent != null)
+				textComponent.gameObject.layer = value;
+		}
+	}
 	//位移
 	//xy的動畫曲線是否要分開，不分開都用PosXCurve
 	public bool PosSeperateXY = true;

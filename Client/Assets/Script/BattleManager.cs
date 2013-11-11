@@ -62,7 +62,7 @@ public class BattleManager : BattleState
 	UnitGenerater Generater;
 
 	//跳血元件
-	HUDManager hudManager;
+	public HUDManager hudManager;
 	//後製元件
 	PostEffectManager postEffectManager;
 	
@@ -875,7 +875,7 @@ public class BattleManager : BattleState
 	{
 		if (Instance != null && Instance.hudManager != null)
 		{
-			Instance.hudManager.ShowText(GLOBAL_STRING.HUD_MISS, displayPosition, Vector3.left, Color.red, 0.5f);
+			Instance.hudManager.ShowText(GLOBAL_STRING.HUD_MISS, displayPosition, Vector3.left, Color.red, 0.5f,GLOBALCONST.GameSetting.LAYER_UNIT);
 		}
 	}
 	#endregion
@@ -1722,6 +1722,7 @@ public class BattleEntering : BattleState
                 control.GUIStation.GUICamera.clearFlags = CameraClearFlags.Depth;
                 // ================================================================
                 control.GUIStation.ShowAndHideOther(typeof(UI_Battle));
+				SetBackGround();
                 GameControl.Instance.ChangeGameState(BattleManager.Instance);
             }
             else
@@ -1733,6 +1734,17 @@ public class BattleEntering : BattleState
         //{
         //    GameControl.Instance.ChangeGameState(BattleManager.Instance);
         //}
+	}
+	public void SetBackGround()
+	{
+		string[] tempBackGround = new string[] { "BambooForest", "GhostIsland" };
+		int index = Random.Range(0, tempBackGround.Length);
+		GameObject bggo = GameObject.FindGameObjectWithTag(GLOBALCONST.TAG_BACKGROUND);
+		if (bggo != null && bggo.renderer != null)
+			bggo.renderer.sharedMaterial = ResourceStation.LoadBackGroundMaterial(tempBackGround[index]);
+		GameObject ggo = GameObject.FindGameObjectWithTag(GLOBALCONST.TAG_GROUND);
+		if (ggo != null && ggo.renderer != null)
+			ggo.renderer.sharedMaterial = ResourceStation.LoadGroundMaterial(tempBackGround[index]);
 	}
 	public override void OnChangeOut(GameControl control)
 	{

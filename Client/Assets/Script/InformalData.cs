@@ -80,7 +80,7 @@ public class InformalDataBase{
 		playerInfo[tempIndex].spriteNames[1] = InformalDataBase.TestPlayAtlasName[1];
 		tempIndex = 2;
 		playerInfo[tempIndex] = new UnitInfo();
-		playerInfo[tempIndex].AttackID = 2;
+		playerInfo[tempIndex].AttackID = 4;
 		playerInfo[tempIndex].SkillID = new ushort[] { 3006, 3007 };
 		playerInfo[tempIndex].MaxLife = 200;
 		playerInfo[tempIndex].MoveMode = 1;
@@ -90,10 +90,10 @@ public class InformalDataBase{
 		for (int i = 0; i < playerInfo[tempIndex].spriteNames.Length; i++)
 			playerInfo[tempIndex].spriteNames[i] = InformalDataBase.TestPlayAtlasName[1];
 		playerInfo[tempIndex].spriteNames[1] = InformalDataBase.TestPlayAtlasName[1];
-		playerInfo[tempIndex].spriteNames[(int)GLOBALCONST.eModelPartName.WEAPON_RIGHT] = "";
+		playerInfo[tempIndex].spriteNames[(int)GLOBALCONST.eModelPartName.WEAPON_RIGHT] = TestPlayAtlasName[2];
 		tempIndex = 3;
 		playerInfo[tempIndex] = new UnitInfo();
-		playerInfo[tempIndex].AttackID = 2;
+		playerInfo[tempIndex].AttackID = 3;
 		playerInfo[tempIndex].SkillID = new ushort[] { 3013, 3014 };
 		playerInfo[tempIndex].MaxLife = 200;
 		playerInfo[tempIndex].MoveMode = 1;
@@ -105,7 +105,7 @@ public class InformalDataBase{
 		for (int i = (int)GLOBALCONST.eModelPartName.BODY; i < playerInfo[tempIndex].spriteNames.Length; i++)
 			playerInfo[tempIndex].spriteNames[i] = InformalDataBase.TestPlayAtlasName[2];
 		playerInfo[tempIndex].spriteNames[1] = InformalDataBase.TestPlayAtlasName[1];
-		playerInfo[tempIndex].spriteNames[(int)GLOBALCONST.eModelPartName.WEAPON_RIGHT] ="";
+		playerInfo[tempIndex].spriteNames[(int)GLOBALCONST.eModelPartName.WEAPON_RIGHT] = TestPlayAtlasName[2];
 
 		#endregion
 

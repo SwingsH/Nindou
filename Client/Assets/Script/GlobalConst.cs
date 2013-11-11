@@ -21,7 +21,7 @@ public static class GLOBALCONST
 		public static readonly Vector2 GRID_SIZE = new Vector2(8, 6);
 		public const int GRID_COUNT_W = 9;
 		public const int GRID_COUNT_L = 5;
-
+		public const float ENTITY_SCALE_RATE = 0.5f;
 		public const int ENEMY_MAX_NUMBER = 5;
 	}
 	public static class BattleSettingValue
@@ -42,6 +42,11 @@ public static class GLOBALCONST
         public static readonly Color AVATAR_DAMAGE_COLOR = CommonFunction.Color256Bit(200, 100, 100, 255); //受擊後變色效果
         public static readonly Color AVATAR_NORMAL_COLOR = CommonFunction.Color256Bit(255, 255, 255, 255); 
     }
+	public const string TAG_BACKGROUND = "BackGround";
+	public const string TAG_GROUND = "Ground";
+	public const string BACKGROUND_MATERIAL_POSTFIX = "_BackGround";
+	public const string GROUND_MATERIAL_POSTFIX = "_Ground";
+
 
 	public const int TOTAL_BONE_NUMBER = 11;
 	public const string HAND_LEFT = "HandL";
@@ -114,6 +119,7 @@ public static class GLOBALCONST
     public const string DIR_RESOURCES_PARTICLE = "Particle/";
     public const string DIR_RESOURCES_ATLAS = "Atlas/";
     public const string DIR_RESOURCES_AVATAR_BONE = "BasicBone/";
+	public const string DIR_RESOURCES_BACKGROUND = "BackGround/";
 
     #endregion
 

@@ -16,6 +16,8 @@ public class ResourceStation {
     static Dictionary<string, ParticleSystem> particles = new Dictionary<string, ParticleSystem>();
     static Dictionary<string, TextureAtlas> Atlases = new Dictionary<string, TextureAtlas>();
 
+	static Dictionary<string, Material> mats = new Dictionary<string, Material>();
+
     //constructor
     public ResourceStation()
     {
@@ -197,4 +199,19 @@ public class ResourceStation {
     }
 
     #endregion
+
+	#region Materials
+	public static Material LoadMaterial_FromResource(string name)
+	{
+		return Resources.Load(name,typeof(Material)) as Material;
+	}
+	public static Material LoadBackGroundMaterial(string name)
+	{
+		return LoadMaterial_FromResource(GLOBALCONST.DIR_RESOURCES_BACKGROUND + name + GLOBALCONST.BACKGROUND_MATERIAL_POSTFIX);
+	}
+	public static Material LoadGroundMaterial(string name)
+	{
+		return LoadMaterial_FromResource(GLOBALCONST.DIR_RESOURCES_BACKGROUND + name + GLOBALCONST.GROUND_MATERIAL_POSTFIX);
+	}
+	#endregion
 }

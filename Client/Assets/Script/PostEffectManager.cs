@@ -18,17 +18,17 @@ public class PostEffectManager : MonoBehaviour {
 	//大絕特效
 	Camera ExtraCamera;
 	Renderer ExtraRenderer;
-	const float PART2_STARTTIME = 0.2f;
-	const float EXTRIM_TIME = 1f;
+	const float PART2_STARTTIME = 1f;
+	const float EXTRIM_TIME = 2f;
 	readonly Vector3 EXTRIM_RENDERER_BORDER_START_POS = new Vector3(-600, -85, 60);
 	readonly Vector3 EXTRIM_RENDERER_BORDER_END_POS = new Vector3(0, -85, 60);
 	bool isPlayingExtrimeSkill = false;
 	Vector3 Extrim_StartPos;
 	Vector3 Extrim_EndPos;
-	Unit Extrim_TargetUnit;
+	Unit Extrim_CastUnit;
 
 	float ExtrimEffect_StartTime;
-	AnimationCurve Extrim_AnimCurve = new AnimationCurve(new Keyframe(0.00f, 0.00f, 3.15f, 3.15f), new Keyframe(0.90f, 1.00f, 0f, 0f));
+	AnimationCurve Extrim_AnimCurve = new AnimationCurve(new Keyframe(0.00f, 0.00f, 5.35f, 5.35f), new Keyframe(0.60f, 1.00f, 0.00f, 0.00f));
 
 	//存現在最大是幾號，新增號碼時用
 	public int currentMaxNumber = -1;
@@ -210,7 +210,7 @@ public class PostEffectManager : MonoBehaviour {
 	/// <summary>
 	/// 開始播放施放大絕前的效果
 	/// </summary>
-	public void ExtrimSkillEffectStart(Unit targetUnit)
+	public void ExtrimSkillEffectStart(Unit castUnit)
 	{
 		if (isPlayingExtrimeSkill)
 			return;
@@ -245,17 +245,17 @@ public class PostEffectManager : MonoBehaviour {
 			ExtraRenderer.transform.localPosition = new Vector3(0, 0, 0);
 			ExtraRenderer.transform.localScale = new Vector3(600, 1100, 1);
 		}
-		if(targetUnit == null)
+		if(castUnit == null)
 			return;
-		Extrim_TargetUnit = targetUnit;
-		if (Extrim_TargetUnit.Entity != null)
+		Extrim_CastUnit = castUnit;
+		if (Extrim_CastUnit.Entity != null)
 		{
-			NGUITools.SetLayer(Extrim_TargetUnit.Entity, GLOBALCONST.GameSetting.LAYER_EXTRAUNIT);
+			NGUITools.SetLayer(Extrim_CastUnit.Entity, GLOBALCONST.GameSetting.LAYER_EXTRAUNIT);
 			//特殊需求，大小要回到1
-			Extrim_TargetUnit.Entity.transform.localScale = Vector3.one;
+			Extrim_CastUnit.Entity.transform.localScale = Vector3.one;
 		}
-		Vector3 inTopRightPos = Extrim_TargetUnit.WorldUpperLeft;
-		Vector3 outTopRightPos = Extrim_TargetUnit.WorldUpperRight;
+		Vector3 inTopRightPos = Extrim_CastUnit.WorldUpperLeft;
+		Vector3 outTopRightPos = Extrim_CastUnit.WorldUpperRight;
 		ExtraCamera.gameObject.SetActive(true);
 		Extrim_StartPos = ExtraCamera.transform.position + inTopRightPos - ExtraCamera.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, 0));
 		Extrim_EndPos = ExtraCamera.transform.position + outTopRightPos - ExtraCamera.ScreenToWorldPoint(new Vector3(Screen.width + 60, Screen.height, 0));//+60是目前的模型右邊留白太多，先做一點位移
@@ -274,13 +274,13 @@ public class PostEffectManager : MonoBehaviour {
 		{
 			isPlayingExtrimeSkill = false;
 			ExtraCamera.gameObject.SetActive(false);
-			if (Extrim_TargetUnit.Entity != null)
+			if (Extrim_CastUnit.Entity != null)
 			{
 				//還原大小跟方向
-				eDirection orginDirection = Extrim_TargetUnit.Direction;
-				Extrim_TargetUnit.Direction = eDirection.Both;
-				Extrim_TargetUnit.Direction = orginDirection;
-				NGUITools.SetLayer(Extrim_TargetUnit.Entity, GLOBALCONST.GameSetting.LAYER_UNIT);
+				eDirection orginDirection = Extrim_CastUnit.Direction;
+				Extrim_CastUnit.Direction = eDirection.Both;
+				Extrim_CastUnit.Direction = orginDirection;
+				NGUITools.SetLayer(Extrim_CastUnit.Entity, GLOBALCONST.GameSetting.LAYER_UNIT);
 			}
 			return;
 		}
