@@ -107,6 +107,7 @@ public class UI_Battle : GUIFormBase
             NGUISpriteData.BTN_FAST_FORWARD, 150, 150, null, Color.white, string.Empty);
         _fastForwardBtn.SetColor(Color.white, Color.white, Color.white, Color.white);
         _fastForwardBtn.onClick.Add(new EventDelegate(this, "FastForwardBtnClick"));
+
         // 暫停鈕
         _pauseBtn = GUIStation.CreateUIButton(panel.gameObject, "Pause", new Vector3(884, 428, 0), 5,
             NGUISpriteData.ICON_PAUSE, 150, 150, null, Color.white, string.Empty);
@@ -212,6 +213,7 @@ public class UI_Battle : GUIFormBase
     /// </summary>
     void FastForwardBtnClick()
     {
+#if !KOREAN_GSTAR
         CommonFunction.DebugMsg("按下「加速鈕」");
         if (_isBattleEnd) 
         {
@@ -219,6 +221,7 @@ public class UI_Battle : GUIFormBase
             return; 
         }
         if (!isPause) { TimeMachine.FastForward(); }
+#endif
     }
 
     /// <summary>

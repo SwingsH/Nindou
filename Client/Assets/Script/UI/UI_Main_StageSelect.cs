@@ -343,10 +343,12 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
     /// </summary>
     void CharacterBtnClick()
     {
+#if !KOREAN_GSTAR
         CommonFunction.DebugMsg("按下 「人物」按鈕");
         // test :
         _allSubStage[0].StageOpen = false;
         CommonFunction.DebugMsg("關閉第一關");
+#endif
     }
     /// <summary>
     /// 按下「背包」按鈕的反應函式
@@ -368,20 +370,24 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
     /// </summary>
     void ShopBtnClick()
     {
+#if !KOREAN_GSTAR
         CommonFunction.DebugMsg("按下「商店」按鈕");
         // test :
         _allSubStage[1].SetExploreProgress(8, 30);
         CommonFunction.DebugMsg("修改第二關探索度=> 8/30");
+#endif
     }
     /// <summary>
     /// 按下「好友」按鈕的反應函式
     /// </summary>
     void FriendBtnClick()
     {
+#if !KOREAN_GSTAR
         CommonFunction.DebugMsg("按下「好友」按鈕");
         // test : 
         _allSubStage[0].SetStageNameAndCost("靈山山腰", null);
         CommonFunction.DebugMsg("修改第一關名字=> 「靈山山腰」");
+#endif
     }
     #endregion
 
@@ -390,10 +396,12 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
     /// </summary>
     void ReturnPreviousUI()
     {
+#if !KOREAN_GSTAR
         CommonFunction.DebugMsg("按下返回(X)按鈕");
         // TODO: 如果確定只能從主介面點選關卡地圖進入此介面，則直接回到進入遊戲狀態即可
         //       否則會需要處理「回到上一個開啟介面」的功能
         GameControl.Instance.ChangeGameState(GameEntered.Instance);
+#endif
     }
     /// <summary>
     /// 按下選擇關卡的按鈕
