@@ -115,6 +115,8 @@ public class GUIStation
         _camera.clearFlags = CameraClearFlags.Depth;
         
         _uiCamera.eventReceiverMask = 1 << GLOBALCONST.LAYER_UI_BASE; // 只接收uiBase layer的事件
+
+        _uiCamera.gameObject.AddComponent<CameraScaler>();
         #endregion
 
         _guiReference = new Dictionary<Type, GUIFormBase>();
