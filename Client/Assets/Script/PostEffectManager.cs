@@ -18,18 +18,18 @@ public class PostEffectManager : MonoBehaviour {
 	//大絕特效
 	Camera ExtraCamera;
 	Renderer ExtraRenderer;
-	const float PART2_STARTTIME = 1f;
-	const float EXTRIM_TIME = 2f;
-	readonly Vector3 EXTRIM_RENDERER_BORDER_START_POS = new Vector3(-600, -85, 60);
-	readonly Vector3 EXTRIM_RENDERER_BORDER_END_POS = new Vector3(0, -85, 60);
+	const float PART2_STARTTIME = 0.5f;
+	const float EXTRIM_TIME = 1.5f;
+	readonly Vector3 EXTRIM_RENDERER_BORDER_START_POS = new Vector3(-1400, -160, 60);
+	readonly Vector3 EXTRIM_RENDERER_BORDER_END_POS = new Vector3(0, -160, 60);
 	bool isPlayingExtrimeSkill = false;
 	Vector3 Extrim_StartPos;
 	Vector3 Extrim_EndPos;
 	Unit Extrim_CastUnit;
 
 	float ExtrimEffect_StartTime;
-	AnimationCurve Extrim_AnimCurve = new AnimationCurve(new Keyframe(0.00f, 0.00f, 5.35f, 5.35f), new Keyframe(0.60f, 1.00f, 0.00f, 0.00f));
-
+	AnimationCurve ExtrimP2_AnimCurve = new AnimationCurve(new Keyframe(0.55f, 0.00f, 8.08f, 8.08f), new Keyframe(0.95f, 1.01f, 0.04f, 0.04f));
+	AnimationCurve ExtrimP1_AnimCurve = new AnimationCurve(new Keyframe(0.00f, 0.00f, 0.00f, 0.00f), new Keyframe(1.00f, 1.00f, 2.00f, 2.00f));
 	//存現在最大是幾號，新增號碼時用
 	public int currentMaxNumber = -1;
 
@@ -226,7 +226,7 @@ public class PostEffectManager : MonoBehaviour {
 			ExtraCamera.depth = 10;
 			ExtraCamera.transform.rotation = TargetCamera.transform.rotation;
 			ExtraCamera.orthographic = true;
-			ExtraCamera.orthographicSize = 150;
+			ExtraCamera.orthographicSize = 256;
 			ExtraCamera.nearClipPlane = 0.3f;
 			ExtraCamera.farClipPlane = 70;
 		}
@@ -243,7 +243,7 @@ public class PostEffectManager : MonoBehaviour {
 			ExtraRenderer.transform.parent = ExtraCamera.transform;
 			ExtraRenderer.transform.localRotation = Quaternion.identity;
 			ExtraRenderer.transform.localPosition = new Vector3(0, 0, 0);
-			ExtraRenderer.transform.localScale = new Vector3(600, 1100, 1);
+			ExtraRenderer.transform.localScale = new Vector3(1400, 3000, 1);
 		}
 		if(castUnit == null)
 			return;
@@ -258,7 +258,7 @@ public class PostEffectManager : MonoBehaviour {
 		Vector3 outTopRightPos = Extrim_CastUnit.WorldUpperRight;
 		ExtraCamera.gameObject.SetActive(true);
 		Extrim_StartPos = ExtraCamera.transform.position + inTopRightPos - ExtraCamera.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, 0));
-		Extrim_EndPos = ExtraCamera.transform.position + outTopRightPos - ExtraCamera.ScreenToWorldPoint(new Vector3(Screen.width + 60, Screen.height, 0));//+60是目前的模型右邊留白太多，先做一點位移
+		Extrim_EndPos = ExtraCamera.transform.position + outTopRightPos - ExtraCamera.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, 0));//+60是目前的模型右邊留白太多，先做一點位移
 		Extrim_StartPos.z += ExtraCamera.transform.forward.z * -30;
 		Extrim_EndPos.z = Extrim_StartPos.z;
 
@@ -287,9 +287,9 @@ public class PostEffectManager : MonoBehaviour {
 
 		float part1Time = Mathf.Clamp(Time.realtimeSinceStartup - ExtrimEffect_StartTime, 0, PART2_STARTTIME) / PART2_STARTTIME;
 		float part2Time = Mathf.Clamp(Time.realtimeSinceStartup - ExtrimEffect_StartTime - PART2_STARTTIME, 0, EXTRIM_TIME - PART2_STARTTIME) / (EXTRIM_TIME - PART2_STARTTIME);
-		
-		ExtraRenderer.transform.localPosition = Vector3.Lerp(EXTRIM_RENDERER_BORDER_START_POS, EXTRIM_RENDERER_BORDER_END_POS, Extrim_AnimCurve.Evaluate(part1Time));
-		ExtraCamera.transform.position = Vector3.Lerp(Extrim_StartPos, Extrim_EndPos, Extrim_AnimCurve.Evaluate(part2Time));
+
+		ExtraRenderer.transform.localPosition = Vector3.Lerp(EXTRIM_RENDERER_BORDER_START_POS, EXTRIM_RENDERER_BORDER_END_POS, ExtrimP1_AnimCurve.Evaluate(part1Time));
+		ExtraCamera.transform.position = Vector3.Lerp(Extrim_StartPos, Extrim_EndPos, ExtrimP2_AnimCurve.Evaluate(part1Time));
 	}
 
 	void OnDestroy()
