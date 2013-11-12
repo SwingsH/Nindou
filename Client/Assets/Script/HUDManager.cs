@@ -205,8 +205,8 @@ public class HUDManager : MonoBehaviour {
 	//多段攻擊的總傷害文字
 	void SetDamageGroupAnim(HUDTextInfo info, Vector3 position)
 	{
-		info.PosStart = position + new Vector3(0, 2f * ShiftUnit);
-		info.PosEnd = position + new Vector3(0, 3.5f * ShiftUnit);
+		info.PosStart = position + new Vector3(0, 4.5f * ShiftUnit);
+		info.PosEnd = position + new Vector3(0, 6f * ShiftUnit);
 		info.PosXCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 		info.PosYCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 		info.Duration = 1.5f;
