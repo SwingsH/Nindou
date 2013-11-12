@@ -893,7 +893,7 @@ public class BattleManager : BattleState
 			UnitCamera.transform.rotation = Camera.main.transform.rotation;
 		}
 		UnitCamera.orthographic = true;
-		UnitCamera.cullingMask = ~(1 << GLOBALCONST.GameSetting.LAYER_BACKGROUND | 1<<GLOBALCONST.GameSetting.LAYER_EXTRAEFFECT);
+		UnitCamera.cullingMask = ~(1 << GLOBALCONST.GameSetting.LAYER_BACKGROUND | 1<<GLOBALCONST.GameSetting.LAYER_EXTRAEFFECT | 1<<GLOBALCONST.LAYER_UI_BASE);
 		UnitCamera.clearFlags = CameraClearFlags.Depth;
 		UnitCamera.orthographicSize = GLOBALCONST.GameSetting.UNIT_CAMERA_SIZE;
 
