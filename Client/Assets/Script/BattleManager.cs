@@ -1031,6 +1031,8 @@ public class BattleManager : BattleState
             if (i < Players.Length && Players[i] != null) { control.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, true, Players[i].Life, Players[i].MaxLife); }
             else { control.GUIStation.Form<UI_Battle>().SetPlayerIcon(i, false); }
         }
+        // fs: 設定我方角色屬性
+        control.GUIStation.Form<UI_Battle>().SetAllRoleGameAttribute();
         // fs: 設定我方角色CD時間
         control.GUIStation.Form<UI_Battle>().InitPlayerRoleCD(Players.ToList().AsReadOnly());
     }

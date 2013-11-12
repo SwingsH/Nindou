@@ -353,8 +353,10 @@ public class UI_Main_StageSelect: GUIFormBase // : MonoBehaviour
     /// </summary>
     void BagBtnClick()
     {
+        // GSTAR版本不使用者按背包有效果
+#if !KOREAN_GSTAR
         _guistation.ShowAndHideOther(typeof(UI_ItemBag));
-
+#endif
         //CommonFunction.DebugMsg("按下「背包」按鈕");
 
         // test :

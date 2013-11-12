@@ -325,6 +325,18 @@ public class UI_Battle : GUIFormBase
             _playerRoleIcons[playerIndex].SetHP((int)life, (int)maxLife);
         }
     }
+    /// <summary>
+    /// 設定所有玩家角色遊戲屬性
+    /// TODO: 改依照傳入資訊設定
+    /// </summary>
+    public void SetAllRoleGameAttribute()
+    {
+        CommonFunction.DebugMsgFormat("set all role game attribute");
+        _playerRoleIcons[0].SetGameAttribute(GameAttribute.MAN);
+        _playerRoleIcons[1].SetGameAttribute(GameAttribute.SUN);
+        _playerRoleIcons[2].SetGameAttribute(GameAttribute.NONE);
+        _playerRoleIcons[3].SetGameAttribute(GameAttribute.MOON);
+    }
 
     /// <summary>
     /// 加一個playerIcon
@@ -339,8 +351,7 @@ public class UI_Battle : GUIFormBase
         _playerRoleIcons.Add(new SubUI_RoleIcon(new GORelativeInfo(parentObj, new Vector3(xBase + leftPadding * playerIndex, 12, 0), string.Format("PlayerRoleIcon_{0}", playerIndex)),
             ResourceStation.GetAtlas(InformalDataBase.Instance.playerInfo[playerIndex].spriteNames[(int)GLOBALCONST.eModelPartName.HEAD]),
             new EventDelegate(this, "IconBtnClick"),
-            "桃太郎", true, (GameAttribute)Random.Range(0, System.Enum.GetValues(typeof(GameAttribute)).Length - 1)));
-        _playerRoleIcons[playerIndex].UpdateCD(0, Random.Range(1.0f, 3.0f));
+            "桃太郎"));
     }
 
     /// <summary>
@@ -354,8 +365,7 @@ public class UI_Battle : GUIFormBase
             {
                 ActionUnit au = allPlayers[index] as ActionUnit;
                 _playerRoleIcons[index].StopCDTweenColor();
-                if (au.ExtrimSkill != null) { _playerRoleIcons[index].UpdateCD(0, au.ExtrimSkill.CoolDown); }
-                else { _playerRoleIcons[index].UpdateCD(0, 0); }
+                _playerRoleIcons[index].UpdateCD(0, au.ExtrimSkill != null ? au.ExtrimSkill.CoolDown : 0);
                 _playerRoleIcons[index].SetBtnEnable(false);
             }
         }

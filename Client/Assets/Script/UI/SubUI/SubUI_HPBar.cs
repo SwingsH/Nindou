@@ -239,4 +239,22 @@ public class SubUI_HPBar : GUISubFormBase
             _subUIRoot.transform.position = uiScreenPos;
         }
     }
+
+    /// <summary>
+    /// 設定遊戲屬性
+    /// </summary>
+    /// <param name="ga">要設定的遊戲屬性</param>
+    public void SetGameAttribute(GameAttribute ga)
+    {
+        _gameAttribute = ga;
+        if (_gameAttributeImage == null)
+        {
+            _gameAttributeImage = UIImageManager.CreateUISprite(new GORelativeInfo(_baseSilder.gameObject, "AttributeImage"),
+            new UISpriteInfo(_gameAttribute.GetCorrespondingNGUISpriteData(), 62, 61));
+        }
+        else
+        {
+            _gameAttributeImage.spriteName = ga.GetCorrespondingSpriteName();
+        }
+    }
 }

@@ -60,9 +60,8 @@ public class SubUI_LoadingBar : GUISubFormBase
         UISprite sandFilter = UIImageManager.CreateUISprite(new GORelativeInfo(_subUIRoot.gameObject, "LoadingSandFilter"),
             new UISpriteInfo(NGUISpriteData.ICON_SANDFILTER, 138, 135, depth + 2, UISprite.Type.Simple, UIWidget.Pivot.Center));
         // 「讀取進度」文字
-        GUIStation.CreateUILabel(_subUIRoot.gameObject, "LoadingProgressText", UIWidget.Pivot.Center, new Vector3(0, -7, 0), depth+3,
-            UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.LARGE, FontStyle.Bold),
-            Color.white, "讀取進度");
+        GUIStation.CreateUILabel(new GORelativeInfo(_subUIRoot.gameObject, new Vector3(0, -7, 0), "LoadingProgressText"),
+            new UILabelInfo(UIFontName.MSJH, UIFontSize.LARGE, FontStyle.Bold, GLOBAL_STRING.LOADING_PROGRESS_TEXT, depth + 3));
     }
     #endregion
     #region Dispose -- 資源釋放

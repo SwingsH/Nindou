@@ -82,6 +82,7 @@ public class GUIStation
             GameObject.DontDestroyOnLoad(rootObj);
             _uiRoot = rootObj.AddComponent<UIRoot>();
             _uiRoot.scalingStyle = UIRoot.Scaling.FixedSizeOnMobiles;
+            
             _uiRoot.manualHeight = MANUAL_SCREEN_HEIGHT; // TODO:先設死，之後測試用 Screen.height; //sh131020 marked, remove shortly
         }
 
@@ -112,7 +113,7 @@ public class GUIStation
         _camera.nearClipPlane = -2f;
         _camera.farClipPlane = 2f;
         _camera.clearFlags = CameraClearFlags.Depth;
-
+        
         _uiCamera.eventReceiverMask = 1 << GLOBALCONST.LAYER_UI_BASE; // 只接收uiBase layer的事件
         #endregion
 

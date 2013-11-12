@@ -70,8 +70,7 @@ public class SubUI_RoleIcon : GUISubFormBase
         SmoothMoves.TextureAtlas roleTextureAtlas,
         EventDelegate roleIconEventDelegte,
         string roleName,
-        bool showHPBar = true,
-        GameAttribute gameAttr = GameAttribute.NONE
+        bool showHPBar = true
         ) : base(goInfo.ParentObject, goInfo.ObjectName, goInfo.LocalPosition)
     {
         // 若名字為空，修改為預設名稱
@@ -122,9 +121,7 @@ public class SubUI_RoleIcon : GUISubFormBase
         // 血條
         _roleHPBar = new SubUI_HPBar(_roleIconBtn.gameObject, "Role_HP_Bar", new Vector3(-104, -81, 0), 5,
             (int)(219 * GUIStation.RESOLUTION_SCALE_BETWEEN_ART_AND_UI),
-            (int)(41*GUIStation.RESOLUTION_SCALE_BETWEEN_ART_AND_UI),
-            ga : gameAttr
-            );
+            (int)(41*GUIStation.RESOLUTION_SCALE_BETWEEN_ART_AND_UI));
         _roleHPBar.FullSize = new Vector2(205, 28);
         _roleHPBar.SetVisible(showHPBar);
         // 角色名字
@@ -313,5 +310,15 @@ public class SubUI_RoleIcon : GUISubFormBase
                 tc.enabled = false;
             }
         }
+    }
+
+    /// <summary>
+    /// 設定遊戲屬性
+    /// </summary>
+    /// <param name="ga">要設成的遊戲屬性</param>
+    public void SetGameAttribute(GameAttribute ga)
+    {
+        CommonFunction.DebugMsgFormat("SubUI_RoleIcon setGA = {0}", ga);
+        _roleHPBar.SetGameAttribute(ga);
     }
 }
