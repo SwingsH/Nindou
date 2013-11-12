@@ -115,12 +115,18 @@ public class UI_Battle : GUIFormBase
         // 放置角色Icon的背景圖版
         _iconBackground = UIImageManager.CreateUISprite(new GORelativeInfo(panel.gameObject, new Vector3(0, -398, 0), "IconBackground"),
             new UISpriteInfo(NGUISpriteData.ROLE_ICON_PLATE, ROLE_ICON_PLATE_BG_WIDTH, ROLE_ICON_PLATE_BG_HEIGHT, 0));
+
+        List<string> allRoleTempName = new List<string>(4);
         // 玩家角色圖像 & 血條
         for (int i = 0; i < GLOBALCONST.MAX_BATTLE_ROLE_COUNT; ++i)
         {
             AddPlayerIcon(_iconBackground.gameObject);
         }
-
+        allRoleTempName.Add("桃太郎");
+        allRoleTempName.Add("桃一郎");
+        allRoleTempName.Add("桃大郎");
+        allRoleTempName.Add("桃人郎");
+        SetAllRoleName(allRoleTempName);
         AddShowOrHideFinishedDelegate(true, new EventDelegate(this, "ShowStart"), oneShot:false);
     }
      #endregion
@@ -336,6 +342,15 @@ public class UI_Battle : GUIFormBase
         _playerRoleIcons[1].SetGameAttribute(GameAttribute.SUN);
         _playerRoleIcons[2].SetGameAttribute(GameAttribute.NONE);
         _playerRoleIcons[3].SetGameAttribute(GameAttribute.MOON);
+    }
+
+    public void SetAllRoleName(List<string> allRoleName)
+    {
+        for (int index = 0; index < _playerRoleIcons.Count; ++index)
+        {
+            if (index < allRoleName.Count) { _playerRoleIcons[index].SetRoleName(string.IsNullOrEmpty(allRoleName[index]) ? string.Empty : allRoleName[index]); }
+            else { _playerRoleIcons[index].SetRoleName(string.Empty); }
+        }
     }
 
     /// <summary>

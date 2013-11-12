@@ -318,7 +318,6 @@ public class SubUI_RoleIcon : GUISubFormBase
     /// <param name="ga">要設成的遊戲屬性</param>
     public void SetGameAttribute(GameAttribute ga)
     {
-        CommonFunction.DebugMsgFormat("SubUI_RoleIcon setGA = {0}", ga);
         _roleHPBar.SetGameAttribute(ga);
     }
 }
