@@ -80,6 +80,9 @@ public enum NGUISpriteData
     [EnumUISpriteConfig("Atlas_Icons", "icon_play")]                ICON_PLAY, // 播放圖
 
     #endregion
+    #region UI_ShowLogo
+    [EnumUISpriteConfig("Atlas_Backgrounds_2", "BG_Logo")] LOGO, // LOGO圖
+    #endregion
     // TODO：改成正式用圖
     [EnumUISpriteConfig("TestAtlas", "gold")]                       POINT_PIC, // 點數指示圖
     [EnumUISpriteConfig("TestAtlas", "fb_300_main")]                BTN_INHERIT, // 繼承按鈕圖

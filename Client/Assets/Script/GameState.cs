@@ -432,3 +432,39 @@ public class GameStageSelect : IGameState
 		//throw new System.NotImplementedException();
 	}
 }
+
+/// <summary>
+/// 顯示LOGO的狀態
+/// </summary>
+public class GameShowLogo : IGameState
+{
+    private static GameShowLogo _instance = null;
+
+    ~GameShowLogo()
+    {
+        _instance = null;
+    }
+
+    public void OnChangeIn(GameControl control)
+    {
+        // 開啟LOGO介面
+        control.GUIStation.ShowAndHideOther(typeof(UI_ShowLogo));
+    }
+    public void Update(GameControl control)
+    {
+    }
+    public static GameShowLogo Instance
+    {
+        get
+        {
+            if (_instance == null)
+                _instance = new GameShowLogo();
+            return _instance;
+        }
+    }
+
+    public void OnChangeOut(GameControl control)
+    {
+        //throw new System.NotImplementedException();
+    }
+}

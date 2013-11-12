@@ -340,7 +340,7 @@ public class UI_Battle : GUIFormBase
         CommonFunction.DebugMsgFormat("set all role game attribute");
         _playerRoleIcons[0].SetGameAttribute(GameAttribute.MAN);
         _playerRoleIcons[1].SetGameAttribute(GameAttribute.SUN);
-        _playerRoleIcons[2].SetGameAttribute(GameAttribute.NONE);
+        _playerRoleIcons[2].SetGameAttribute(GameAttribute.SUN);
         _playerRoleIcons[3].SetGameAttribute(GameAttribute.MOON);
     }
 

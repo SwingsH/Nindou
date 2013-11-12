@@ -7,6 +7,10 @@ using System.Collections;
 public static class GLOBAL_STRING
 {	
 	public const string GAME_TITLE = "忍豆豆豆風雲";
+
+    public const string EMAIL = "business@tiegamer.com";
+
+
     public const string UI_BUTTON_1 = "快速登入";
     public const string UI_BUTTON_2 = "重試";
     public const string UI_BUTTON_3 = "確認";

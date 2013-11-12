@@ -28,6 +28,7 @@ public enum UIFontSize
     UI_BATTLE_START = 120, // 戰鬥UI中，開始文字的文字大小
     UI_BATTLE_END_WIN_OR_LOSE = 120,
     UI_BATTLE_END_TAP = 30,
+    UI_SHOW_EMAIL = 60,
 }
 
 /// <summary>

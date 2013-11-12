@@ -1857,7 +1857,7 @@ public class BattleLeaving :BattleState
 			if (Application.loadedLevelName == "Empty")
 			{
                 control.GUIStation.ResetAllCamera(); // 換場完畢，重設定Camera深度
-				GameControl.Instance.ChangeGameState(GameStageSelect.Instance);
+				GameControl.Instance.ChangeGameState(GameShowLogo.Instance);
 			}
 		}
 	}
