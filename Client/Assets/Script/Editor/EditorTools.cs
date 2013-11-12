@@ -591,6 +591,11 @@ public static class EditorTools {
 			{
 				GameObject.DestroyImmediate(adi, true);
 			}
+
+			foreach (CFX_ShurikenThreadFix adi in go.GetComponentsInChildren<CFX_ShurikenThreadFix>(true))
+			{
+				GameObject.DestroyImmediate(adi, true);
+			}
 		}
 	}
 	#region XML

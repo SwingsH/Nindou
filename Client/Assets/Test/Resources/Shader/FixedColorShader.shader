@@ -4,7 +4,7 @@
 		_MainTex ("Base (RGB)", 2D) = "white" {}
 	}
 	SubShader {
-		Tags { "RenderType"="Transparent" }
+		Tags { "Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Transparent" }
 		LOD 200
 		Blend SrcAlpha OneMinusSrcAlpha
 		pass

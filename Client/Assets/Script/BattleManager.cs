@@ -67,6 +67,7 @@ public class BattleManager : BattleState
 	PostEffectManager postEffectManager;
 	
 	float StartCountDown;
+	float SpawnDelay;
 
 	void UnitRun()
 	{
@@ -445,7 +446,8 @@ public class BattleManager : BattleState
 		{
 			case eGroup.Enemy:
 				if (EnemyInfos.Count != 0)
-					RandomEnemy(GLOBALCONST.GameSetting.ENEMY_MAX_NUMBER, 0);
+					//RandomEnemy(GLOBALCONST.GameSetting.ENEMY_MAX_NUMBER, 0);
+					SpawnDelay = 1;
 				else
 				{
 					IsBattleStart = false;
@@ -950,6 +952,16 @@ public class BattleManager : BattleState
 			StartCountDown -= Time.deltaTime;
 			return;
 		}
+		if (SpawnDelay > 0)
+		{
+			SpawnDelay -= Time.deltaTime;
+			if (SpawnDelay <= 0)
+			{
+				if (EnemyInfos.Count != 0)
+					RandomEnemy(GLOBALCONST.GameSetting.ENEMY_MAX_NUMBER, 0);
+			}
+		}
+
         UpdateUICDTime(Time.deltaTime);
 		UnitRun();
         UpdateUnits();
