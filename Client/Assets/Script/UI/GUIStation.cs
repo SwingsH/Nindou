@@ -712,6 +712,14 @@ public static class GUIComponents
             (int)(136 * iconScale), (int)(115 * iconScale),
             UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
             Color.white, GLOBAL_STRING.CHARACTER_BTN_TEXT);
+
+        UILabel label = GUIComponents.GetUIButtonLabel(character);
+        if (label != null)
+        {
+            label.effectDistance = new Vector2(2.0f, 2.0f);
+            label.effectStyle = UILabel.Effect.Outline;
+        }
+
         //調整文字位置
         pos = character.gameObject.GetComponentInChildren<UILabel>().transform;
         pos.localPosition = new Vector3(pos.localPosition.x + 20, pos.localPosition.y - 40, pos.localPosition.z);
@@ -723,8 +731,15 @@ public static class GUIComponents
                                         (int)(135 * iconScale), (int)(122 * iconScale),
                                         UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
                                         Color.white, GLOBAL_STRING.BAG_BTN_TEXT);
+        label = GUIComponents.GetUIButtonLabel(bag);
+        if (label != null)
+        {
+            label.effectDistance = new Vector2(2.0f, 2.0f);
+            label.effectStyle = UILabel.Effect.Outline;
+        }
+
         //調整文字位置
-        pos = bag.gameObject.GetComponentInChildren<UILabel>().transform;
+        pos = label.transform;
         pos.localPosition = new Vector3(pos.localPosition.x + 20, pos.localPosition.y - 50, pos.localPosition.z);
         bag.SetColor(Color.white, Color.black, Color.grey, Color.grey);
 
@@ -734,8 +749,15 @@ public static class GUIComponents
                                         (int)(133 * iconScale), (int)(115 * iconScale),
                                         UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
                                         Color.white, GLOBAL_STRING.SHOP_BTN_TEXT);
+        label = GUIComponents.GetUIButtonLabel(shop);
+        if (label != null)
+        {
+            label.effectDistance = new Vector2(2.0f, 2.0f);
+            label.effectStyle = UILabel.Effect.Outline;
+        }
+
         //調整文字位置
-        pos = shop.gameObject.GetComponentInChildren<UILabel>().transform;
+        pos = label.transform;
         pos.localPosition = new Vector3(pos.localPosition.x + 20, pos.localPosition.y - 40, pos.localPosition.z);
         shop.SetColor(Color.white, Color.black, Color.grey, Color.grey);
 
@@ -745,8 +767,15 @@ public static class GUIComponents
                                             (int)(136 * iconScale), (int)(122 * iconScale),
                                             UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
                                             Color.white, GLOBAL_STRING.FRIEND_BTN_TEXT);
+        label = GUIComponents.GetUIButtonLabel(friend);
+        if (label != null)
+        {
+            label.effectDistance = new Vector2(2.0f, 2.0f);
+            label.effectStyle = UILabel.Effect.Outline;
+        }
+
         //調整文字位置
-        pos = friend.gameObject.GetComponentInChildren<UILabel>().transform;
+        pos = label.transform;
         pos.localPosition = new Vector3(pos.localPosition.x + 20, pos.localPosition.y - 50, pos.localPosition.z);
         friend.SetColor(Color.white, Color.black, Color.grey, Color.grey);
     }
@@ -776,6 +805,19 @@ public static class GUIComponents
         UISprite worldMap = UIImageManager.CreateUISprite(new GORelativeInfo(parent, new Vector3(10, 35, 0), "WorldMap"),
             new UISpriteInfo(NGUISpriteData.WORLDMAP, 1760, 838, 1, UISprite.Type.Simple, UIWidget.Pivot.Center));
         return worldMap;
+    }
+
+    /// <summary>
+    /// 取得 Button 內的 Label
+    /// </summary>
+    public static UILabel GetUIButtonLabel(UIButton button)
+    {
+        if (button.gameObject == null)
+        {
+            CommonFunction.DebugMsg( " GetUIButtonLabel, gameObject == null" );
+            return null;
+        }
+        return button.GetComponentInChildren<UILabel>();  
     }
 }
 

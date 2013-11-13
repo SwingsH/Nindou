@@ -77,6 +77,7 @@ public class UI_ItemBag : GUIFormBase
         //返回按鈕
         _btnPrevious = GUIStation.CreateUIButton(_panel.gameObject, "ButtonReturn", new Vector3(-842, 147, 0), 4,
             NGUISpriteData.BTN_PREVIOUS, 115, 153, null, Color.white, string.Empty);
+        _btnPrevious.onClick.Add(new EventDelegate(this, "OnReturnClick"));
 
         //確認按鈕
         _btnConfirm = GUIStation.CreateUIButton(_panel.gameObject, "ButtonConfirm", new Vector3(828, 190, 0), 4,
@@ -110,8 +111,6 @@ public class UI_ItemBag : GUIFormBase
                 _itemButtons[row, i] = GUIStation.CreateUIButton(_panel.gameObject, string.Format("Item_{0}_{1}_{2}", row, i, cardID), pos, 6,
                                         NGUISpriteData.ICON_EQUIP_BG, 140, 140, null, Color.white, string.Empty);
                 _itemButtons[row, i].onClick.Add(new EventDelegate(this, "OnItemClick"));
-
-                //CommonFunction.DebugMsg(" cardID : " + cardID.ToString());
 
                 itemData = InformalDataBase.Instance.GetItemData(cardID);
                 if (itemData == null)
@@ -167,9 +166,8 @@ public class UI_ItemBag : GUIFormBase
                                     UIFontManager.GetUIDynamicFont(UIFontName.MSJH, fontStyle: FontStyle.Bold),
                                     Color.white, itemData.Name);
                 }
-                else
+                else // 刷新
                 {
-                    CommonFunction.DebugMsg(" _itemLabels[row, i].text = itemData.Name; " + itemData.Name);
                     _itemLabels[row, i].text = itemData.Name;
                 }
             }
@@ -272,6 +270,11 @@ public class UI_ItemBag : GUIFormBase
 
         _guistation.Control.DoItemBlend(mainItemIndex, materialItemIndex, mainItemID, materialItemID);
         _currentState = BagOperateState.Normal;
+    }
+
+    public void OnReturnClick()
+    {
+        _guistation.ShowAndHideOther(typeof(UI_Main_WorldMap));
     }
 
     /// <summary>

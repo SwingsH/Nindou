@@ -29,11 +29,19 @@ public class UI_Loading_Before_Battle: GUIFormBase
 
         UIPanel panel = NGUITools.AddChild<UIPanel>(anchor.gameObject);
 
+#if KOREAN_GSTAR
+
+        // 讀取進度條
+        _loadingBar = new SubUI_LoadingBar(panel.gameObject, "SubUI_LoadingBar", LOADING_BAR_POS, 1);
+#else
         UISprite background = UIImageManager.CreateUISprite(new GORelativeInfo(panel.gameObject, "Background"),
             new UISpriteInfo(NGUISpriteData.TILE_BG_PATTERN, GUIStation.MANUAL_SCREEN_WIDTH, GUIStation.MANUAL_SCREEN_HEIGHT, 0, UISprite.Type.Tiled, UIWidget.Pivot.Center));
 
         // 讀取進度條
         _loadingBar = new SubUI_LoadingBar(background.gameObject, "SubUI_LoadingBar", LOADING_BAR_POS, 1);
+#endif
+
+
         // TODO : G-STAR 先不需要
         //// Boss圖
         //UISprite bossBG = UIImageManager.CreateUISprite(background.gameObject, NGUISpriteData.ICON_BOSS_BEFORE_BATTLE);

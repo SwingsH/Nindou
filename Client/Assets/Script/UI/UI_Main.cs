@@ -89,13 +89,22 @@ public class UI_Main : GUIFormBase
         int y = -435;
         float iconScale = 1.6f;
 
+        UILabel label = null;
         character = GUIStation.CreateUIButton(parent, "Chatacter", new Vector3(x, y, 0), 10,
             NGUISpriteData.ICON_PERSON,
             (int)(136 * iconScale), (int)(115 * iconScale),
             UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
             Color.white, GLOBAL_STRING.CHARACTER_BTN_TEXT);
+
+        label = GUIComponents.GetUIButtonLabel(character);
+        if (label != null)
+        {
+            label.effectDistance = new Vector2(2.0f, 2.0f);
+            label.effectStyle = UILabel.Effect.Outline;
+        }
+
         //調整文字位置
-        pos = character.gameObject.GetComponentInChildren<UILabel>().transform;
+        pos = label.transform;
         pos.localPosition = new Vector3(pos.localPosition.x + 20, pos.localPosition.y - 40, pos.localPosition.z);
         character.SetColor(Color.white, Color.black, Color.grey, Color.grey);
 
@@ -105,8 +114,16 @@ public class UI_Main : GUIFormBase
                                         (int)(135 * iconScale), (int)(122 * iconScale),
                                         UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
                                         Color.white, GLOBAL_STRING.BAG_BTN_TEXT);
+
+        label = GUIComponents.GetUIButtonLabel(bag);
+        if (label != null)
+        {
+            label.effectDistance = new Vector2(2.0f, 2.0f);
+            label.effectStyle = UILabel.Effect.Outline;
+        }
+
         //調整文字位置
-        pos = bag.gameObject.GetComponentInChildren<UILabel>().transform;
+        pos = label.transform;
         pos.localPosition = new Vector3(pos.localPosition.x + 20, pos.localPosition.y - 50, pos.localPosition.z);
         bag.SetColor(Color.white, Color.black, Color.grey, Color.grey);
 
@@ -116,8 +133,15 @@ public class UI_Main : GUIFormBase
                                         (int)(133 * iconScale), (int)(115 * iconScale),
                                         UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
                                         Color.white, GLOBAL_STRING.SHOP_BTN_TEXT);
+        label = GUIComponents.GetUIButtonLabel(shop);
+        if (label != null)
+        {
+            label.effectDistance = new Vector2(2.0f, 2.0f);
+            label.effectStyle = UILabel.Effect.Outline;
+        }
+
         //調整文字位置
-        pos = shop.gameObject.GetComponentInChildren<UILabel>().transform;
+        pos = label.transform;
         pos.localPosition = new Vector3(pos.localPosition.x + 20, pos.localPosition.y - 40, pos.localPosition.z);
         shop.SetColor(Color.white, Color.black, Color.grey, Color.grey);
 
@@ -127,8 +151,14 @@ public class UI_Main : GUIFormBase
                                             (int)(136 * iconScale), (int)(122 * iconScale),
                                             UIFontManager.GetUIDynamicFont(UIFontName.MSJH, UIFontSize.MEDIUM, FontStyle.Bold),
                                             Color.white, GLOBAL_STRING.FRIEND_BTN_TEXT);
+        label = GUIComponents.GetUIButtonLabel(friend);
+        if (label != null)
+        {
+            label.effectDistance = new Vector2(2.0f, 2.0f);
+            label.effectStyle = UILabel.Effect.Outline;
+        }
         //調整文字位置
-        pos = friend.gameObject.GetComponentInChildren<UILabel>().transform;
+        pos = label.transform;
         pos.localPosition = new Vector3(pos.localPosition.x + 20, pos.localPosition.y - 50, pos.localPosition.z);
         friend.SetColor(Color.white, Color.black, Color.grey, Color.grey);
     }

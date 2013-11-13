@@ -30,10 +30,19 @@ public static class GLOBAL_STRING
     public const string UI_LABEL_DISABLE_SELECT = "無法選取";
 
     #region UI_Main （主介面共通）
+
+#if KOREAN_GSTAR
+    public const string CHARACTER_BTN_TEXT = "         Coming Soon...";
+    public const string BAG_BTN_TEXT = "         Coming Soon...";
+    public const string SHOP_BTN_TEXT = "         Coming Soon...";
+    public const string FRIEND_BTN_TEXT = "         Coming Soon...";
+#else
     public const string CHARACTER_BTN_TEXT = "人物";
     public const string BAG_BTN_TEXT = "背包";
     public const string SHOP_BTN_TEXT = "商店";
     public const string FRIEND_BTN_TEXT = "好友";
+#endif
+
     #endregion
     #region UI_Main_WorldMap (顯示世界地圖的主介面)
     public const string MENU_BTN_TEXT = "選單";
